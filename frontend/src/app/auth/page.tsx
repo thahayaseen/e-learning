@@ -3,11 +3,14 @@ import React, { useEffect, useState } from "react";
 import api from "@/services/asios";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useDispatch } from "react-redux";
+import { useDispatch,useSelector } from "react-redux";
+import { loading } from "@/lib/features/User";
 import { clearGs } from "@/lib/auth";
+import { Loader2 } from "lucide-react";
 import { setUser } from "@/lib/features/User";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { checkUserAuthentication } from "@/lib/auth";
+
 interface AuthResponse {
   success: boolean;
   message: string;
@@ -28,15 +31,20 @@ import toast from "react-hot-toast";
 import { AxiosError } from "axios";
 import axios from "@/services/asios";
 import { useRouter } from "next/navigation";
+import { storeType } from "@/lib/store";
 // import { storeType } from "@/lib/store";
 
 const ELearningAuth = () => {
   const dispatch = useDispatch();
   const router = useRouter();
+  const loadingstate=useSelector((state:storeType)=>state.User.loading)
   useEffect(() => {
     (async function checkAuth() {
+      dispatch(loading())
+
       const isAuthenticated = await checkUserAuthentication(dispatch);
       console.log(isAuthenticated);
+      dispatch(loading())
 
       if (isAuthenticated) {
         router.replace("/");
@@ -58,8 +66,9 @@ const ELearningAuth = () => {
         localStorage.setItem("access", session?.accessToken);
         try {
           console.log(localStorage.getItem("access"));
-
+          dispatch(loading())
           const data = await axios.post("/glogin");
+          dispatch(loading())
 
           console.log(data);
           toast.success(data.message);
@@ -122,22 +131,28 @@ const ELearningAuth = () => {
     }
 
     try {
+      dispatch(loading())
+
       const response: AuthResponse = await api.post(
         islogin ? "/login" : "/signup",
         !islogin
           ? formData
           : { email: formData.email, password: formData.password }
       );
+      dispatch(loading())
+      localStorage.setItem('access',response.accsess)
+
       console.log(response);
       if (response.success && response && islogin) {
         dispatch(setUser(response.user));
       } else if (!islogin && response.data) {
+        console.log('signin');
+        
         router.push(`/auth/otp/${response.data.userid}`);
       }
-      localStorage.setItem('access',response.accsess)
       toast.success(response.message);
       console.log("users", response);
-      router.push('/')
+
       return;
     } catch (error: unknown) {
       if (error instanceof AxiosError) {
@@ -156,6 +171,14 @@ const ELearningAuth = () => {
  
   return (
     <div className="min-h-screen bg-login-gradient flex items-center justify-center p-6">
+    {loadingstate && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="flex flex-col items-center">
+            <Loader2 className="animate-spin text-white" size={50} />
+            <p className="text-white mt-2">Loading...</p>
+          </div>
+        </div>
+      )}
       <div className="w-full max-w-6xl bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-8 relative overflow-hidden">
         {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden">

@@ -21,11 +21,14 @@ export default class UserController {
           .json({ success: false, message: "User already exists" });
         return;
       }
+      console.log('datais',data);
+      
       res.status(200).json({
         success: true,
         data: { userid: data.uid },
         message: data.message,
       });
+      return 
     } catch (error: any) {
       console.log("error in ", error);
       console.log("error code is ", error.statusCode);
@@ -57,7 +60,7 @@ export default class UserController {
   async login(req: Request, res: Response) {
     try {
       const data = await login.logins(req.body.email, req.body.password);
-      console.log(data);
+      console.log(data,'ingoo');
       
       res.cookie("refresh", "data.datas.refresh", { httpOnly: true });
       res

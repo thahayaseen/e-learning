@@ -46,6 +46,11 @@ const slices = createSlice({
       console.log('removed');
       
     },
+    loading:(state)=>{
+      state.loading=!state.loading
+      console.log(state.loading,'changed');
+      
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -59,5 +64,5 @@ const slices = createSlice({
   },
 });
 
-export const { setUser,logout } = slices.actions;
+export const { setUser,logout,loading } = slices.actions;
 export default slices.reducer;
