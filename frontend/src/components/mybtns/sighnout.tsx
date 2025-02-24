@@ -3,25 +3,31 @@
 import React from "react";
 import { clearGs } from '@/lib/auth'
 import {useDispatch} from 'react-redux'
-// import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { delete_cookie, get_cookie } from "@/lib/features/cookie";
 
 export function Sighnout() {
-  // const router=useRouter()
+  const router=useRouter()
+  const tocken=get_cookie('access')
+  console.log(tocken);
+  
   const dispatch=useDispatch()
   return (
-    <div>
+    
       <button
         className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
         onClick={() => {
             console.log('happended');
-            localStorage.removeItem('access')
+            delete_cookie('access')
             clearGs(dispatch)
-
+            router.push('/auth')
             }}>
-        Sign Up
+        {tocken?'Sign-Out':'Sign-in'}
       </button>
-    </div>
+    
   );
 }
 
+export const User=()=>{
 
+}

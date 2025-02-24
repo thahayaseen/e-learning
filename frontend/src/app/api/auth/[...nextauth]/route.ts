@@ -1,4 +1,4 @@
-import axios from "axios";
+
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
@@ -14,31 +14,26 @@ const handler = NextAuth({
       if (account && profile && profile.email) {
         if (account.provider === "google") {
           console.log(profile);
-          return true; 
+          return true;
         }
-        return true; 
+        return true;
       }
-      return false; 
+      return false;
     },
-    async jwt({ token, account }) {  
+    async jwt({ token, account }) {
       if (account) {
         token.accsessToken = account.access_token;
-      
       }
-
-
 
       return token;
     },
     async session({ session, token }) {
-      session.accessToken = token.accsessToken;
-    
       
+      session.accsessToken = token.accsessToken;
+
       return session;
-    }
-  }
+    },
+  },
 });
 
 export { handler as GET, handler as POST };
-
-

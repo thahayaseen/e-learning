@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Mail } from "lucide-react";
+import { get_cookie, save_cookie } from "@/lib/features/cookie";
 import axios from "@/services/asios";
 import { useRouter } from "next/navigation";
 const ForgotPasswordPage = () => {
@@ -20,10 +21,14 @@ const ForgotPasswordPage = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log(email);
-    await axios.post("/forgotpass", {
+  const data=  await axios.post("/forgotpass", {
       email: email,
     });
-    router.push("/auth/fotp/"+email);
+    console.log(data.token.token);
+    save_cookie('reset_Token',data.token.token)
+    console.log(JSON.stringify(get_cookie('reset_Token')));
+    
+    router.push("/auth/forgetpassword/otp/");
   };
 
   return (

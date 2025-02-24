@@ -1,10 +1,16 @@
 import { Request, Response, NextFunction } from "express";
-import { userCases, login, userRepo } from "../../config/users";
+// import {   userRepo } from "../../config/dependencies";
+import {
+  signUpUser,
+  LoginUsecase,
+  adminUsecase,
+} from "../../config/dependencies";
 import { handleError } from "../../utils/handleerror";
-import redis from "../../config/redis";
+// import redis from "../../config/redis";
 import axios from "axios";
-import jwt from "../../config/jwt";
-interface AuthServices extends Request {
+import { Roles, userError } from "../../domain/enum/User";
+// import jwt from "../../config/jwt";
+export interface AuthServices extends Request {
   error?: string;
   user?: any;
 }
@@ -14,21 +20,16 @@ export default class UserController {
     try {
       console.log(req.body);
 
-      const data = await userCases.create(req.body);
-      if (!data) {
-        res
-          .status(200)
-          .json({ success: false, message: "User already exists" });
-        return;
-      }
-      console.log('datais',data);
-      
+      const data = await signUpUser.create(req.body);
+
+      console.log("datais", data);
+
       res.status(200).json({
         success: true,
-        data: { userid: data.uid },
+        token: data.token,
         message: data.message,
       });
-      return 
+      return;
     } catch (error: any) {
       console.log("error in ", error);
       console.log("error code is ", error.statusCode);
@@ -39,7 +40,7 @@ export default class UserController {
 
   async resendOtp(req: AuthServices, res: Response) {
     try {
-      const otp = await userCases.reOtp(req.body.userid);
+      const otp = await signUpUser.reOtp(req.body.userid);
 
       res.status(200).json(otp);
     } catch (error: any) {
@@ -47,9 +48,11 @@ export default class UserController {
     }
   }
 
-  async verify(req: AuthServices, res: Response) {
+  async verifyed(req: AuthServices, res: Response) {
     try {
-      await userCases.SavetoDb(req.body.userid);
+      console.log("idis", req.body.userid);
+
+      await signUpUser.SavetoDb(req.body.userid);
 
       res.status(200).json({ success: true });
     } catch (error) {
@@ -59,13 +62,16 @@ export default class UserController {
 
   async login(req: Request, res: Response) {
     try {
-      const data = await login.logins(req.body.email, req.body.password);
-      console.log(data,'ingoo');
-      
-      res.cookie("refresh", "data.datas.refresh", { httpOnly: true });
-      res
-        .status(data?.success ? 200 : 401)
-        .json({ success: data.success,message:data.message, accsess: data.datas.accses,user:data.user });
+      console.log(req.body, "ingoo");
+      const data = await LoginUsecase.logins(req.body.email, req.body.password);
+
+      res.cookie("refresh", data.datas.refresh, { httpOnly: true });
+      res.status(data?.success ? 200 : 401).json({
+        success: data.success,
+        message: data.message,
+        access: data.datas.accses,
+        user: data.user,
+      });
       return;
     } catch (error) {
       handleError(res, error, 401);
@@ -73,25 +79,14 @@ export default class UserController {
   }
   async otpverify(req: Request, res: Response, next: NextFunction) {
     try {
-      let ids: string;
-      if (req.body.email) {
-        const temp = await userRepo.findByEmail(req.body.email);
-        const email = req.body.email;
-        console.log(email, "otpsiis");
+      const token = req.body.token;
+      console.log(token, "in token");
 
-        if (!temp || !temp._id) {
-          throw new Error("User not fount");
-        }
-        ids = temp._id.toString();
-      } else {
-        ids = req.body.userid;
-      }
-      if (!ids) {
-        handleError(res, "User not found", 404);
-      }
-      const isValid = await userCases.verifyOtp(req.body.otp, ids);
+      const isValid = await signUpUser.verifyOtp(req.body.otp, token);
+      console.log("the untoken", isValid);
+
       if (isValid) {
-        req.body = { userid: ids };
+        req.body = { userid: isValid.userid };
 
         next();
       }
@@ -99,13 +94,12 @@ export default class UserController {
       handleError(res, error, 401);
     }
   }
-  async verifyFps(req: Request, res: Response) {
+  async verifyForgotpassword(req: Request, res: Response) {
     try {
       if (req.body.userid) {
         console.log("here", req.body.userid);
 
-        const tocken = await redis.createTockens(req.body.userid);
-        console.log(tocken);
+        const tocken = await LoginUsecase.forgotTocken(req.body.userid);
 
         res.status(200).json({ success: true, tocken: tocken });
       }
@@ -114,65 +108,49 @@ export default class UserController {
     }
   }
 
-  async forgotPass(req: Request, res: Response) {
+  async forgotPassOtpsent(req: Request, res: Response) {
     try {
-      await login.forgetpass(req.body.email);
-      res.status(200).json({ success: true });
+      const token = await LoginUsecase.forgetpass(req.body.email);
+      res.status(200).json({ success: true, token });
     } catch (error) {
       console.log(error);
       handleError(res, error, 401);
     }
   }
-  async jwtmiddlewere(req: AuthServices, res: Response, next: NextFunction) {
-    let tocken = req.headers.authorization?.split(" ")[1];
-    console.log(tocken, "in jwt middlewerfsae");
-    const refresh = await req.cookies;
-    console.log(refresh, "tocken is refrashis no ");
-    let data;
-    if (tocken) {
-      data = jwt.verifyToken(tocken);
-    }
-    if (!data) {
-      const refresh = await req.cookies.refresh;
-      console.log(refresh, "tocken is refrashis no ");
-      if (!refresh) {
-         res
-          .status(404)
-          .json({ success: false, message: "user not found" });
-          return
-      }
-      const refreshvarify = jwt.verifyToken(refresh);
-      if (!refreshvarify) {
-        res.status(401).json({ success: false, message: "tocken expaied" });
-        return;
-      }
-      req.body.accessTocken = jwt.generateToken({
-        name: refreshvarify.role,
-        email: refreshvarify.email,
-        roll: refreshvarify.role,
-      });
-    }
-    req.user = data;
-    next();
-  }
+
   async changepass(req: AuthServices, res: Response) {
+    console.log("usersss", req.user);
+
     if (!req.user) {
-      res.status(401).json({ success: false, message: "Usernot fount" });
+      res.status(401).json({ success: false, message: userError.UserNotFound });
       return;
     }
-    console.log("sdfasfasedgfasdthfiduw", req.body.password);
+    console.log("sdfasfasedgfasdthfiduw", req.body, req.user);
+    if (!req.user.userid || !req.body.password) {
+      res.status(401).json({ message: "please check all feiled" });
+      return;
+    }
+    await LoginUsecase.changepassword(req.user.userid, req.body.password);
+    console.log(req.user, "returning");
 
-    login.changepassword(req.user.userid, req.body.password);
     res.status(200).json({ success: true, message: "password changed" });
+    return;
   }
   async reduxvarify(req: AuthServices, res: Response) {
-    res.status(200).json({ success: true, message: req.user });
+    if (req.body.accessTocken) {
+      console.log("yse");
+
+      res.cookie("access",req.body.accessTocken, {httpOnly: true});
+    }
+    res
+      .status(200)
+      .json({ success: true, message: "varified success", user: req.user });
     return;
   }
   async glogin(req: AuthServices, res: Response) {
     try {
       const token = req.headers.authorization?.split(" ")[1];
-      console.log(token, "fsadllkj;");
+      console.log(token, "now nwo;");
 
       if (!token) {
         res.status(401).json({ success: false, message: "No token provided" });
@@ -189,37 +167,20 @@ export default class UserController {
       );
 
       const userData: any = response.data;
-      const data = await userCases.glogin(userData);
-      console.log(data);
-      if (data.success) {
-        console.log("jtokens reach");
+      console.log("userdata is ", userData);
 
-        const jtoken = await jwt.generateToken({
-          name: userData?.name,
-          email: userData?.email,
-        });
-        const Rtoken = jwt.RefreshToken({
-          name: userData?.name,
-          email: userData?.email,
-        });
-        console.log(jtoken, "jtocken");
-        console.log(Rtoken, "Rtocken");
-        res.cookie("refresh", Rtoken, {
-          httpOnly: true,
-          secure: false,
-          sameSite: "strict",
-        });
-        res.status(200).json({
-          message: "successfully logind",
-          accessTocken: jtoken.accses,
-          user: {
-            name: userData.name,
-            email: userData.email,
-            role: data.role,
-          },
-        });
-        return;
-      }
+      const datas = await signUpUser.glogin(userData);
+      console.log(datas, "is dasdgfsdfta");
+
+      res.cookie("refresh", datas.token.refresh, { httpOnly: true });
+
+      res.status(200).json({
+        success: true,
+        message: "google login success",
+        token: datas.token?.accses,
+        user: datas.user,
+      });
+      return;
     } catch (error) {
       console.error("Error in glogin:", error);
       res
@@ -235,5 +196,36 @@ export default class UserController {
     res
       .status(200)
       .json({ success: true, message: "Session cleared, refresh token kept." });
+  }
+  async userData(req: AuthServices, res: Response) {
+    try {
+      const { role } = req.user;
+      console.log(role, "in  usedatass");
+
+      if (!role || role !== Roles.ADMIN) {
+        res.status(401).json({ success: true, message: "Unauthorized" });
+        return;
+      }
+      const { page, limit } = req.query;
+      if (!page || !limit) {
+        res.status(401).json({ success: false, message: "credential error" });
+        return;
+      }
+      if (typeof page == "string" && typeof limit == "string") {
+        const datas = await adminUsecase.getuserAdata({ page, limit });
+
+        console.log(datas, "fasasdg");
+
+        res
+          .status(200)
+          .json({
+            success: true,
+            message: "data fetched success",
+            data: datas,
+          });
+      }
+    } catch (error: any) {
+      res.status(404).json({ success: false, message: error.message });
+    }
   }
 }

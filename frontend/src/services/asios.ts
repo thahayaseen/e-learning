@@ -1,3 +1,4 @@
+import { get_cookie } from "@/lib/features/cookie";
 import axios, { AxiosInstance } from "axios";
 
 const api: AxiosInstance = axios.create({
@@ -7,12 +8,17 @@ const api: AxiosInstance = axios.create({
 api.interceptors.request.use(
   (config) => {
     console.log("Requset Intercepto", config);
-    const tocken = localStorage.getItem("access");
+    const tocken = get_cookie('access')
+ 
+    
     if (tocken) {
-      config.headers["Authorization"] = `Beare ${tocken}`;
+      console.log('tojen in access',tocken);
+      
+      config.headers["Authorization"] = `Bearer ${tocken}`;
+      return config;
     }
     config.withCredentials=true
-    return config;
+    return config
   },
   (error) => {
     console.log("error in request" + error);

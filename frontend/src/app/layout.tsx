@@ -4,6 +4,7 @@ import "./globals.css";
 import RProviders from "./RProvider";
 import { Toaster } from "react-hot-toast";
 import SesstionProvider from "./SesstionProvider";
+import Protaction from '@/components/auth/Redisautofill'
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -33,7 +34,9 @@ export default function RootLayout({
           <SesstionProvider>
         <RProviders>
           <Toaster position="top-right"/>
+          
           {children}
+        
           </RProviders>
           </SesstionProvider>
       </body>

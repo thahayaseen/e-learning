@@ -5,8 +5,8 @@ interface Users {
   user: {
     name: string;
     email: string;
-    roll: string;
-  }|null;
+    role: string;
+  } | null;
   loading: boolean;
   isAuthenticated: boolean;
 }
@@ -16,7 +16,10 @@ export const Varify = createAsyncThunk(
     try {
       console.log("clicked");
 
-      const reponse = await axios.post("/autherisation");
+      const reponse = await axios.get("/autherisation", { 
+    
+        withCredentials: true 
+      })
       console.log(reponse);
 
       return reponse;
@@ -27,7 +30,7 @@ export const Varify = createAsyncThunk(
   }
 );
 const initialState: Users = {
-  user:null,
+  user: null,
   loading: false,
   isAuthenticated: false,
 };
@@ -37,32 +40,40 @@ const slices = createSlice({
   reducers: {
     setUser: (state, action) => {
       state.isAuthenticated = true;
+      // console.log(action.payload,"pausersss");
+
       state.user = action.payload;
-     
     },
     logout: (state) => {
       state.isAuthenticated = false;
-     
-      console.log('removed');
-      
+
+      console.log("removed");
     },
-    loading:(state)=>{
-      state.loading=!state.loading
-      console.log(state.loading,'changed');
-      
-    }
+    loading: (state, payload) => {
+      state.loading = payload.payload;
+      console.log(state.loading, "changed");
+    },
   },
   extraReducers: (builder) => {
     builder
       .addCase(Varify.pending, (state) => {
-        state.loading = true;
+        state.loading = true; // Consistent naming
+      })
+      .addCase(Varify.rejected, (state) => {
+        state.loading = false;
+        state.isAuthenticated = false; // Ensure failed verification logs user out
       })
       .addCase(Varify.fulfilled, (state, action) => {
+        state.isAuthenticated = true;
         state.loading = false;
-        console.log(action);
+        console.log(action, "in case");
+        const { name, email, role } = action.payload.user;
+        state.user = { name, email, role };
+
+        // state.user = action.payload.message; // Ensure `message` is the correct user object
       });
   },
 });
 
-export const { setUser,logout,loading } = slices.actions;
+export const { setUser, logout, loading } = slices.actions;
 export default slices.reducer;

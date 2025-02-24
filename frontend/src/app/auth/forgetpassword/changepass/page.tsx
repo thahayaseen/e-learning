@@ -5,6 +5,7 @@ import { Eye, EyeOff, Lock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import axios from '@/services/asios';
 import { useRouter } from 'next/navigation';
+import { delete_cookie, get_cookie } from '@/lib/features/cookie';
 const ChangePasswordForm = () => {
     const router=useRouter()
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -22,12 +23,26 @@ const ChangePasswordForm = () => {
         return 
     }
     console.log('Password change submitted:', formData);
+    const token=get_cookie('reset_Token2')
+    console.log('Password  submitted:', token);
     
-   await axios.post('/changepassword',{
+   try {
+    await axios.post('/changepassword',{
+      // token:get_cookie('reset_Token2'),
+      
         password:formData.newPassword
+    },{
+      headers:{
+        Authorization:`Baere ${token}`
+      }
     })
-    localStorage.removeItem('access')
+    delete_cookie('reset_Token2')
     router.push('/auth')
+   } catch (error) {
+    console.log(error.response.data.message);
+    toast.error(error.response.data.message);
+    
+   }
   };
 
   const handleChange = (e) => {
