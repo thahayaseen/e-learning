@@ -65,7 +65,7 @@ export default class UserController {
       console.log(req.body, "ingoo");
       const data = await LoginUsecase.logins(req.body.email, req.body.password);
 
-      res.cookie("refresh", data.datas.refresh, { httpOnly: true });
+      res.cookie("refresh", data.datas.refresh, { httpOnly: false });
       res.status(data?.success ? 200 : 401).json({
         success: data.success,
         message: data.message,
@@ -140,7 +140,7 @@ export default class UserController {
     if (req.body.accessTocken) {
       console.log("yse");
 
-      res.cookie("access",req.body.accessTocken, {httpOnly: true});
+      res.cookie("access",req.body.accessTocken, {httpOnly: false});
     }
     res
       .status(200)
@@ -172,7 +172,7 @@ export default class UserController {
       const datas = await signUpUser.glogin(userData);
       console.log(datas, "is dasdgfsdfta");
 
-      res.cookie("refresh", datas.token.refresh, { httpOnly: true });
+      res.cookie("refresh", datas.token.refresh, { httpOnly: false });
 
       res.status(200).json({
         success: true,
