@@ -16,7 +16,7 @@ export default class Admincontroler {
       console.log('yses');
       
       await adminUsecase.Blockuser(req.body.userid, req.body.type);
-    res.status(200).json({message:`user ${req.body.type?"unbloked":"bloked"}`})
+    res.status(200).json({message:`user ${req.body.type?"bloked":"unbloked"}`})
       
    } catch (error) {
     res.status(401).json({message:SystemError.SystemError})
