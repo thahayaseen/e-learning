@@ -1,0 +1,41 @@
+import jwt, { JwtPayload, SignOptions, Secret } from "jsonwebtoken";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+// const secretKey: Secret = String(process.env.JWT_SECRET || "default_secret");
+interface AuthServises {
+  error?: string;
+  user?: string;
+}
+interface auth {
+  accses: string;
+  refresh: string;
+}
+export default class JwtService {
+  constructor(private secretKey: string,private accTime:number, private RefreshKey: string,private refreshTime:number) {}
+  async exicute(payload: object): Promise<auth> {
+    return {
+      accses: this.accsessToken(payload),
+      refresh: this.RefreshToken(payload),
+    };
+  }
+  accsessToken(payload: object) {
+    return jwt.sign(payload, this.secretKey, {
+      expiresIn: `${this.accTime}m`,
+    });
+  }
+  RefreshToken(payload: object) {
+    return jwt.sign(payload, this.RefreshKey, {
+      expiresIn: `${this.refreshTime}d`,
+    });
+  }
+
+  verifyToken(token: string): JwtPayload | null {
+    try {
+      return jwt.verify(token, this.secretKey) as JwtPayload;
+    } catch (error) {
+      return null;
+    }
+  }
+}
