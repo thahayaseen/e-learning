@@ -5,7 +5,7 @@ import {
   redisUseCases,
   jwtTockenProvider,
 } from "../../config/dependencies";
-import { userError } from "../../domain/enum/User";
+import { userError } from "./enum/User";
 // import jwtokens from "../../config/jwt";
 // import redis from "../../config/redis";
 // import nodemailer from "../../config/nodemailer";
@@ -95,3 +95,4 @@ export default class Login {
     return jwtTockenProvider.accsessToken(data)
   }
 }
+export type IloginUsecase = InstanceType<typeof Login>;

@@ -1,7 +1,7 @@
 import { IMailProvider } from "../Provider/Inodemail";
 import NodemailDto from "../dtos/nodemailDto";
 import { AppError } from "../../domain/entities/ITrycatchError";
-import { SystemError } from "../../domain/enum/systemError";
+import { SystemError } from "../useCases/enum/systemError";
 export class MailServices {
   constructor(private mailProvider: IMailProvider) {}
   async sendWelcomEmail(data: NodemailDto) {

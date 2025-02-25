@@ -33,7 +33,7 @@ export default class PrRedis implements IRedis {
     return { userid, users };
   }
   async getBtId(uId: string): Promise<User | null> {
-    console.log(uId);
+    console.log(uId, "from resend");
 
     let data = await this.redis.get(`user:${uId}`);
 

@@ -4,7 +4,6 @@ import { Formik, Form } from "formik";
 
 import { Button } from "@/components/ui/button";
 import { useDispatch, useSelector } from "react-redux";
-import { loading } from "@/lib/features/User";
 
 import { Loader2, Globe } from "lucide-react";
 import { useSession, signIn, signOut } from "next-auth/react";
@@ -14,39 +13,52 @@ import { storeType } from "@/lib/store";
 import { Card, CardContent } from "@/components/ui/card";
 
 // Import components and services from our separate files
-import { 
-  EmailField, 
-  PasswordField, 
-  ConfirmPasswordField, 
-  NameField 
+import {
+  EmailField,
+  PasswordField,
+  ConfirmPasswordField,
+  NameField,
 } from "./FormComponents";
-import { 
-  loginSchema, 
-  registerSchema, 
-  loginInitialValues, 
-  registerInitialValues 
+import {
+  loginSchema,
+  registerSchema,
+  loginInitialValues,
+  registerInitialValues,
 } from "./validationSchemas";
-import { loginUser, registerUser, googleLogin } from "@/lib/features/authService";
+import {
+  loginUser,
+  registerUser,
+  googleLogin,
+} from "@/lib/features/authService";
+import useForm from "@/hooks/useForm";
 
 interface ELearningAuthProps {
   places?: string;
 }
 
 const ELearningAuth: React.FC<ELearningAuthProps> = ({ places }) => {
-  const [islogin, setLogin] = useState(true);
   const [choosepath, setCpath] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
+
+  const {
+    islogin,
+    showConfirmPassword,
+    showPassword,
+    toggleConfirmPasswordVisibility,
+    toggleLogin,
+    togglePasswordVisibility,
+  } = useForm();
   const dispatch = useDispatch();
   const router = useRouter();
   const Rstate = useSelector((state: storeType) => state.User);
 
   const { data: session } = useSession();
-  const routeing = places ? '/' + places : '/';
-  
+  const routeing = places ? "/" + places : "/";
+
   // Handle form submission
-  const handleFormSubmit = async (values: any, { setSubmitting, resetForm }: any) => {
+  const handleFormSubmit = async (
+    values: any,
+    { setSubmitting, resetForm }: any
+  ) => {
     if (islogin) {
       const result = await loginUser(values, dispatch);
       if (result.success) {
@@ -55,10 +67,11 @@ const ELearningAuth: React.FC<ELearningAuthProps> = ({ places }) => {
     } else {
       const { confirmPassword, ...registerData } = values;
       const result = await registerUser(registerData, dispatch);
+      console.log(result);
+      
       if (result.success) {
-        setLogin(true);
-        resetForm();
-        setCpath(true);
+       
+       router.push('/auth/otp')
       }
     }
     setSubmitting(false);
@@ -77,14 +90,6 @@ const ELearningAuth: React.FC<ELearningAuthProps> = ({ places }) => {
     }
   }, [session, router, dispatch, routeing]);
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
-  const toggleConfirmPasswordVisibility = () => {
-    setShowConfirmPassword(!showConfirmPassword);
-  };
-
   return (
     <div className="min-h-screen bg-login-gradient flex items-center justify-center p-6">
       {/* Loading Overlay */}
@@ -96,7 +101,7 @@ const ELearningAuth: React.FC<ELearningAuthProps> = ({ places }) => {
           </div>
         </div>
       )}
-      
+
       {/* Role Selection Modal */}
       {choosepath && (
         <div className="min-h-screen w-screen fixed z-50 backdrop-blur-sm flex items-center border-0 justify-center p-4">
@@ -126,7 +131,7 @@ const ELearningAuth: React.FC<ELearningAuthProps> = ({ places }) => {
           </Card>
         </div>
       )}
-      
+
       {/* Main Content */}
       <div className="w-full max-w-6xl bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-8 relative overflow-hidden">
         {/* Animated background elements */}
@@ -207,29 +212,30 @@ const ELearningAuth: React.FC<ELearningAuthProps> = ({ places }) => {
             </div>
 
             <Formik
-              initialValues={islogin ? loginInitialValues : registerInitialValues}
+              initialValues={
+                islogin ? loginInitialValues : registerInitialValues
+              }
               validationSchema={islogin ? loginSchema : registerSchema}
               onSubmit={handleFormSubmit}
-              enableReinitialize
-            >
+              enableReinitialize>
               {({ errors, touched, isSubmitting }) => (
                 <Form className="space-y-6">
                   {/* Conditional rendering of form fields */}
                   {!islogin && <NameField errors={errors} touched={touched} />}
-                  
+
                   <EmailField errors={errors} touched={touched} />
-                  
-                  <PasswordField 
-                    errors={errors} 
-                    touched={touched} 
+
+                  <PasswordField
+                    errors={errors}
+                    touched={touched}
                     showPassword={showPassword}
                     togglePassword={togglePasswordVisibility}
                   />
 
                   {!islogin && (
-                    <ConfirmPasswordField 
-                      errors={errors} 
-                      touched={touched} 
+                    <ConfirmPasswordField
+                      errors={errors}
+                      touched={touched}
                       showPassword={showConfirmPassword}
                       togglePassword={toggleConfirmPasswordVisibility}
                     />
@@ -247,7 +253,7 @@ const ELearningAuth: React.FC<ELearningAuthProps> = ({ places }) => {
                       "Create Account"
                     )}
                   </Button>
-                  
+
                   {islogin && (
                     <p
                       className="text-gray-300 cursor-pointer"
@@ -258,7 +264,7 @@ const ELearningAuth: React.FC<ELearningAuthProps> = ({ places }) => {
                 </Form>
               )}
             </Formik>
-            
+
             <div className="relative my-8">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-white/10"></div>
@@ -269,7 +275,7 @@ const ELearningAuth: React.FC<ELearningAuthProps> = ({ places }) => {
                 </span>
               </div>
             </div>
-            
+
             <div className="flex justify-center space-x-4">
               <Button
                 variant="outline"
@@ -282,7 +288,7 @@ const ELearningAuth: React.FC<ELearningAuthProps> = ({ places }) => {
             <p className="text-center mt-8 text-white/60">
               {islogin ? `Don't have account ? ` : "Already have an account ? "}
               <a
-                onClick={() => setLogin(!islogin)}
+                onClick={toggleLogin}
                 className="text-purple-400 cursor-pointer hover:text-purple-300 font-medium">
                 {islogin ? "Sign up" : "Sign in"}
               </a>

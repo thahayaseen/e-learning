@@ -7,7 +7,7 @@ class AppError extends Error {
     Error.captureStackTrace(this, this.constructor);
   }
 }
-export default class {
+export default class Admin{
   constructor(private UserRepository:IUserReposetory){}
   async getuserAdata({page,limit}:{page?:string,limit?:string}) {
     try {
@@ -33,3 +33,4 @@ export default class {
       }
   }
 }
+export type IAdminUsecase = InstanceType<typeof Admin>;

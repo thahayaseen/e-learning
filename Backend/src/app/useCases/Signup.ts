@@ -8,11 +8,12 @@ import {
   jwtTockenProvider,
 } from "../../config/dependencies";
 import { v4 as uuid } from "uuid";
-import { SystemError } from "../../domain/enum/systemError";
-import { userError } from "../../domain/enum/User";
+import { SystemError } from "./enum/systemError";
+import { userError,EOtp } from "./enum/User";
 import Otp from "../../domain/entities/otp";
 import RedisAndOtpUsecases from "../adapters/RedisAdapter";
 import { userCreateDTO } from "../dtos/Duser";
+import { HttpStatusCode } from "./enum/Status";
 
 // import redis from "../../config/redis";
 
@@ -70,22 +71,22 @@ export default class Signup {
 
         console.log(errors, "error is ");
 
-        throw new AppError(errors || "Validation failed", 400);
+        throw new AppError(errors || "Validation failed", HttpStatusCode.BAD_REQUEST);
       }
 
       console.log(`Checking if email exists: ${users.email}`);
 
       await this.aldredyExsist(users.email);
 
-      let result = await redisUseCases.storeUser(uid, newUser, 1800); //1800 time saved user data
+      let result = await redisUseCases.storeUser(uid, newUser, 900); //1800 time saved user data
       if (!result) {
-        throw new AppError(SystemError.DatabaseError, 501);
+        throw new AppError(SystemError.DatabaseError, HttpStatusCode.INTERNAL_SERVER_ERROR);
       }
 
       console.log(`User created with ID: ${uid}`);
       const token = await jwtTockenProvider.accsessToken({ userid: uid });
       if (!token) {
-        throw new AppError(SystemError.SystemError, 500);
+        throw new AppError(SystemError.SystemError, HttpStatusCode.INTERNAL_SERVER_ERROR);
       }
       const otp = await redisUseCases.exexute(uid);
       await mailServices.otpsent({
@@ -104,7 +105,7 @@ export default class Signup {
 
       throw new AppError(
         error.message || "Internal Server Error",
-        error.statusCode || 500
+        error.statusCode || HttpStatusCode.INTERNAL_SERVER_ERROR
       );
     }
   }
@@ -112,32 +113,35 @@ export default class Signup {
     try {
       const data = await userRepository.findByEmail(email);
       if (data) {
-        throw new Error(userError.UseralreadyExisit);
+        throw new AppError(userError.UseralreadyExisit,HttpStatusCode.BAD_REQUEST);
       }
     } catch (error:any) {
-      throw new AppError(error.message, 501);
+      throw new AppError(error.message, error.statusCode||HttpStatusCode.INTERNAL_SERVER_ERROR);
     }
   }
   async reOtp(Id: string) {
     try {
       console.log(`Regenerating OTP for user ID: ${Id}`);
-      const user = await redisUseCases.getotp(Id);
+      const user = await redisUseCases.FindData(`${Id}`)||await userRepository.findByid(Id)
+      // const mongodata=await userRepository.findByid(Id)
       if (!user) {
-        throw new Error("User not Fount");
+        throw new AppError(userError.UserNotFound,HttpStatusCode.NOT_FOUND);
       }
+      console.log('user in resend is ',user);
+      
       const otp = await redisUseCases.reOtp(Id);
-      const parsed_User: User = JSON.parse(user);
-      parsed_User.email;
+    
+      user.email;
       await mailServices.otpsent({
-        useEmail: parsed_User.email,
-        name: parsed_User.name,
+        useEmail: user.email,
+        name: user.name,
         otp,
       });
 
       return { success: true, message: "otp set successfully" };
     } catch (error: any) {
       console.error("Error regenerating OTP:", error.message);
-      throw new AppError(error.message, 500);
+      throw new AppError(error.message, error.statusCode);
     }
   }
 
@@ -146,7 +150,7 @@ export default class Signup {
       const data = await redisUseCases.FindData(userId);
 
       if (!data) {
-        throw new AppError("User Not Found", 404);
+        throw new AppError(userError.UserNotFound, HttpStatusCode.NOT_FOUND);
       }
       await redisUseCases.Udelete(userId);
       await redisUseCases.Otpdelete(userId);
@@ -157,7 +161,7 @@ export default class Signup {
       console.error("Error saving user to DB:", error.message);
       throw new AppError(
         error.message || "Failed to save user to database.",
-        error.statusCode || 500
+        error.statusCode || HttpStatusCode.INTERNAL_SERVER_ERROR
       );
     }
   }
@@ -166,23 +170,25 @@ export default class Signup {
     try {
       console.log(`Verifying OTP for user ID: ${Id}`);
       const token = jwtTockenProvider.verifyToken(Id);
+      console.log(token);
+      
       if (!token) {
         throw Error(userError.Unauthorised);
       }
       const storedOtp = await redisUseCases.getotp(token.userid);
       if (!storedOtp) {
-        throw new Error("Otp Expaied");
+        throw new AppError(EOtp.OtpExpired,HttpStatusCode.NOT_FOUND);
       }
       if (storedOtp !== otp) {
         console.log("OTP verification failed.");
-        throw new AppError("Invalid OTP.", 400);
+        throw new AppError(EOtp.InvalidOtp, 400);
       }
 
       console.log("OTP verified successfully.");
       return token;
     } catch (error: any) {
       console.error("Error verifying OTP:", error.message);
-      throw new AppError(error.message, 500);
+      throw new AppError(error.message, error.statusCode);
     }
   }
   async glogin(user: any) {
@@ -214,17 +220,18 @@ export default class Signup {
         return { success: true, message: "User created successfully", token };
       }
 
-      if (!useremail.verified) throw new AppError("Unauthorized", 500);
+      if (!useremail.verified) throw new AppError(userError.Unauthorised, HttpStatusCode.UNAUTHORIZED);
       if (!useremail.gid) {
         await userRepository.updatagid(useremail._id, user.id);
         return { success: true, message: "Verified successfully", user:{name:user.name,email:user.email,role:user.role},token };
       }
       if (useremail.gid !== user.id)
-        throw new AppError(userError.Unauthorised, 500);
+        throw new AppError(userError.Unauthorised, HttpStatusCode.UNAUTHORIZED);
 
       return { success: true, user:{name:user.name,email:user.email,role:user.role},token };
     } catch (error: any) {
-      throw new AppError(error.message, 500);
+      throw new AppError(error.message, error.statusCode||HttpStatusCode.INTERNAL_SERVER_ERROR);
     }
   }
 }
+export type IsignUpUser = InstanceType<typeof Signup>;

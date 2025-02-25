@@ -1,7 +1,7 @@
 
 import { Request, Response, NextFunction } from "express";
 import { LoginUsecase } from "../../config/dependencies";
-import { userError } from "../../domain/enum/User";
+import { userError } from "../../app/useCases/enum/User";
 interface AuthServices extends Request {
   error?: string;
   user?: any;
@@ -9,8 +9,10 @@ interface AuthServices extends Request {
 
 
 export const jwtVerify = async(req: AuthServices, res: Response, next: NextFunction) => {
+  console.log(req.headers.authorization);
+  
   const token = req.headers.authorization?.split(" ")[1]; 
-console.log('token is ',typeof token);
+console.log('token is ', token);
 
   // if (!token) {
   //   console.log('thius');

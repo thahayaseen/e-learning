@@ -19,9 +19,13 @@ import { Check, Timer } from "lucide-react";
 import toast from "react-hot-toast";
 
 import axios from "@/services/asios";
-import { delete_cookie, get_cookie, save_cookie } from "@/lib/features/cookie";
+import { delete_cookie, get_cookie } from "@/lib/features/cookie";
 
 function Page() {
+  const [rOtpbtn, setRopt] = useState(false);
+  const [timer, setTimer] = useState(60);
+  const [value, setValue] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
   const router=useRouter()
   const {id}=useParams()
 
@@ -38,12 +42,21 @@ function Page() {
   };
   const handleResend = async () => {
     try {
-     
+      console.log(get_cookie('varifyToken'));
+      
       const data = await axios.post("/resent", {
-        userid: decodeURI(id as string),
+        userid: get_cookie('varifyToken'),
+      },{
+        headers:{
+          Authorization:`Baerer ${get_cookie('varifyToken')}`
+        }
       });
       console.log(data);
       toast.success(data.message)
+      console.log('sened');
+      setRopt(prev=>!prev)
+      
+      setTimer(60)
     } catch (error) {
       console.log(error);
       
@@ -51,10 +64,7 @@ function Page() {
     }
   };
   
-  const [rOtpbtn, setRopt] = useState(false);
-  const [timer, setTimer] = useState(10);
-  const [value, setValue] = useState("");
-  const [isVerifying, setIsVerifying] = useState(false);
+
 
   useEffect(() => {
     if (timer > 0) {

@@ -27,7 +27,7 @@ export const loginUser = async (
     save_cookie("access", response.token);
     return { success: true, data: response };
   } catch (error: any) {
-    const errorMessage = error.data?.message || "Login failed";
+    const errorMessage = error.response.data?.message || "Login failed";
     toast.error(errorMessage);
     console.error(error);
     return { success: false, error };
@@ -42,11 +42,14 @@ export const registerUser = async (
 ) => {
   try {
     dispatch(loading(true));
-    const response = await axios.post("/register", data);
+    const response = await axios.post("/signup", data);
+    console.log(response);
+    
     toast.success(response.message || "Registration successful!");
+    
     return { success: true, data: response };
   } catch (error: any) {
-    const errorMessage = error.data?.message || "Registration failed";
+    const errorMessage = error.response.data?.message || "Registration failed";
     toast.error(errorMessage);
     console.error(error);
     return { success: false, error };

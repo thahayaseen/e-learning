@@ -8,14 +8,7 @@ import {
   Filter,
   RefreshCcw
 } from "lucide-react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import AdminTable from "./adminTable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -92,7 +85,9 @@ const UserManagementPage = () => {
   };
 
   const toggleBlock = async (userId, type) => {
+    console.log(userId);
     try {
+      
       const response = await axios.post('/blockuser', {
         userid: userId,
         type: !type
@@ -120,7 +115,7 @@ const UserManagementPage = () => {
 
   const activeUsers = useMemo(() => users.filter(user => !user.blocked).length, [users]);
   const blockedUsers = useMemo(() => users.filter(user => user.blocked).length, [users]);
-
+const [colomns,setColomns]=useState<string[]>(["Name","Email","Role","Created","Actions"])
   return (
     <div className="min-h-screen bg-blue-950">
       {/* Main Content */}
@@ -208,94 +203,7 @@ const UserManagementPage = () => {
           </div>
         </div>
 
-        <Card className="bg-blue-900 border-blue-800 shadow-lg">
-          <CardContent className="p-0">
-            {isLoading ? (
-              <div className="p-8 text-center text-blue-100 flex justify-center items-center">
-                <svg className="animate-spin h-6 w-6 mr-3 text-blue-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Loading users...
-              </div>
-            ) : filteredUsers.length === 0 ? (
-              <div className="p-8 text-center text-blue-100">
-                No users match your search criteria
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-blue-800 hover:bg-blue-800">
-                    <TableHead className="text-white">Name</TableHead>
-                    <TableHead className="text-white">Email</TableHead>
-                    <TableHead className="text-white">Role</TableHead>
-                    <TableHead className="text-white">Created</TableHead>
-                    <TableHead className="text-white text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredUsers.map((user: Adminshousers) => (
-                    <TableRow
-                      key={user.id}
-                      className={`border-blue-800 ${
-                        user.blocked ? "bg-blue-800/50" : "bg-blue-900"
-                      } hover:bg-blue-800 transition-colors`}>
-                      <TableCell className="font-medium text-white">
-                        {user.name}
-                        {user.blocked && (
-                          <Badge variant="outline" className="ml-2 bg-red-900/30 text-red-300 border-red-500">
-                            Blocked
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-blue-100">
-                        {user.email}
-                      </TableCell>
-                      <TableCell>
-                        <span
-                          className={`px-3 py-1 rounded-full text-sm font-medium ${
-                            user.role === "Admin"
-                              ? "bg-blue-500 text-white"
-                              : user.role === "Editor"
-                              ? "bg-indigo-500 text-white"
-                              : "bg-blue-600 text-white"
-                          }`}>
-                          {user.role}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-blue-100">
-                        {user.lastActive}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant={user.blocked ? "outline" : "destructive"}
-                          size="sm"
-                          onClick={() => toggleBlock(user.id, user.blocked)}
-                          className={`flex items-center gap-2 ${
-                            user.blocked
-                              ? "border-blue-400 text-blue-400 hover:bg-blue-800/50"
-                              : "bg-blue-600 hover:bg-blue-700 text-white"
-                          }`}>
-                          {user.blocked ? (
-                            <>
-                              <UserCheck className="h-4 w-4" />
-                              Unblock
-                            </>
-                          ) : (
-                            <>
-                              <UserX className="h-4 w-4" />
-                              Block
-                            </>
-                          )}
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
+        <AdminTable colomns={colomns} filteredUsers={filteredUsers} isLoading={isLoading} toggleBlock={toggleBlock} />
         
         {filteredUsers.length > 0 && (
           <div className="mt-4">

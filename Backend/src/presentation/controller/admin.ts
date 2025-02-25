@@ -1,11 +1,12 @@
 import { adminUsecase, adminUsecaseType } from "../../config/dependencies";
 import { Request, Response } from "express";
-import { Roles, userError } from "../../domain/enum/User";
+import { Roles, userError } from "../../app/useCases/enum/User";
 import { AuthServices } from "./user";
-import { SystemError } from "../../domain/enum/systemError";
+import { SystemError } from "../../app/useCases/enum/systemError";
+import { IAdminUsecase } from "../../app/useCases/admin";
 
 export default class Admincontroler {
-  // constructor() {}
+  constructor(private adminUsecase:IAdminUsecase) {}
   async blockUser(req: AuthServices, res: Response) {
    try {
     console.log(req.user);
@@ -15,7 +16,7 @@ export default class Admincontroler {
     }
       console.log('yses');
       
-      await adminUsecase.Blockuser(req.body.userid, req.body.type);
+      await this.adminUsecase.Blockuser(req.body.userid, req.body.type);
     res.status(200).json({message:`user ${req.body.type?"bloked":"unbloked"}`})
       
    } catch (error) {
@@ -38,7 +39,7 @@ export default class Admincontroler {
         return;
       }
      if(typeof page=='string'&&typeof limit =='string'){
-      const datas = await adminUsecase.getuserAdata({ page , limit });
+      const datas = await this.adminUsecase.getuserAdata({ page , limit });
 
       console.log(datas,'fasasdg');
 
