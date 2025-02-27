@@ -29,7 +29,7 @@ export const loginUser = async (
   } catch (error: any) {
     const errorMessage = error.response.data?.message || "Login failed";
     toast.error(errorMessage);
-    console.error(error);
+    console.warn(errorMessage);
     return { success: false, error };
   } finally {
     dispatch(loading(false));

@@ -1,5 +1,6 @@
 import jwt, { JwtPayload, SignOptions, Secret } from "jsonwebtoken";
 import dotenv from "dotenv";
+import { IJwtService } from "../../domain/Provider/Ijwt";
 
 dotenv.config();
 
@@ -12,7 +13,7 @@ interface auth {
   accses: string;
   refresh: string;
 }
-export default class JwtService {
+export default class JwtService implements IJwtService {
   constructor(private secretKey: string,private accTime:number, private RefreshKey: string,private refreshTime:number) {}
   async exicute(payload: object): Promise<auth> {
     return {

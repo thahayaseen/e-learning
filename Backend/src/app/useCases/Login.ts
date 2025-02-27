@@ -6,6 +6,7 @@ import {
   jwtTockenProvider,
 } from "../../config/dependencies";
 import { userError } from "./enum/User";
+import IUserReposetory from "../repository/IUser";
 // import jwtokens from "../../config/jwt";
 // import redis from "../../config/redis";
 // import nodemailer from "../../config/nodemailer";
@@ -17,17 +18,18 @@ class AppError extends Error {
   }
 }
 export default class Login {
+  constructor(private userRepository:IUserReposetory){}
   async logins(email: string, password: string) {
     try {
       console.log(email);
 
-      const data = await userRepository.findByEmail(email);
+      const data = await this.userRepository.findByEmail(email);
       console.log(data);
 
-      if (!data) {
+      if (!data||!data.password) {
         throw new AppError("User not Fount", 404);
       }
-      const isvalid = await userRepository.Hmatch(password, data.password);
+      const isvalid = await this.userRepository.Hmatch(password, data.password);
       console.log(password, isvalid);
 
       if (!isvalid) {
@@ -52,7 +54,7 @@ export default class Login {
   }
   async forgetpass(email: string) {
     try {
-      const data = await userRepository.findByEmail(email);
+      const data = await this.userRepository.findByEmail(email);
       if (!data || !data._id) {
         throw new AppError(userError.UserNotFound, 404);
       }
@@ -76,7 +78,7 @@ export default class Login {
     try {
       console.log("userid and pass in login", userid, password);
 
-      await userRepository.changepass(userid, password);
+      await this.userRepository.changepass(userid, password);
       console.log('done');
       
       return;

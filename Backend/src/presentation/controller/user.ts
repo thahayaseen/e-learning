@@ -18,7 +18,7 @@ export interface AuthServices extends Request {
 }
 
 export default class UserController {
-  constructor(private signUpUser:IsignUpUser){}
+  constructor(private signUpUser: IsignUpUser) {}
   async create(req: Request, res: Response) {
     try {
       console.log(req.body);
@@ -26,7 +26,11 @@ export default class UserController {
       const data = await this.signUpUser.create(req.body);
 
       console.log("datais", data);
-      res.cookie('varifyToken',data.token,{httpOnly:false})
+      res.cookie("varifyToken", data.token, {
+        httpOnly: false,
+        expires: new Date(Date.now() + 15 * 60 * 1000), // Expires in 15 minutes
+      });
+
       res.status(HttpStatusCode.OK).json({
         success: true,
         token: data.token,
@@ -43,8 +47,8 @@ export default class UserController {
 
   async resendOtp(req: AuthServices, res: Response) {
     try {
-      console.log(req.user,"user is doigshdfkilghdiuofhgd");
-      
+      console.log(req.user, "user is doigshdfkilghdiuofhgd");
+
       const otp = await this.signUpUser.reOtp(req.user.userid);
 
       res.status(HttpStatusCode.OK).json(otp);
@@ -60,8 +64,8 @@ export default class UserController {
       await this.signUpUser.SavetoDb(req.body.userid);
 
       res.status(HttpStatusCode.OK).json({ success: true });
-    } catch (error:any) {
-      handleError(res, error, error.statusCode||HttpStatusCode.UNAUTHORIZED);
+    } catch (error: any) {
+      handleError(res, error, error.statusCode || HttpStatusCode.UNAUTHORIZED);
     }
   }
 
@@ -70,16 +74,21 @@ export default class UserController {
       console.log(req.body, "ingoo");
       const data = await LoginUsecase.logins(req.body.email, req.body.password);
 
-      res.cookie("refresh", data.datas.refresh, { httpOnly: false });
-      res.status(data?.success ? HttpStatusCode.OK : HttpStatusCode.UNAUTHORIZED).json({
-        success: data.success,
-        message: data.message,
-        access: data.datas.accses,
-        user: data.user,
+      res.cookie("refresh", data.datas.refresh, {
+        httpOnly: false,
+        expires: new Date(Date.now() + 7 * 60 * 60 * 1000), // Expires in 15 minutes
       });
+      res
+        .status(data?.success ? HttpStatusCode.OK : HttpStatusCode.UNAUTHORIZED)
+        .json({
+          success: data.success,
+          message: data.message,
+          access: data.datas.accses,
+          user: data.user,
+        });
       return;
-    } catch (error:any) {
-      handleError(res, error,error.statusCode|| HttpStatusCode.UNAUTHORIZED);
+    } catch (error: any) {
+      handleError(res, error, error.statusCode || HttpStatusCode.UNAUTHORIZED);
     }
   }
   async otpverify(req: Request, res: Response, next: NextFunction) {
@@ -95,8 +104,8 @@ export default class UserController {
 
         next();
       }
-    } catch (error:any) {
-      handleError(res, error, error.statusCode||HttpStatusCode.UNAUTHORIZED);
+    } catch (error: any) {
+      handleError(res, error, error.statusCode || HttpStatusCode.UNAUTHORIZED);
     }
   }
   async verifyForgotpassword(req: Request, res: Response) {
@@ -108,8 +117,8 @@ export default class UserController {
 
         res.status(HttpStatusCode.OK).json({ success: true, tocken: tocken });
       }
-    } catch (error:any) {
-      handleError(res, error, error.statusCode||HttpStatusCode.UNAUTHORIZED);
+    } catch (error: any) {
+      handleError(res, error, error.statusCode || HttpStatusCode.UNAUTHORIZED);
     }
   }
 
@@ -117,9 +126,9 @@ export default class UserController {
     try {
       const token = await LoginUsecase.forgetpass(req.body.email);
       res.status(HttpStatusCode.OK).json({ success: true, token });
-    } catch (error:any) {
+    } catch (error: any) {
       console.log(error);
-      handleError(res, error,error.statusCode|| HttpStatusCode.UNAUTHORIZED);
+      handleError(res, error, error.statusCode || HttpStatusCode.UNAUTHORIZED);
     }
   }
 
@@ -127,25 +136,34 @@ export default class UserController {
     console.log("usersss", req.user);
 
     if (!req.user) {
-      res.status(HttpStatusCode.UNAUTHORIZED).json({ success: false, message: userError.UserNotFound });
+      res
+        .status(HttpStatusCode.UNAUTHORIZED)
+        .json({ success: false, message: userError.UserNotFound });
       return;
     }
     console.log("sdfasfasedgfasdthfiduw", req.body, req.user);
     if (!req.user.userid || !req.body.password) {
-      res.status(HttpStatusCode.UNAUTHORIZED).json({ message: "please check all feiled" });
+      res
+        .status(HttpStatusCode.UNAUTHORIZED)
+        .json({ message: "please check all feiled" });
       return;
     }
     await LoginUsecase.changepassword(req.user.userid, req.body.password);
     console.log(req.user, "returning");
 
-    res.status(HttpStatusCode.OK).json({ success: true, message: "password changed" });
+    res
+      .status(HttpStatusCode.OK)
+      .json({ success: true, message: "password changed" });
     return;
   }
   async reduxvarify(req: AuthServices, res: Response) {
     if (req.body.accessTocken) {
       console.log("yse");
 
-      res.cookie("access",req.body.accessTocken, {httpOnly: false});
+      res.cookie("access", req.body.accessTocken, {
+        httpOnly: false,
+        expires: new Date(Date.now() + 15 * 60 * 1000) // Expires in 15 minutes
+      });
     }
     res
       .status(HttpStatusCode.OK)
@@ -158,7 +176,9 @@ export default class UserController {
       console.log(token, "now nwo;");
 
       if (!token) {
-        res.status(HttpStatusCode.UNAUTHORIZED).json({ success: false, message: "No token provided" });
+        res
+          .status(HttpStatusCode.UNAUTHORIZED)
+          .json({ success: false, message: "No token provided" });
         return;
       }
 
@@ -177,7 +197,10 @@ export default class UserController {
       const datas = await this.signUpUser.glogin(userData);
       console.log(datas, "is dasdgfsdfta");
 
-      res.cookie("refresh", datas.token.refresh, { httpOnly: false });
+      res.cookie("refresh", datas.token.refresh, {
+        httpOnly: false,
+        expires: new Date(Date.now() + 7 *60* 60 * 1000) // Expires in 15 minutes
+      });
 
       res.status(HttpStatusCode.OK).json({
         success: true,
@@ -208,12 +231,16 @@ export default class UserController {
       console.log(role, "in  usedatass");
 
       if (!role || role !== Roles.ADMIN) {
-        res.status(HttpStatusCode.UNAUTHORIZED).json({ success: true, message: "Unauthorized" });
+        res
+          .status(HttpStatusCode.UNAUTHORIZED)
+          .json({ success: true, message: "Unauthorized" });
         return;
       }
       const { page, limit } = req.query;
       if (!page || !limit) {
-        res.status(HttpStatusCode.UNAUTHORIZED).json({ success: false, message: "credential error" });
+        res
+          .status(HttpStatusCode.UNAUTHORIZED)
+          .json({ success: false, message: "credential error" });
         return;
       }
       if (typeof page == "string" && typeof limit == "string") {
@@ -221,16 +248,21 @@ export default class UserController {
 
         console.log(datas, "fasasdg");
 
-        res
-          .status(HttpStatusCode.OK)
-          .json({
-            success: true,
-            message: "data fetched success",
-            data: datas,
-          });
+        res.status(HttpStatusCode.OK).json({
+          success: true,
+          message: "data fetched success",
+          data: datas,
+        });
       }
     } catch (error: any) {
-      res.status(HttpStatusCode.NOT_FOUND).json({ success: false, message: error.message });
+      res
+        .status(HttpStatusCode.NOT_FOUND)
+        .json({ success: false, message: error.message });
     }
   }
+  // user profile and datas 
+  // async userProfile(){
+  //   this.signUpUser.
+  // }
 }
+

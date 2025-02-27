@@ -3,8 +3,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import RProviders from "./RProvider";
 import { Toaster } from "react-hot-toast";
-import SesstionProvider from "./SesstionProvider";
-import Protaction from '@/components/auth/Redisautofill'
+import SesstionProvider from "./SessionProvider";
+import Protection from "@/components/auth/Redisautofill";
+// import Protaction from '@/components/auth/Redisautofill'
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -22,23 +23,21 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
- 
 }: Readonly<{
   children: React.ReactNode;
-  
 }>) {
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-          <SesstionProvider>
-        <RProviders>
-          <Toaster position="top-right"/>
-          
-          {children}
-        
+        <SesstionProvider>
+          <RProviders>
+            <Protection>
+              <Toaster position="top-right" />
+            {children}
+            </Protection>
           </RProviders>
-          </SesstionProvider>
+        </SesstionProvider>
       </body>
     </html>
   );

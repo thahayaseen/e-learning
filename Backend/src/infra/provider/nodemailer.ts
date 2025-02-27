@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer";
-import { IMailProvider } from "../../app/Provider/Inodemail";
+import { IMailProvider } from "../../domain/Provider/Inodemail";
 import nodemail from "../config/nodemail";
 export default class mailProvider implements IMailProvider {
   private transport;

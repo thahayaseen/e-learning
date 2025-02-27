@@ -5,11 +5,13 @@ import User from "../../domain/entities/UserSchema";
 
 import bcrypt from "bcrypt";
 import AdminUserDTO from "../../app/dtos/adminDTOUsers";
+import { UserDTO } from "../../app/dtos/Duser";
 
 export default class UserRepository implements IUser {
   constructor() {}
-  create = catchAsync(async (users: IUserModel): Promise<IUserModel> => {
-    return await UserModel.create(users);
+  create = catchAsync(async (users: IUserModel): Promise<UserDTO|null> => {
+     await UserModel.create(users);
+     return null
   });
 
   changepass = catchAsync(
@@ -28,18 +30,18 @@ export default class UserRepository implements IUser {
   );
 
   findByEmail = catchAsync(
-    async (email: string): Promise<IUserModel | null> => {
+    async (email: string): Promise<UserDTO | null> => {
       // console.log(email);
 
-      return UserModel.findOne({ email: email });
+      return await UserModel.findOne({ email: email });
     }
   );
-  updatagid = catchAsync(async (id: string, gid: string) => {
+  updatagid = catchAsync(async (id: string, gid: string):Promise<UserDTO|null> => {
     return await UserModel.findOneAndUpdate({ _id: id }, { gid });
   });
 
   updateName = catchAsync(
-    async (name: string, id: string): Promise<IUserModel | null> => {
+    async (name: string, id: string): Promise<UserDTO | null> => {
       return await UserModel.findOneAndUpdate(
         { _id: id },
         { name: name },
@@ -63,7 +65,7 @@ export default class UserRepository implements IUser {
     await UserModel.updateOne({ _id: id }, { verified: true });
   });
 
-  findByid = catchAsync(async (id: string): Promise<IUserModel | null> => {
+  findByid = catchAsync(async (id: string): Promise<UserDTO | null> => {
     return await UserModel.findById(id);
     // const { name, email, gid, isblocked, password, profile, purchasedCourses, role, subscription, verified } = data;
     //  const Users=new User(name,email,profile,gid,password,isblocked,purchasedCourses,role,subscription,verified)

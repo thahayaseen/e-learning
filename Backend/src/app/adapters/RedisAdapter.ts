@@ -1,4 +1,4 @@
-import { IRedis } from "../Provider/IRedis";
+import { IRedis } from "../../domain/Provider/IRedis";
 import Otp from "../../domain/entities/otp";
 import User from "../../domain/entities/UserSchema";
 import {jwtTockenProvider} from "../../config/dependencies";

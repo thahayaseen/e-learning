@@ -1,13 +1,7 @@
 "use client";
 import React, { useEffect, useState, useMemo } from "react";
 import PaginationComponent from "../default/pagination";
-import {
-  UserCheck,
-  UserX,
-  Search,
-  Filter,
-  RefreshCcw
-} from "lucide-react";
+import { UserCheck, UserX, Search, Filter, RefreshCcw } from "lucide-react";
 import AdminTable from "./adminTable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import axios from "@/services/asios";
 import { Adminshousers } from "@/services/userinterface";
 import toast from "react-hot-toast";
+import { fetchUsers } from "@/services/fetchdata";
 
 const UserManagementPage = () => {
   const [users, setUsers] = useState<Adminshousers[]>([]);
@@ -34,13 +29,13 @@ const UserManagementPage = () => {
   const [roleFilter, setRoleFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
 
-  const fetchUsers = async () => {
+  const fetchUser = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`/allusers?page=${page}&limit=${5}`);
-      setTotal(response.data.totalpages);
-      setUsers(response.data.formattedData);
-      setFilteredUsers(response.data.formattedData);
+      const response = await fetchUsers(`/allusers?page=${page}&limit=${5}`);
+      setTotal(response.totalpages);
+      setUsers(response.formattedData);
+      setFilteredUsers(response.formattedData);
     } catch (error) {
       toast.error("Failed to fetch users");
       console.error("Error fetching users:", error);
@@ -50,12 +45,13 @@ const UserManagementPage = () => {
   };
 
   useEffect(() => {
-    fetchUsers();
+    fetchUser();
   }, [page]);
 
   useEffect(() => {
     applyFilters();
-  }, [searchTerm, roleFilter, statusFilter, users]);
+  }, [searchTerm, roleFilter, statusFilter,users]);
+console.log(roleFilter);
 
   const applyFilters = () => {
     let result = [...users];
@@ -87,19 +83,18 @@ const UserManagementPage = () => {
   const toggleBlock = async (userId, type) => {
     console.log(userId);
     try {
-      
-      const response = await axios.post('/blockuser', {
+      const response = await axios.post("/blockuser", {
         userid: userId,
-        type: !type
+        type: !type,
       });
-      
+
       setUsers(
         users.map((user) =>
           user.id === userId ? { ...user, blocked: !user.blocked } : user
         )
       );
       console.log(response);
-      
+
       toast.success(response.message || "User status updated");
     } catch (error) {
       toast.error("Failed to update user status");
@@ -113,9 +108,21 @@ const UserManagementPage = () => {
     setStatusFilter("All");
   };
 
-  const activeUsers = useMemo(() => users.filter(user => !user.blocked).length, [users]);
-  const blockedUsers = useMemo(() => users.filter(user => user.blocked).length, [users]);
-const [colomns,setColomns]=useState<string[]>(["Name","Email","Role","Created","Actions"])
+  const activeUsers = useMemo(
+    () => users.filter((user) => !user.blocked).length,
+    [users]
+  );
+  const blockedUsers = useMemo(
+    () => users.filter((user) => user.blocked).length,
+    [users]
+  );
+  const [colomns, setColomns] = useState<string[]>([
+    "Name",
+    "Email",
+    "Role",
+    "Created",
+    "Actions",
+  ]);
   return (
     <div className="min-h-screen bg-blue-950">
       {/* Main Content */}
@@ -167,19 +174,20 @@ const [colomns,setColomns]=useState<string[]>(["Name","Email","Role","Created","
                 <Filter className="h-4 w-4 text-blue-300" />
                 <span className="text-blue-300 text-sm">Filters:</span>
               </div>
-              
+
               <Select value={roleFilter} onValueChange={setRoleFilter}>
                 <SelectTrigger className="bg-blue-800 border-blue-700 text-white w-32">
                   <SelectValue placeholder="Role" />
                 </SelectTrigger>
                 <SelectContent className="bg-blue-800 border-blue-700 text-white">
                   <SelectItem value="All">All Roles</SelectItem>
-                  <SelectItem value="Admin">Admin</SelectItem>
-                  <SelectItem value="Editor">Editor</SelectItem>
-                  <SelectItem value="User">User</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="student">Student</SelectItem>
+                  <SelectItem value="mentor">Mentor</SelectItem>
                 </SelectContent>
               </Select>
               
+
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="bg-blue-800 border-blue-700 text-white w-32">
                   <SelectValue placeholder="Status" />
@@ -190,10 +198,10 @@ const [colomns,setColomns]=useState<string[]>(["Name","Email","Role","Created","
                   <SelectItem value="Blocked">Blocked</SelectItem>
                 </SelectContent>
               </Select>
-              
-              <Button 
-                variant="outline" 
-                size="sm" 
+
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={resetFilters}
                 className="border-blue-400 text-blue-400 hover:bg-blue-800/50">
                 <RefreshCcw className="h-4 w-4 mr-2" />
@@ -203,8 +211,13 @@ const [colomns,setColomns]=useState<string[]>(["Name","Email","Role","Created","
           </div>
         </div>
 
-        <AdminTable colomns={colomns} filteredUsers={filteredUsers} isLoading={isLoading} toggleBlock={toggleBlock} />
-        
+        <AdminTable
+          colomns={colomns}
+          filteredUsers={filteredUsers}
+          isLoading={isLoading}
+          toggleBlock={toggleBlock}
+        />
+
         {filteredUsers.length > 0 && (
           <div className="mt-4">
             <PaginationComponent page={page} setPage={setPage} total={total} />

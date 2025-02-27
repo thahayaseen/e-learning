@@ -1,4 +1,4 @@
-import { IRedis } from "../../app/Provider/IRedis";
+import { IRedis } from "../../domain/Provider/IRedis";
 import credis from "../config/Redis";
 import User from "../../domain/entities/UserSchema";
 

@@ -1,19 +1,17 @@
 import User from "../../domain/entities/UserSchema";
 import { validateUser, UserType } from "../../infra/validator/zod";
 import Profile from "../../domain/entities/Profile";
-import {
-  userRepository,
-  mailServices,
-  redisUseCases,
-  jwtTockenProvider,
-} from "../../config/dependencies";
+import { mailServices, redisUseCases } from "../../config/dependencies";
 import { v4 as uuid } from "uuid";
 import { SystemError } from "./enum/systemError";
-import { userError,EOtp } from "./enum/User";
-import Otp from "../../domain/entities/otp";
-import RedisAndOtpUsecases from "../adapters/RedisAdapter";
-import { userCreateDTO } from "../dtos/Duser";
+import { userError, EOtp, Roles } from "./enum/User";
+
+
+import { GoogleLoginDTO, userCreateDTO } from "../dtos/Duser";
 import { HttpStatusCode } from "./enum/Status";
+import IUserReposetory from "../repository/IUser";
+
+import { IJwtService } from "../../domain/Provider/Ijwt";
 
 // import redis from "../../config/redis";
 
@@ -31,6 +29,10 @@ export class AppError extends Error {
 }
 
 export default class Signup {
+  constructor(
+    private userRepository: IUserReposetory,
+    private jwtTockenProvider: IJwtService
+  ) {}
   async create(users: User): Promise<userCreateDTO> {
     try {
       const uid = uuid();
@@ -52,7 +54,7 @@ export default class Signup {
       };
 
       const validation = validateUser(newUser);
-      const pass = await userRepository.hashpass(users.password);
+      const pass = await this.userRepository.hashpass(users.password);
       newUser.password = pass;
       console.log("users", newUser);
 
@@ -71,7 +73,10 @@ export default class Signup {
 
         console.log(errors, "error is ");
 
-        throw new AppError(errors || "Validation failed", HttpStatusCode.BAD_REQUEST);
+        throw new AppError(
+          errors || "Validation failed",
+          HttpStatusCode.BAD_REQUEST
+        );
       }
 
       console.log(`Checking if email exists: ${users.email}`);
@@ -80,13 +85,19 @@ export default class Signup {
 
       let result = await redisUseCases.storeUser(uid, newUser, 900); //1800 time saved user data
       if (!result) {
-        throw new AppError(SystemError.DatabaseError, HttpStatusCode.INTERNAL_SERVER_ERROR);
+        throw new AppError(
+          SystemError.DatabaseError,
+          HttpStatusCode.INTERNAL_SERVER_ERROR
+        );
       }
 
       console.log(`User created with ID: ${uid}`);
-      const token = await jwtTockenProvider.accsessToken({ userid: uid });
+      const token = await this.jwtTockenProvider.accsessToken({ userid: uid });
       if (!token) {
-        throw new AppError(SystemError.SystemError, HttpStatusCode.INTERNAL_SERVER_ERROR);
+        throw new AppError(
+          SystemError.SystemError,
+          HttpStatusCode.INTERNAL_SERVER_ERROR
+        );
       }
       const otp = await redisUseCases.exexute(uid);
       await mailServices.otpsent({
@@ -111,26 +122,34 @@ export default class Signup {
   }
   async aldredyExsist(email: string) {
     try {
-      const data = await userRepository.findByEmail(email);
+      const data = await this.userRepository.findByEmail(email);
       if (data) {
-        throw new AppError(userError.UseralreadyExisit,HttpStatusCode.BAD_REQUEST);
+        throw new AppError(
+          userError.UseralreadyExisit,
+          HttpStatusCode.BAD_REQUEST
+        );
       }
-    } catch (error:any) {
-      throw new AppError(error.message, error.statusCode||HttpStatusCode.INTERNAL_SERVER_ERROR);
+    } catch (error: any) {
+      throw new AppError(
+        error.message,
+        error.statusCode || HttpStatusCode.INTERNAL_SERVER_ERROR
+      );
     }
   }
   async reOtp(Id: string) {
     try {
       console.log(`Regenerating OTP for user ID: ${Id}`);
-      const user = await redisUseCases.FindData(`${Id}`)||await userRepository.findByid(Id)
-      // const mongodata=await userRepository.findByid(Id)
+      const user =
+        (await redisUseCases.FindData(`${Id}`)) ||
+        (await this.userRepository.findByid(Id));
+      // const mongodata=await this.userRepository.findByid(Id)
       if (!user) {
-        throw new AppError(userError.UserNotFound,HttpStatusCode.NOT_FOUND);
+        throw new AppError(userError.UserNotFound, HttpStatusCode.NOT_FOUND);
       }
-      console.log('user in resend is ',user);
-      
+      console.log("user in resend is ", user);
+
       const otp = await redisUseCases.reOtp(Id);
-    
+
       user.email;
       await mailServices.otpsent({
         useEmail: user.email,
@@ -156,7 +175,7 @@ export default class Signup {
       await redisUseCases.Otpdelete(userId);
 
       data.verified = true;
-      await userRepository.create(data);
+      await this.userRepository.create(data);
     } catch (error: any) {
       console.error("Error saving user to DB:", error.message);
       throw new AppError(
@@ -169,15 +188,15 @@ export default class Signup {
   async verifyOtp(otp: string, Id: string) {
     try {
       console.log(`Verifying OTP for user ID: ${Id}`);
-      const token = jwtTockenProvider.verifyToken(Id);
+      const token = this.jwtTockenProvider.verifyToken(Id);
       console.log(token);
-      
+
       if (!token) {
         throw Error(userError.Unauthorised);
       }
       const storedOtp = await redisUseCases.getotp(token.userid);
       if (!storedOtp) {
-        throw new AppError(EOtp.OtpExpired,HttpStatusCode.NOT_FOUND);
+        throw new AppError(EOtp.OtpExpired, HttpStatusCode.NOT_FOUND);
       }
       if (storedOtp !== otp) {
         console.log("OTP verification failed.");
@@ -191,25 +210,25 @@ export default class Signup {
       throw new AppError(error.message, error.statusCode);
     }
   }
-  async glogin(user: any) {
+  async glogin(user: GoogleLoginDTO) {
     try {
-      console.log(user,"in datas");
-      
-      const useremail = await userRepository.findByEmail(user.email);
-      user.role=useremail?.role||'student'
-      const token = await jwtTockenProvider.exicute({
+      console.log(user, "in datas");
+
+      const useremail = await this.userRepository.findByEmail(user.email);
+      user.role = useremail?.role || "student";
+      const token = await this.jwtTockenProvider.exicute({
         name: user.name,
         email: user.email,
-        role: useremail?.role||'student',
+        role: useremail?.role || "student",
       });
       if (!useremail) {
         const passwords = uuid();
-        const pass = await userRepository.hashpass(passwords);
-
-        await userRepository.create({
+        const pass = await this.userRepository.hashpass(passwords);
+        await this.userRepository.create({
           name: user.name,
           email: user.email,
-          Profile: { avatar: user.profile },
+
+          profile: { avatar: user.profile }, // You're still passing only the avatar
           password: pass,
           verified: true,
           role: "student",
@@ -220,17 +239,30 @@ export default class Signup {
         return { success: true, message: "User created successfully", token };
       }
 
-      if (!useremail.verified) throw new AppError(userError.Unauthorised, HttpStatusCode.UNAUTHORIZED);
+      if (!useremail.verified)
+        throw new AppError(userError.Unauthorised, HttpStatusCode.UNAUTHORIZED);
       if (!useremail.gid) {
-        await userRepository.updatagid(useremail._id, user.id);
-        return { success: true, message: "Verified successfully", user:{name:user.name,email:user.email,role:user.role},token };
+        await this.userRepository.updatagid(useremail._id as string, user.id);
+        return {
+          success: true,
+          message: "Verified successfully",
+          user: { name: user.name, email: user.email, role: user.role },
+          token,
+        };
       }
       if (useremail.gid !== user.id)
         throw new AppError(userError.Unauthorised, HttpStatusCode.UNAUTHORIZED);
 
-      return { success: true, user:{name:user.name,email:user.email,role:user.role},token };
+      return {
+        success: true,
+        user: { name: user.name, email: user.email, role: user.role },
+        token,
+      };
     } catch (error: any) {
-      throw new AppError(error.message, error.statusCode||HttpStatusCode.INTERNAL_SERVER_ERROR);
+      throw new AppError(
+        error.message,
+        error.statusCode || HttpStatusCode.INTERNAL_SERVER_ERROR
+      );
     }
   }
 }

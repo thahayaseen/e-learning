@@ -18,6 +18,7 @@ router.post('/changepassword',jwtVerify,controller.changepass.bind(controller))
 router.post("/logout",controller.logout.bind(controller) )
 router.get('/allusers',jwtVerify,adminControler.userData.bind(adminControler))
 router.post('/blockuser',jwtVerify,adminControler.blockUser.bind(adminControler))
+// router.get('/profile',controller.)
 
 
 

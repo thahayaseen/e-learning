@@ -1,5 +1,5 @@
 
-import { userRepository} from "../../config/dependencies";
+
 import IUserReposetory from "../repository/IUser";
 class AppError extends Error {
   constructor(message: string, private statuscode: number) {

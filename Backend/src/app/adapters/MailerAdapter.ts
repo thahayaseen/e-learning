@@ -1,4 +1,4 @@
-import { IMailProvider } from "../Provider/Inodemail";
+import { IMailProvider } from "../../domain/Provider/Inodemail";
 import NodemailDto from "../dtos/nodemailDto";
 import { AppError } from "../../domain/entities/ITrycatchError";
 import { SystemError } from "../useCases/enum/systemError";
