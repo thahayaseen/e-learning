@@ -8,7 +8,7 @@ export default class User{
     public gid:string|null,
     public profile: Profile,
     public password: string,
-    public isblocked: boolean,
+    public isBlocked: boolean,
     public verified: boolean,
     public role: "admin" | "student" | "mentor",
     public purchasedCourses: string[],

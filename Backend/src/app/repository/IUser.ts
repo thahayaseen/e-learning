@@ -16,6 +16,7 @@ export default interface IUserReposetory{
     hashpass(pass:string):Promise<string>
     Hmatch(Upass:string,Hpass:string):Promise<boolean>
     findAlluser(limit:number,skip:number):Promise<Alluserinterface>
+    finduserBymentor(mentorid:string,skip:number,limit:number):Promise<UserDTO[]>
     Blockuser(id:string,type:boolean):Promise<void>
     updatagid(id:string,git:string):Promise<UserDTO|null>
 } 

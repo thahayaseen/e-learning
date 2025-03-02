@@ -3,7 +3,7 @@ import IUser from '../../../domain/entities/UserSchema'
 
 export interface IUserModel extends Document,IUser{}
 const Profile = new mongoose.Schema({
-  avathar: String,
+  avatar: String,
   experience: Number,
   social_link: String,
   userid: String,
@@ -17,7 +17,7 @@ export const User = new mongoose.Schema<IUserModel>({
   email:String,
   password: String,
   verified: { type: Boolean, default: false },
-  isblocked:{
+  isBlocked:{
     type:Boolean,
     default:false
   },

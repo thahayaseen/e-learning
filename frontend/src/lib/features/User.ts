@@ -49,7 +49,7 @@ const slices = createSlice({
 
       console.log("removed");
     },
-    loading: (state, payload) => {
+    setloading: (state, payload) => {
       state.loading = payload.payload;
       console.log(state.loading, "changed");
     },
@@ -75,5 +75,5 @@ const slices = createSlice({
   },
 });
 
-export const { setUser, logout, loading } = slices.actions;
+export const { setUser, logout, setloading } = slices.actions;
 export default slices.reducer;

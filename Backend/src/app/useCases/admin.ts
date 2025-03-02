@@ -1,13 +1,14 @@
 
 
 import IUserReposetory from "../repository/IUser";
+import { IAdmin } from "./interface/Iadmin";
 class AppError extends Error {
   constructor(message: string, private statuscode: number) {
     super(message);
     Error.captureStackTrace(this, this.constructor);
   }
 }
-export default class Admin{
+export default class Admin implements IAdmin{
   constructor(private UserRepository:IUserReposetory){}
   async getuserAdata({page,limit}:{page?:string,limit?:string}) {
     try {

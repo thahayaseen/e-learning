@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import PaginationComponent from "../default/pagination";
 import { UserCheck, UserX, Search, Filter, RefreshCcw } from "lucide-react";
-import AdminTable from "./adminTable";
+import AdminTable from "./adminuserTable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import axios from "@/services/asios";
-import { Adminshousers } from "@/services/userinterface";
+import { Adminshousers } from "@/services/interface/userinterface";
 import toast from "react-hot-toast";
 import { fetchUsers } from "@/services/fetchdata";
 
@@ -32,10 +32,13 @@ const UserManagementPage = () => {
   const fetchUser = async () => {
     setIsLoading(true);
     try {
+      
       const response = await fetchUsers(`/allusers?page=${page}&limit=${5}`);
+      console.log(response);
+      
       setTotal(response.totalpages);
-      setUsers(response.formattedData);
-      setFilteredUsers(response.formattedData);
+      setUsers(response.data);
+      setFilteredUsers(response.data);
     } catch (error) {
       toast.error("Failed to fetch users");
       console.error("Error fetching users:", error);
@@ -80,17 +83,17 @@ console.log(roleFilter);
     setFilteredUsers(result);
   };
 
-  const toggleBlock = async (userId, type) => {
-    console.log(userId);
+  const toggleBlock = async (id:string, type) => {
+    console.log(id);
     try {
       const response = await axios.post("/blockuser", {
-        userid: userId,
+        userid: id,
         type: !type,
       });
 
       setUsers(
         users.map((user) =>
-          user.id === userId ? { ...user, blocked: !user.blocked } : user
+          user.id == id ? { ...user, blocked: !user.blocked } : user
         )
       );
       console.log(response);
@@ -109,22 +112,62 @@ console.log(roleFilter);
   };
 
   const activeUsers = useMemo(
-    () => users.filter((user) => !user.blocked).length,
+    () => (users.filter((user) => !user.blocked).length),
     [users]
   );
   const blockedUsers = useMemo(
     () => users.filter((user) => user.blocked).length,
     [users]
   );
-  const [colomns, setColomns] = useState<string[]>([
-    "Name",
-    "Email",
-    "Role",
-    "Created",
-    "Actions",
-  ]);
+  const userColumns = [
+    {
+      key: "name",
+      header: "Name",
+      render: (user: Adminshousers) => (
+        <>
+          {user.name}
+          {user.blocked && (
+            <Badge className="ml-2 bg-red-900/30 text-red-300 border-red-500">
+              Blocked
+            </Badge>
+          )}
+        </>
+      ),
+    },
+    {
+      key: "email",
+      header: "Email",
+      render: (user: Adminshousers) => user.email,
+    },
+    {
+      key: "role",
+      header: "Role",
+      render: (user: Adminshousers) => (
+        <span
+          className={`px-3 py-1 rounded-full text-sm font-medium ${
+            user.role === "Admin"
+              ? "bg-blue-500 text-white"
+              : user.role === "Editor"
+              ? "bg-indigo-500 text-white"
+              : "bg-blue-600 text-white"
+          }`}>
+          {user.role}
+        </span>
+      ),
+    },
+    {
+      key: "lastActive",
+      header: "Last Active",
+      render: (user: Adminshousers) => user.lastActive,
+    },
+    {
+      key: "actions",
+      header: "Actions",
+      render: () => null, // This will be handled by the component's built-in actions
+    },
+  ];
   return (
-    <div className="min-h-screen bg-blue-950">
+    <div className="min-h-screen w-full bg-blue-950">
       {/* Main Content */}
       <div className="flex-1 p-8">
         <div className="mb-8">
@@ -212,8 +255,8 @@ console.log(roleFilter);
         </div>
 
         <AdminTable
-          colomns={colomns}
-          filteredUsers={filteredUsers}
+          columns={userColumns}
+          data={filteredUsers}
           isLoading={isLoading}
           toggleBlock={toggleBlock}
         />

@@ -13,31 +13,26 @@ export const jwtVerify = async (
 ) => {
   console.log(req.headers.authorization);
 
-  const token = req.headers.authorization?.split(" ")[1];
-  console.log("token is ", token);
-
-  // if (!token) {
-  //   console.log('thius');
-
-  //    res.status(401).json({ success: false, message: "Unauthorized: No token provided" });
-  //    return
-  // }
-
   try {
     let tocken = req.headers.authorization?.split(" ")[1];
-    console.log(tocken, "in jwt middlewerfsae");
+    console.log("acces token", typeof tocken);
 
     let data;
     if (tocken) {
       data = await LoginUsecase.protectByjwt(tocken);
+      console.log("acces token varified", typeof tocken);
     }
     console.log(data);
 
     if (!data) {
+      console.log("no acces token no,refreshing ");
       const refresh = req.cookies.refresh;
-      console.log(refresh, "tocken is refrashis no ");
+      console.log("refresh token is", typeof refresh);
+
       if (!refresh) {
-        res.status(404).json({ success: false, message: "user not found" });
+        res
+          .status(401)
+          .json({ success: false, message: userError.Unauthorised });
         return;
       }
       const refreshvarify = await LoginUsecase.protectByjwt(refresh);
@@ -52,7 +47,10 @@ export const jwtVerify = async (
         email: refreshvarify.email,
         role: refreshvarify.role,
       };
-
+      res.cookie("access", req.body.accessTocken, {
+        httpOnly: false,
+        expires: new Date(Date.now() + 15 * 60 * 1000), // Expires in 15 minutes
+      });
       req.body.accessTocken = await LoginUsecase.generatToken(data);
     }
     req.user = data;
@@ -64,34 +62,3 @@ export const jwtVerify = async (
     return;
   }
 };
-
-// async jwtmiddlewere(req: AuthServices, res: Response, next: NextFunction) {
-//   let tocken = req.headers.authorization?.split(" ")[1];
-//   console.log(tocken, "in jwt middlewerfsae");
-//   const refresh = await req.cookies;
-//   console.log(refresh, "tocken is refrashis no ");
-//   let data;
-//   if (tocken) {
-//     data = jwt.verifyToken(tocken);
-//   }
-//   if (!data) {
-//     const refresh = await req.cookies.refresh;
-//     console.log(refresh, "tocken is refrashis no ");
-//     if (!refresh) {
-//       res.status(404).json({ success: false, message: "user not found" });
-//       return;
-//     }
-//     const refreshvarify = jwt.verifyToken(refresh);
-//     if (!refreshvarify) {
-//       res.status(401).json({ success: false, message: "tocken expaied" });
-//       return;
-//     }
-//     req.body.accessTocken = jwt.generateToken({
-//       name: refreshvarify.role,
-//       email: refreshvarify.email,
-//       roll: refreshvarify.role,
-//     });
-//   }
-//   req.user = data;
-//   next();
-// }

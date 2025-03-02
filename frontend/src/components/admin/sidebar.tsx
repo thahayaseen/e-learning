@@ -11,7 +11,8 @@ import {
   LogOut,
   Menu,
   ChevronLeft,
-  Home
+  Home,
+  CarTaxiFront
 } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
@@ -25,7 +26,7 @@ const dispatch=useDispatch()
   const menuItems = [
     { icon: Home, label: 'Dashboard', badge: null,path:'/admin' },
     { icon: Users, label: 'User Management', badge: '12',path:'/admin/user' },
-    { icon: Shield, label: 'Roles & Permissions', badge: null },
+    { icon: CarTaxiFront, label: 'Category', badge: null,path:'/admin/category' },
     { icon: BarChart3, label: 'Analytics', badge: null },
     { icon: Mail, label: 'Messages', badge: '5' },
     { icon: Bell, label: 'Notifications', badge: '3' },

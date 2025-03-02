@@ -6,7 +6,6 @@ import { v4 as uuid } from "uuid";
 import { SystemError } from "./enum/systemError";
 import { userError, EOtp, Roles } from "./enum/User";
 
-
 import { GoogleLoginDTO, userCreateDTO } from "../dtos/Duser";
 import { HttpStatusCode } from "./enum/Status";
 import IUserReposetory from "../repository/IUser";
@@ -39,7 +38,7 @@ export default class Signup {
       const newUser: UserType & {
         profile: Profile;
         gid: null;
-        isblocked: boolean;
+        isBlocked: boolean;
       } = {
         name: users.name,
         email: users.email,
@@ -48,7 +47,7 @@ export default class Signup {
         verified: false,
         role: "student",
         gid: null,
-        isblocked: false,
+        isBlocked: false,
         purchasedCourses: [],
         subscription: null,
       };
@@ -213,7 +212,9 @@ export default class Signup {
   async glogin(user: GoogleLoginDTO) {
     try {
       console.log(user, "in datas");
-
+      const myprofile={ avatar: user.picture }
+      console.log(myprofile);
+      
       const useremail = await this.userRepository.findByEmail(user.email);
       user.role = useremail?.role || "student";
       const token = await this.jwtTockenProvider.exicute({
@@ -224,17 +225,18 @@ export default class Signup {
       if (!useremail) {
         const passwords = uuid();
         const pass = await this.userRepository.hashpass(passwords);
-        await this.userRepository.create({
+       const adta= await this.userRepository.create({
           name: user.name,
           email: user.email,
 
-          profile: { avatar: user.profile }, // You're still passing only the avatar
+          profile: myprofile,
           password: pass,
           verified: true,
           role: "student",
           purchasedCourses: [],
           subscription: null,
         });
+console.log(adta);
 
         return { success: true, message: "User created successfully", token };
       }

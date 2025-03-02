@@ -3,7 +3,7 @@ import axios, { AxiosInstance } from "axios";
 
 const api: AxiosInstance = axios.create({
   baseURL: "http://" + process.env.NEXT_PUBLIC_DOMAIN,
-  timeout: 10000,
+  timeout: 100000,
 });
 api.interceptors.request.use(
   (config) => {

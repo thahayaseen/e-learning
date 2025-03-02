@@ -16,7 +16,7 @@ export interface GoogleLoginDTO {
   id: string;
   name: string;
   email: string;
-  profile: string;
+  picture: string;
   role?: "admin" | "student" | "mentor";
 }
 export interface UserDTO {
@@ -31,6 +31,7 @@ export interface UserDTO {
   role?: "admin" | "student" | "mentor";
   purchasedCourses?: string[];
   subscription?: string | null;
+  updatedAt?  :string
 }
 
 export interface ProfileDTO {

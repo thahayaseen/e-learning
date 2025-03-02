@@ -1,6 +1,6 @@
 "use client"
 import type React from "react"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useRouter, usePathname } from "next/navigation"
 import type { AppDispatch, storeType } from "@/lib/store"
@@ -13,25 +13,38 @@ function Protection({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const path = usePathname()
 
-  const { user, isAuthenticated, loading } = useSelector((state: storeType) => state.User)
+  // Get user state from Redux
+  const { user, isAuthenticated,loading } = useSelector((state: storeType) => state.User)
 
+  // Local verification state - separate from the global loading state
   const [isVerifying, setIsVerifying] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+
+  // Use a ref to track if verification has been attempted
+  const verificationAttempted = useRef(false)
 
   // Check if the current path is a public route that doesn't need authentication
-  const isPublicRoute = path === "/" || path === "/auth"
-  
-  // Initialize verification state
+  const isPublicRoute = path === "/" || path === "/auth"||path.startsWith('/auth')
+
+  // Initialize verification state - only run once per path change
   useEffect(() => {
     const verifyUser = async () => {
+      // Skip verification for public routes
       if (isPublicRoute) {
-        console.log('Public route detected - skipping verification');
+        console.log("Public route detected - skipping verification")
         setIsVerifying(false)
         return
       }
-      
+
+      // Skip if we've already verified for this path
+      if (verificationAttempted.current) {
+        return
+      }
+
+      verificationAttempted.current = true
+      setIsVerifying(true)
+
       try {
-        console.log('Protected route - verifying user');
+        console.log("Protected route - verifying user")
         await dispatch(Varify()).unwrap()
       } catch (error) {
         console.log("Verification failed:", error)
@@ -39,9 +52,14 @@ function Protection({ children }: { children: React.ReactNode }) {
         setIsVerifying(false)
       }
     }
-    
+
     verifyUser()
-  }, [dispatch, isPublicRoute, path])
+
+    // Reset verification flag when path changes
+    return () => {
+      verificationAttempted.current = false
+    }
+  }, [dispatch, isPublicRoute])
 
   // Handle redirects after verification
   useEffect(() => {
@@ -57,7 +75,7 @@ function Protection({ children }: { children: React.ReactNode }) {
 
     // If not authenticated, redirect to auth
     if (!isAuthenticated) {
-      console.log('Not authenticated - redirecting to auth');
+      console.log("Not authenticated - redirecting to auth")
       router.push("/auth")
       return
     }
@@ -68,20 +86,18 @@ function Protection({ children }: { children: React.ReactNode }) {
       const isMentorPath = path.startsWith("/mentor")
 
       if (isAdminPath && user.role !== Roles.ADMIN) {
-        console.log('Not admin - redirecting from admin path');
+        console.log("Not admin - redirecting from admin path")
         router.replace("/")
       } else if (isMentorPath && user.role !== Roles.MENTOR) {
-        console.log('Not mentor - redirecting from mentor path');
+        console.log("Not mentor - redirecting from mentor path")
         router.replace("/")
       }
     }
   }, [isAuthenticated, user?.role, path, router, isVerifying, isPublicRoute])
 
-  // Prevent flashing by always showing loading state during initial load
-  // or when authentication state is changing, except for public routes
-  if ((isVerifying || loading) && !isPublicRoute) {
-    console.log('Showing loading state');
-    
+
+  // Render loading state
+  if ((isVerifying && !isPublicRoute)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-900">
         <div className="flex flex-col items-center gap-4">
@@ -94,13 +110,11 @@ function Protection({ children }: { children: React.ReactNode }) {
 
   // For public routes, always render children
   if (isPublicRoute) {
-    console.log('Rendering public route content');
     return <>{children}</>
   }
 
   // Only render protected content when we're fully verified and authenticated
   if (!isAuthenticated) {
-    console.log('Not authenticated - not rendering protected content');
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-900">
         <div className="flex flex-col items-center gap-4">
@@ -112,7 +126,6 @@ function Protection({ children }: { children: React.ReactNode }) {
   }
 
   if (path.startsWith("/admin") && user?.role !== Roles.ADMIN) {
-    console.log('Not admin - not rendering admin content');
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-900">
         <div className="flex flex-col items-center gap-4">
@@ -124,7 +137,6 @@ function Protection({ children }: { children: React.ReactNode }) {
   }
 
   if (path.startsWith("/mentor") && user?.role !== Roles.MENTOR) {
-    console.log('Not mentor - not rendering mentor content');
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-900">
         <div className="flex flex-col items-center gap-4">
@@ -136,8 +148,8 @@ function Protection({ children }: { children: React.ReactNode }) {
   }
 
   // All checks passed, render the children
-  console.log('All checks passed - rendering protected content');
   return <>{children}</>
 }
 
 export default Protection
+

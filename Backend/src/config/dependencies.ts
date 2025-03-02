@@ -15,7 +15,9 @@ export const redisUseCases = new RedisUsecases(redisProvider);
 import Signup from "../app/useCases/Signup";
 import Login from "../app/useCases/Login";
 import admin from "../app/useCases/admin";
+import { UserUsecase } from "../app/useCases/User";
 export const signUpUser=new Signup(userRepository,jwtTockenProvider)
-export const LoginUsecase=new Login(userRepository)
+export const LoginUsecase=new Login(userRepository,jwtTockenProvider)
 export const adminUsecase=new admin(userRepository)
+export const userUseCase=new UserUsecase(userRepository)
 export type adminUsecaseType=typeof adminUsecase

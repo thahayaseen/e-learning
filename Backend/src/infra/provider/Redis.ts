@@ -1,6 +1,7 @@
 import { IRedis } from "../../domain/Provider/IRedis";
 import credis from "../config/Redis";
 import User from "../../domain/entities/UserSchema";
+import { UserDTO } from "../../app/dtos/Duser";
 
 export default class PrRedis implements IRedis {
   private redis;
@@ -32,7 +33,7 @@ export default class PrRedis implements IRedis {
 
     return { userid, users };
   }
-  async getBtId(uId: string): Promise<User | null> {
+  async getBtId(uId: string): Promise<UserDTO | null> {
     console.log(uId, "from resend");
 
     let data = await this.redis.get(`user:${uId}`);
@@ -41,7 +42,7 @@ export default class PrRedis implements IRedis {
       const ans: User = JSON.parse(data);
       console.log(ans);
 
-      return ans;
+      return ans as UserDTO
     }
     return null;
   }

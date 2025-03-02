@@ -19,7 +19,7 @@ const ELearningPlatform = () => {
     }
    }
    varify()
- },[])
+ },[dispatch,state.isAuthenticated])
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
       {/* Header */}

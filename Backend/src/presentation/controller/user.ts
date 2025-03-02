@@ -1,24 +1,31 @@
 import { Request, Response, NextFunction } from "express";
-// import {   userRepo } from "../../config/dependencies";
-import {
-  // signUpUser,
-  LoginUsecase,
-  adminUsecase,
-} from "../../config/dependencies";
+
 import { handleError } from "../../utils/handleerror";
-// import redis from "../../config/redis";
+
 import axios from "axios";
 import { Roles, userError } from "../../app/useCases/enum/User";
-// import jwt from "../../config/jwt";
+
 import { HttpStatusCode } from "../../app/useCases/enum/Status";
 import { IsignUpUser } from "../../app/useCases/Signup";
+import { ILogin } from "../../app/useCases/interface/Ilogin";
+import { IAdmin } from "../../app/useCases/interface/Iadmin";
+import { IuserUseCase } from "../../app/useCases/interface/IUseruseCase";
+import { SystemError } from "../../app/useCases/enum/systemError";
+import { SuccessMessage } from "../../app/useCases/enum/httpSuccess";
 export interface AuthServices extends Request {
   error?: string;
   user?: any;
 }
-
+interface CustomError {
+  message: string;
+}
 export default class UserController {
-  constructor(private signUpUser: IsignUpUser) {}
+  constructor(
+    private signUpUser: IsignUpUser,
+    private LoginUsecase: ILogin,
+    private adminUsecase: IAdmin,
+    private userUseCase: IuserUseCase
+  ) {}
   async create(req: Request, res: Response) {
     try {
       console.log(req.body);
@@ -72,9 +79,16 @@ export default class UserController {
   async login(req: Request, res: Response) {
     try {
       console.log(req.body, "ingoo");
-      const data = await LoginUsecase.logins(req.body.email, req.body.password);
-
-      res.cookie("refresh", data.datas.refresh, {
+      const data = await this.LoginUsecase.logins(
+        req.body.email,
+        req.body.password
+      );
+      const tokess = JSON.parse(data.datas);
+      res.cookie("refresh", tokess.refresh, {
+        httpOnly: false,
+        expires: new Date(Date.now() + 7 * 60 * 60 * 1000), // Expires in 15 minutes
+      });
+      res.cookie("access", tokess.access, {
         httpOnly: false,
         expires: new Date(Date.now() + 7 * 60 * 60 * 1000), // Expires in 15 minutes
       });
@@ -83,7 +97,7 @@ export default class UserController {
         .json({
           success: data.success,
           message: data.message,
-          access: data.datas.accses,
+          // access: tokess.access,
           user: data.user,
         });
       return;
@@ -113,7 +127,7 @@ export default class UserController {
       if (req.body.userid) {
         console.log("here", req.body.userid);
 
-        const tocken = await LoginUsecase.forgotTocken(req.body.userid);
+        const tocken = await this.LoginUsecase.forgotTocken(req.body.userid);
 
         res.status(HttpStatusCode.OK).json({ success: true, tocken: tocken });
       }
@@ -124,7 +138,7 @@ export default class UserController {
 
   async forgotPassOtpsent(req: Request, res: Response) {
     try {
-      const token = await LoginUsecase.forgetpass(req.body.email);
+      const token = await this.LoginUsecase.forgetpass(req.body.email);
       res.status(HttpStatusCode.OK).json({ success: true, token });
     } catch (error: any) {
       console.log(error);
@@ -148,7 +162,7 @@ export default class UserController {
         .json({ message: "please check all feiled" });
       return;
     }
-    await LoginUsecase.changepassword(req.user.userid, req.body.password);
+    await this.LoginUsecase.changepassword(req.user.userid, req.body.password);
     console.log(req.user, "returning");
 
     res
@@ -162,7 +176,7 @@ export default class UserController {
 
       res.cookie("access", req.body.accessTocken, {
         httpOnly: false,
-        expires: new Date(Date.now() + 15 * 60 * 1000) // Expires in 15 minutes
+        expires: new Date(Date.now() + 15 * 60 * 1000), // Expires in 15 minutes
       });
     }
     res
@@ -199,13 +213,16 @@ export default class UserController {
 
       res.cookie("refresh", datas.token.refresh, {
         httpOnly: false,
-        expires: new Date(Date.now() + 7 *60* 60 * 1000) // Expires in 15 minutes
+        expires: new Date(Date.now() + 7 * 60 * 60 * 1000), // Expires in 7 day
       });
-
+      res.cookie("access", datas.token?.access, {
+        httpOnly: false,
+        expires: new Date(Date.now() + 7 * 60 * 60 * 1000), // Expires in 15 minutes
+      });
       res.status(HttpStatusCode.OK).json({
         success: true,
         message: "google login success",
-        token: datas.token?.accses,
+        token: datas.token?.access,
         user: datas.user,
       });
       return;
@@ -244,7 +261,7 @@ export default class UserController {
         return;
       }
       if (typeof page == "string" && typeof limit == "string") {
-        const datas = await adminUsecase.getuserAdata({ page, limit });
+        const datas = await this.adminUsecase.getuserAdata({ page, limit });
 
         console.log(datas, "fasasdg");
 
@@ -260,9 +277,44 @@ export default class UserController {
         .json({ success: false, message: error.message });
     }
   }
-  // user profile and datas 
-  // async userProfile(){
-  //   this.signUpUser.
-  // }
-}
+  // user profile and datas
+  async uProfile(req: AuthServices, res: Response) {
+    try {
+      setTimeout(async()=>{
 
+ 
+      const email = req.user.email;
+      console.log(email);
+
+      const data = await this.userUseCase.UseProfile(email);
+      res.status(HttpStatusCode.OK).json({
+        success: true,
+        message: SuccessMessage.FETCH_SUCCESS,
+        data: data,
+      });
+      console.log(data);
+    },1000)
+    } catch (err) {
+      const error = err as CustomError;
+      res
+        .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+        .json({ success: false, message: SystemError.SystemError });
+      return;
+    }
+  }
+  async Beamentor(req: AuthServices, res: Response) {
+    const {
+      fullName,
+      email,
+      phoneNumber,
+      profession,
+      experience,
+      areasOfExpertise,
+      availability,
+      motivation,
+      resume,
+      profileImage,
+    } = req.body;
+    const userid=req.user.userid
+  }
+}

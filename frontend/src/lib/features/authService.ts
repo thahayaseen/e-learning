@@ -2,7 +2,7 @@ import axios from "@/services/asios";
 import { save_cookie } from "@/lib/features/cookie";
 import toast from "react-hot-toast";
 import { AppDispatch } from "@/lib/store";
-import { loading, setUser } from "@/lib/features/User";
+import { setloading, setUser } from "@/lib/features/User";
 
 interface LoginData {
   email: string;
@@ -20,11 +20,11 @@ export const loginUser = async (
   dispatch: AppDispatch
 ) => {
   try {
-    dispatch(loading(true));
+    dispatch(setloading(true));
     const response = await axios.post("/login", data);
     toast.success(response.message || "Login successful!");
     dispatch(setUser(response.user));
-    save_cookie("access", response.token);
+    // save_cookie("access", response.token);
     return { success: true, data: response };
   } catch (error: any) {
     const errorMessage = error.response.data?.message || "Login failed";
@@ -32,7 +32,7 @@ export const loginUser = async (
     console.warn(errorMessage);
     return { success: false, error };
   } finally {
-    dispatch(loading(false));
+    dispatch(setloading(false));
   }
 };
 
@@ -41,7 +41,7 @@ export const registerUser = async (
   dispatch: AppDispatch
 ) => {
   try {
-    dispatch(loading(true));
+    dispatch(setloading(true));
     const response = await axios.post("/signup", data);
     console.log(response);
     
@@ -54,7 +54,7 @@ export const registerUser = async (
     console.error(error);
     return { success: false, error };
   } finally {
-    dispatch(loading(false));
+    dispatch(setloading(false));
   }
 };
 
@@ -63,7 +63,7 @@ export const googleLogin = async (
   dispatch: AppDispatch
 ) => {
   try {
-    dispatch(loading(true));
+    dispatch(setloading(true));
     const response = await axios.post(
       "/glogin",
       {},
@@ -75,12 +75,12 @@ export const googleLogin = async (
     );
     toast.success(response.message || "Google login successful!");
     dispatch(setUser(response.user));
-    save_cookie("access", response.token);
+    // save_cookie("access", response.token);
     return { success: true, data: response };
   } catch (error: any) {
     console.error(error);
     return { success: false, error };
   } finally {
-    dispatch(loading(false));
+    dispatch(setloading(false));
   }
 };

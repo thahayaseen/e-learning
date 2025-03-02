@@ -1,12 +1,14 @@
 import { JwtPayload } from "jsonwebtoken";
 import {
-  userRepository,
+ 
   mailServices,
   redisUseCases,
-  jwtTockenProvider,
+  // jwtTockenProvider,
 } from "../../config/dependencies";
 import { userError } from "./enum/User";
 import IUserReposetory from "../repository/IUser";
+import { ILogin } from "./interface/Ilogin";
+import { IJwtService } from "../../domain/Provider/Ijwt";
 // import jwtokens from "../../config/jwt";
 // import redis from "../../config/redis";
 // import nodemailer from "../../config/nodemailer";
@@ -17,16 +19,24 @@ class AppError extends Error {
     Error.captureStackTrace(this, this.constructor);
   }
 }
-export default class Login {
-  constructor(private userRepository:IUserReposetory){}
-  async logins(email: string, password: string) {
+export default class Login implements ILogin {
+  constructor(private userRepository: IUserReposetory,private jwtTockenProvider:IJwtService) {}
+  async logins(
+    email: string,
+    password: string
+  ): Promise<{
+    success: boolean;
+    message: string;
+    user: { name: string; email: string; role: string };
+    datas:string
+  }> {
     try {
       console.log(email);
 
       const data = await this.userRepository.findByEmail(email);
       console.log(data);
 
-      if (!data||!data.password) {
+      if (!data || !data.password||!data.role) {
         throw new AppError("User not Fount", 404);
       }
       const isvalid = await this.userRepository.Hmatch(password, data.password);
@@ -35,7 +45,7 @@ export default class Login {
       if (!isvalid) {
         throw new AppError("incotect password", 404);
       }
-      const token = await jwtTockenProvider.exicute({
+      const token = await this.jwtTockenProvider.exicute({
         role: data.role,
         name: data.name,
         email: data.email,
@@ -45,7 +55,7 @@ export default class Login {
         success: true,
         message: "varified ",
         user: { name: data.name, email: data.email, role: data.role },
-        datas: token,
+        datas: JSON.stringify(token),
       };
     } catch (error: any) {
       console.log(error);
@@ -59,7 +69,7 @@ export default class Login {
         throw new AppError(userError.UserNotFound, 404);
       }
       const otp = await redisUseCases.exexute(data._id as string);
-      const token=await jwtTockenProvider.accsessToken({userid:data._id})
+      const token = await this.jwtTockenProvider.accsessToken({ userid: data._id });
       await mailServices.otpsent({
         useEmail: data.email,
         name: data.name,
@@ -72,29 +82,29 @@ export default class Login {
     }
   }
   async forgotTocken(userid: string) {
-    return await jwtTockenProvider.accsessToken({ userid });
+    return await this.jwtTockenProvider.accsessToken({ userid });
   }
   async changepassword(userid: string, password: string) {
     try {
       console.log("userid and pass in login", userid, password);
 
       await this.userRepository.changepass(userid, password);
-      console.log('done');
-      
+      console.log("done");
+
       return;
     } catch (error: any) {
       throw new Error(error.message);
     }
   }
-  async protectByjwt(tocken:string){
+  async protectByjwt(tocken: string):Promise<JwtPayload |null> {
     try {
-      return await jwtTockenProvider.verifyToken(tocken)
-    } catch (error:any) {
-      throw new Error(error.message)
+      return  this.jwtTockenProvider.verifyToken(tocken);
+    } catch (error: any) {
+      throw new Error(error.message);
     }
   }
-  async generatToken(data:JwtPayload){
-    return jwtTockenProvider.accsessToken(data)
+  async generatToken(data: JwtPayload) {
+    return this.jwtTockenProvider.accsessToken(data);
   }
 }
 export type IloginUsecase = InstanceType<typeof Login>;
