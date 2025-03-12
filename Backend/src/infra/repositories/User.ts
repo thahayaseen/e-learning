@@ -1,4 +1,4 @@
-import IUser, { Alluserinterface } from "../../app/repository/IUser";
+import IUser, { Alluserinterface } from "../../domain/repository/IUser";
 import UserModel, { IUserModel } from "../database/models/User";
 import catchAsync from "../../utils/catechAsync";
 import User from "../../domain/entities/UserSchema";
@@ -6,6 +6,7 @@ import User from "../../domain/entities/UserSchema";
 import bcrypt from "bcrypt";
 import AdminUserDTO from "../../app/dtos/adminDTOUsers";
 import { UserDTO } from "../../app/dtos/Duser";
+import Courses from "../database/models/course";
 
 export default class UserRepository implements IUser {
   constructor() {}
@@ -147,19 +148,31 @@ export default class UserRepository implements IUser {
   Blockuser = catchAsync(async (id: string, type: boolean): Promise<void> => {
     await UserModel.updateOne({ _id: id }, { isBlocked: type });
   });
-  finduserBymentor = catchAsync(async (mentor:string,limit:number,skip:number): Promise<UserDTO[]> => {
-    const data = await UserModel.find({ purchasedCourses: { $in: [mentor] } }).skip(skip).limit(limit)
-    const obj: UserDTO[] = data.map((dat) => ({
-      _id: dat._id as string,
-      name: dat.name,
-      email: dat.email,
-      isBlocked: dat.isBlocked,
-      profile: dat.profile,
-      purchasedCourses: dat.purchasedCourses,
-      subscription: dat.subscription,
-      updatedAt: String(dat.updatedAt),
-      verified: dat.verified,
-    }));
-    return obj;
-  });
+  // finduserBymentor = catchAsync(
+  //   async (mentor: string, limit: number, skip: number): Promise<UserDTO[]> => {
+  //     const data = await Courses.find({ purchasedCourses: { $in: [mentor] } })
+  //       .skip(skip)
+  //       .limit(limit);
+  //     const obj: UserDTO[] = data.map((dat) => ({
+  //       _id: dat._id as string,
+  //       name: dat.name,
+  //       email: dat.email,
+  //       isBlocked: dat.isBlocked,
+  //       profile: dat.profile,
+  //       purchasedCourses: dat.purchasedCourses,
+  //       subscription: dat.subscription,
+  //       updatedAt: String(dat.updatedAt),
+  //       verified: dat.verified,
+  //     }));
+  //     return obj;
+  //   }
+  // );
+  async addCourseInstudent(userId: string, courseId: string) {
+    await UserModel.updateOne(
+      { _id: userId },
+      { $push: { purchasedCourses: courseId } } // Correct placement of `$push`
+    );
+    return;
+}
+
 }

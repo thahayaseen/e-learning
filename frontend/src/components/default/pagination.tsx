@@ -6,32 +6,39 @@ import {
   PaginationNext,
   PaginationLink,
   PaginationEllipsis,
-} from "@/components/ui/pagination"; // Adjust the import path as needed
-import { SetStateAction, useCallback, useMemo } from "react";
+} from "@/components/ui/pagination";
+import { SetStateAction, useCallback } from "react";
 
 interface PaginationComponentProps {
   page: number; // Current page number
-  total: number; // Total number of pages
+  total: number; // Total number of items
+  itemsPerPage: number; // Number of items per page
   setPage: React.Dispatch<SetStateAction<number>>;
 }
 
 const PaginationComponent: React.FC<PaginationComponentProps> = ({
   page,
   total,
+  itemsPerPage,
   setPage,
 }) => {
+  console.log(total);
+  
+  const totalPages = Math.ceil(total / itemsPerPage);
+  console.log('total pages', totalPages);
+
   const nextPage = useCallback(() => {
-    console.log(page<total,page,total);
-    
-    if (page < total) {
+    if (page < totalPages) {
       setPage((prev) => prev + 1);
     }
-  }, [total, page]);
+  }, [totalPages, page, setPage]);
+
   const previousPage = useCallback(() => {
-    if (1 < page) {
+    if (page > 1) {
       setPage((prev) => prev - 1);
     }
-  }, [page]);
+  }, [page, setPage]);
+
   return (
     <Pagination>
       <PaginationContent>
@@ -40,22 +47,71 @@ const PaginationComponent: React.FC<PaginationComponentProps> = ({
           <PaginationPrevious
             onClick={previousPage}
             aria-label="Go to previous page"
-            disabled={page === 1} // Disable if on the first page
+            className={page === 1 ? "pointer-events-none opacity-50" : ""}
           />
         </PaginationItem>
 
-        {/* Current Page */}
-        <PaginationItem>
-          <PaginationLink href="#" isActive>
-            {page}
-          </PaginationLink>
-        </PaginationItem>
+        {/* Page Numbers */}
+        {totalPages <= 5 ? (
+          // Show all pages if total pages are 5 or less
+          Array.from({ length: totalPages }, (_, i) => (
+            <PaginationItem key={i + 1}>
+              <PaginationLink
+                isActive={page === i + 1}
+                onClick={() => setPage(i + 1)}
+              >
+                {i + 1}
+              </PaginationLink>
+            </PaginationItem>
+          ))
+        ) : (
+          // Show pagination with ellipsis for more than 5 pages
+          <>
+            <PaginationItem>
+              <PaginationLink
+                isActive={page === 1}
+                onClick={() => setPage(1)}
+              >
+                1
+              </PaginationLink>
+            </PaginationItem>
 
-        {/* Ellipsis (Optional) */}
-        {total > page && (
-          <PaginationItem>
-            <PaginationEllipsis />
-          </PaginationItem>
+            {/* First ellipsis */}
+            {page > 3 && (
+              <PaginationItem>
+                <PaginationEllipsis />
+              </PaginationItem>
+            )}
+
+            {/* Pages around current page */}
+            {page > 2 && page < totalPages && (
+              <PaginationItem>
+                <PaginationLink
+                  onClick={() => setPage(page)}
+                  isActive
+                >
+                  {page}
+                </PaginationLink>
+              </PaginationItem>
+            )}
+
+            {/* Second ellipsis */}
+            {page < totalPages - 2 && (
+              <PaginationItem>
+                <PaginationEllipsis />
+              </PaginationItem>
+            )}
+
+            {/* Last page */}
+            <PaginationItem>
+              <PaginationLink
+                isActive={page === totalPages}
+                onClick={() => setPage(totalPages)}
+              >
+                {totalPages}
+              </PaginationLink>
+            </PaginationItem>
+          </>
         )}
 
         {/* Next Button */}
@@ -63,7 +119,7 @@ const PaginationComponent: React.FC<PaginationComponentProps> = ({
           <PaginationNext
             onClick={nextPage}
             aria-label="Go to next page"
-            disabled={page === total} // Disable if on the last page
+            className={page === totalPages ? "pointer-events-none opacity-50" : ""}
           />
         </PaginationItem>
       </PaginationContent>

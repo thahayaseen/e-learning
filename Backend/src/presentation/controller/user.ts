@@ -7,11 +7,16 @@ import { Roles, userError } from "../../app/useCases/enum/User";
 
 import { HttpStatusCode } from "../../app/useCases/enum/Status";
 import { IsignUpUser } from "../../app/useCases/Signup";
-import { ILogin } from "../../app/useCases/interface/Ilogin";
-import { IAdmin } from "../../app/useCases/interface/Iadmin";
-import { IuserUseCase } from "../../app/useCases/interface/IUseruseCase";
+import { ILogin } from "../../domain/interface/Ilogin";
+import { IAdmin } from "../../domain/interface/Iadmin";
+import { IuserUseCase } from "../../domain/interface/IUseruseCase";
 import { SystemError } from "../../app/useCases/enum/systemError";
 import { SuccessMessage } from "../../app/useCases/enum/httpSuccess";
+import { IUserModel } from "../../infra/database/models/User";
+import bcrypt from "bcrypt";
+import { ICourseUseCase } from "../../domain/interface/courseUsecase";
+import IsocketUsecase from "../../domain/interface/socket";
+
 export interface AuthServices extends Request {
   error?: string;
   user?: any;
@@ -24,7 +29,9 @@ export default class UserController {
     private signUpUser: IsignUpUser,
     private LoginUsecase: ILogin,
     private adminUsecase: IAdmin,
-    private userUseCase: IuserUseCase
+    private userUseCase: IuserUseCase,
+    private CourseUseCase: ICourseUseCase,
+    private Socketusecase: IsocketUsecase
   ) {}
   async create(req: Request, res: Response) {
     try {
@@ -226,11 +233,12 @@ export default class UserController {
         user: datas.user,
       });
       return;
-    } catch (error) {
+    } catch (error: any) {
+      this.logout(req,res)
       console.error("Error in glogin:", error);
       res
         .status(HttpStatusCode.BAD_REQUEST)
-        .json({ success: false, message: "Internal Server Error" });
+        .json({ success: false, message: error.message });
     }
   }
   logout(req: Request, res: Response) {
@@ -280,20 +288,24 @@ export default class UserController {
   // user profile and datas
   async uProfile(req: AuthServices, res: Response) {
     try {
-      setTimeout(async()=>{
-
- 
       const email = req.user.email;
       console.log(email);
 
-      const data = await this.userUseCase.UseProfile(email);
+      const data = await this.userUseCase.UseProfileByemail(email);
+      const courseData = await this.getpurchasedCourses(
+        data?.purchasedCourses as string[]
+      );
+      const progresdata=await this.CourseUseCase.getuserallCourseprogresdata(String(data?._id))
+      console.log(progresdata,'dataisissisisi');
+      
       res.status(HttpStatusCode.OK).json({
         success: true,
         message: SuccessMessage.FETCH_SUCCESS,
         data: data,
+        datas: courseData,
+        progresdata
       });
       console.log(data);
-    },1000)
     } catch (err) {
       const error = err as CustomError;
       res
@@ -315,6 +327,140 @@ export default class UserController {
       resume,
       profileImage,
     } = req.body;
-    const userid=req.user.userid
+    const userid = req.user.userid;
   }
+  async GetCourse(req: AuthServices, res: Response) {
+    try {
+      const { courseid } = req.params;
+
+      if (!req.user.email) {
+        res.status(HttpStatusCode.NOT_FOUND).json({
+          success: false,
+          message: "please login before login",
+        });
+      }
+      if (!courseid) {
+        return;
+      }
+      const user = await this.userUseCase.UseProfileByemail(req.user.email);
+      const isvalid = user?.purchasedCourses?.includes(courseid);
+      console.log(isvalid, "in buy course");
+      if (isvalid == undefined) return;
+
+      const reslt = await this.CourseUseCase.getSelectedCourse(
+        courseid,
+        isvalid
+      );
+      console.log("in hjere");
+
+      console.log(JSON.stringify(reslt), "om tjos");
+
+      res.status(HttpStatusCode.OK).json({
+        success: true,
+        message: "fetched",
+        data: reslt,
+        adredypuchased:isvalid
+      });
+      return;
+    } catch (error) {
+      res.status(HttpStatusCode.NOT_FOUND);
+      return;
+    }
+  }
+  async getAllcourseUser(req: AuthServices, res: Response) {
+    try {
+      const { limit } = req.query;
+      const data = await this.CourseUseCase.getAllCourse(Number(limit));
+      console.log(JSON.stringify(data));
+      res.status(HttpStatusCode.OK).json({
+        success: true,
+        message: "fetched success",
+        data,
+      });
+      return;
+    } catch (error) {
+      res.status(HttpStatusCode.BAD_REQUEST);
+    }
+  }
+  async BuyCourse(req: AuthServices, res: Response) {
+    try {
+      let userId;
+      const { email } = req.user;
+      const { courseId } = req.params;
+      if (!courseId) {
+        res.status(HttpStatusCode.BAD_REQUEST).json({
+          success: false,
+          message: "Not Found",
+        });
+        return;
+      }
+      const user = await this.userUseCase.UseProfileByemail(email);
+      if (user?.purchasedCourses?.includes(courseId)) {
+        res.status(HttpStatusCode.CONFLICT).json({
+          success: false,
+          message: "Student aldredy purchased",
+        });
+        return;
+      }
+
+      await this.CourseUseCase.purchaseCourse(String(user?._id), courseId);
+      res.status(HttpStatusCode.OK).json({
+        succes: true,
+        message: "order succes",
+      });
+      return;
+    } catch (error) {
+      handleError(res, "An error occupied", HttpStatusCode.BAD_REQUEST);
+    }
+  }
+  async getpurchasedCourses(data: string[]) {
+    try {
+      const datas = await this.CourseUseCase.getByCoursids(data);
+      return datas;
+    } catch (error) {
+      throw new Error("An error occupied");
+    }
+  }
+  async getchats(req: AuthServices, res: Response) {
+    try {
+      
+    const { roomid } = req.params;
+    const { email, _id } = req.user;
+    console.log(roomid);
+
+    const resp = await this.Socketusecase.findChatwithroom(roomid);
+    console.log(_id, "uidss", resp);
+
+    const ans =( String(resp?.userId)==String(_id))||(String(resp?.mentorId==String(_id)))
+    console.log(ans, "results",resp?.userId,"  ",_id);
+    if (!ans) {
+      throw new Error("Room not fount");
+    }
+    const data = await this.Socketusecase.getAllmessageByroom(roomid);
+    console.log(data, "chats");
+    res.status(HttpStatusCode.OK).json({
+      success:true,
+      message:'succesfully fetch data',
+      data
+    })
+    return 
+    } catch (error) {
+      res.status(HttpStatusCode.BAD_REQUEST).json({
+        success:true,
+        message:'cannot fetch data',
+        
+      }) 
+    }
+  }
+  // async changePassword(req: AuthServices, res: Response) {
+  //   const email = req.user.email;
+  //   const { oldpass,newpassword } = req.body;
+  //   const user = await this.userUseCase.UseProfileByemail(email);
+  //   const fonform = await bcrypt.compare(user?.password as string, oldpass as string);
+  //   if(fonform){
+  //     const newpass=await bcrypt.hash(newpassword,10)
+  //     user?.password=newpass as string
+  //     user.save()
+  //   }
+  // }
 }

@@ -8,7 +8,7 @@ import { userError, EOtp, Roles } from "./enum/User";
 
 import { GoogleLoginDTO, userCreateDTO } from "../dtos/Duser";
 import { HttpStatusCode } from "./enum/Status";
-import IUserReposetory from "../repository/IUser";
+import IUserReposetory from "../../domain/repository/IUser";
 
 import { IJwtService } from "../../domain/Provider/Ijwt";
 
@@ -216,6 +216,10 @@ export default class Signup {
       console.log(myprofile);
       
       const useremail = await this.userRepository.findByEmail(user.email);
+      if(useremail?.isBlocked){
+        throw new Error('user has been blocked')
+        // return {success:false,message:'user has been blocked'}
+      }
       user.role = useremail?.role || "student";
       const token = await this.jwtTockenProvider.exicute({
         name: user.name,

@@ -1,64 +1,71 @@
 import { Request, Response, NextFunction } from "express";
 import { LoginUsecase } from "../../config/dependencies";
 import { userError } from "../../app/useCases/enum/User";
+
 interface AuthServices extends Request {
   error?: string;
   user?: any;
 }
 
-export const jwtVerify = async (
-  req: AuthServices,
-  res: Response,
-  next: NextFunction
-) => {
-  console.log(req.headers.authorization);
-
+export const jwtVerify = async (req:AuthServices, res:Response, next:NextFunction) => {
   try {
-    let tocken = req.headers.authorization?.split(" ")[1];
-    console.log("acces token", typeof tocken);
+    console.log("Authorization Header:", req.headers.authorization);
+    let token = req.headers.authorization?.split(" ")[1];
+    let userData = null;
 
-    let data;
-    if (tocken) {
-      data = await LoginUsecase.protectByjwt(tocken);
-      console.log("acces token varified", typeof tocken);
+    if (token) {
+      userData = await LoginUsecase.protectByjwt(token);
+      console.log("Access token verified:", userData);
     }
-    console.log(data);
 
-    if (!data) {
-      console.log("no acces token no,refreshing ");
-      const refresh = req.cookies.refresh;
-      console.log("refresh token is", typeof refresh);
-
-      if (!refresh) {
-        res
-          .status(401)
-          .json({ success: false, message: userError.Unauthorised });
-        return;
+    if (!userData) {
+      console.log("No access token, checking refresh token...");
+      const refreshToken = req.cookies.refresh;
+      console.log("Cookies:", req.cookies);
+      
+      if (!refreshToken) {
+         res.status(401).json({ success: false, message: "Unauthorized" });return
       }
-      const refreshvarify = await LoginUsecase.protectByjwt(refresh);
-      console.log(refreshvarify);
-
-      if (!refreshvarify) {
-        res.status(401).json({ success: false, message: "tocken expaied" });
-        return;
+      
+      const refreshData = await LoginUsecase.protectByjwt(refreshToken);
+      if (!refreshData) {
+         res.status(401).json({ success: false, message: "Token expired" });return
       }
-      data = {
-        name: refreshvarify.role,
-        email: refreshvarify.email,
-        role: refreshvarify.role,
+      
+      userData = {
+        name: refreshData.name,
+        email: refreshData.email,
+        role: refreshData.role,
       };
-      res.cookie("access", req.body.accessTocken, {
-        httpOnly: false,
-        expires: new Date(Date.now() + 15 * 60 * 1000), // Expires in 15 minutes
+      
+      const newAccessToken = await LoginUsecase.generatToken(userData);
+      res.cookie("access", newAccessToken, {
+        httpOnly: true,
+        expires: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes expiry
       });
-      req.body.accessTocken = await LoginUsecase.generatToken(data);
+      req.body.accessTocken = newAccessToken;
     }
-    req.user = data;
+    
+    if (userData?.email) {
+      const foundUser = await LoginUsecase.findUserwithemail(userData.email);
+      userData._id=userData._id
+      if (foundUser?.isBlocked) {
+        res.clearCookie("refresh", { path: "/" });
+        res.clearCookie("access", { path: "/" });
+         res.status(401).json({
+          success: false,
+          message: "User has been blocked",
+          isBlocked: true,
+        });return
+      }
+      userData = foundUser;
+    }
+    
+    req.user = userData;
     next();
   } catch (error) {
-    res
-      .status(401)
-      .json({ success: false, message: "Unauthorized: Invalid token" });
-    return;
+    console.error("JWT Verification Error:", error);
+     res.status(401).json({ success: false, message: "Unauthorized: Invalid token" });return
   }
 };
+

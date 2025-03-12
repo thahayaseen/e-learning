@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { AxiosError } from "axios";
 import axios from "@/services/asios";
+import toast from "react-hot-toast";
 interface Users {
   user: {
     name: string;
@@ -22,10 +23,14 @@ export const Varify = createAsyncThunk(
       })
       console.log(reponse);
 
+
       return reponse;
-    } catch (error) {
-      const axiosError = error as AxiosError;
-      return rejectWithValue(axiosError.response?.data || "unknow Error");
+    } catch (error:any) {
+    // toast.error( error.response.data.message)
+    console.log(error,"from axios");
+    
+      axios.post('/logout')
+    throw new Error(error.response.data.message)
     }
   }
 );

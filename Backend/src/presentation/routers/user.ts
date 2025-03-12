@@ -1,5 +1,5 @@
 import { Router,Request ,Response} from "express";
-import { controller } from "../service/controler.config";
+import { controller, mentorController } from "../service/controler.config";
 import {jwtVerify} from "../middilwere/varify";
 import Admincontroler from "../controller/admin";
 import { adminUsecase, signUpUser } from "../../config/dependencies";
@@ -18,10 +18,18 @@ router.post('/changepassword',jwtVerify,controller.changepass.bind(controller))
 router.post("/logout",controller.logout.bind(controller) )
 router.get('/allusers',jwtVerify,adminControler.userData.bind(adminControler))
 router.post('/blockuser',jwtVerify,adminControler.blockUser.bind(adminControler))
+router.get('/getcourse/:page/:type',jwtVerify,adminControler.getCourseunaproved.bind(adminControler))
+router.get('/allcourses',controller.getAllcourseUser.bind(controller))
 router.get('/profile',jwtVerify,controller.uProfile.bind(controller))
-router.get('/mentoraplication',jwtVerify,controller.uProfile.bind(controller))
-
-
+// router.get('/mentoraplication',jwtVerify,controller.uProfile.bind(controller))
+router.post('/addcategory',jwtVerify,adminControler.createCategorys.bind(adminControler))
+router.delete('/deleteCategory/:categoryid',jwtVerify,adminControler.deleteCategory.bind(adminControler))
+router.post('/editcategory/:categoryid',jwtVerify,adminControler.editCategory.bind(adminControler))
+router.get('/course/:courseid',jwtVerify,controller.GetCourse.bind(controller))
+router.post('/purchase/:courseId',jwtVerify,controller.BuyCourse.bind(controller))
+// router.post('/changepass',controller.)
+router.post('/startchat',jwtVerify,mentorController.startChat.bind(mentorController))
+router.get('/getchat/:roomid',jwtVerify,controller.getchats.bind(controller))
 
 
 

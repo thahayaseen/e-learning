@@ -1,5 +1,6 @@
 import { get_cookie } from "@/lib/features/cookie";
 import axios, { AxiosInstance } from "axios";
+import toast from "react-hot-toast";
 
 const api: AxiosInstance = axios.create({
   baseURL: "http://" + process.env.NEXT_PUBLIC_DOMAIN,
@@ -9,6 +10,7 @@ api.interceptors.request.use(
   (config) => {
     console.log("Requset Intercepto", config);
     const tocken = get_cookie('access')
+    config.withCredentials=true
  
     
     if (tocken) {
@@ -17,7 +19,6 @@ api.interceptors.request.use(
       config.headers["Authorization"] = `Bearer ${tocken}`;
       return config;
     }
-    config.withCredentials=true
     return config
   },
   (error) => {
@@ -31,8 +32,10 @@ api.interceptors.response.use(
     return response.data;
   },
   (error) => {
-    console.log("error is", error);
-    return Promise.reject(error);
+    console.log("error is", error.response);
+    // toast.error( error.response.data.message)
+    // return Promise.reject(error);
+    throw new Error(error.response.data.message)
   }
 );
 

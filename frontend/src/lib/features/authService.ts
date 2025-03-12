@@ -3,6 +3,7 @@ import { save_cookie } from "@/lib/features/cookie";
 import toast from "react-hot-toast";
 import { AppDispatch } from "@/lib/store";
 import { setloading, setUser } from "@/lib/features/User";
+import { signOut } from "next-auth/react";
 
 interface LoginData {
   email: string;
@@ -27,10 +28,11 @@ export const loginUser = async (
     // save_cookie("access", response.token);
     return { success: true, data: response };
   } catch (error: any) {
-    const errorMessage = error.response.data?.message || "Login failed";
+    const errorMessage = error.message
     toast.error(errorMessage);
     console.warn(errorMessage);
-    return { success: false, error };
+    return
+    // return { success: false, error };
   } finally {
     dispatch(setloading(false));
   }
@@ -49,9 +51,13 @@ export const registerUser = async (
     
     return { success: true, data: response };
   } catch (error: any) {
-    const errorMessage = error.response.data?.message || "Registration failed";
+    const errorMessage = error.message || "Registration failed";
+    console.log(errorMessage);
     toast.error(errorMessage);
-    console.error(error);
+    
+    
+    // toast.error(errorMessage);
+    // console.error(error);
     return { success: false, error };
   } finally {
     dispatch(setloading(false));
@@ -78,9 +84,13 @@ export const googleLogin = async (
     // save_cookie("access", response.token);
     return { success: true, data: response };
   } catch (error: any) {
-    console.error(error);
+    console.log('error in ' ,error.message);
+    toast.error(error.message)
+    
+    // console.error(error);
     return { success: false, error };
   } finally {
+    await signOut({ redirect: false })
     dispatch(setloading(false));
   }
 };

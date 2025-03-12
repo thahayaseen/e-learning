@@ -18,6 +18,7 @@ import axios from "@/services/asios";
 import { Adminshousers } from "@/services/interface/userinterface";
 import toast from "react-hot-toast";
 import { fetchUsers } from "@/services/fetchdata";
+import UserBlockbtn from "../mybtns/userBlockbtn";
 
 const UserManagementPage = () => {
   const [users, setUsers] = useState<Adminshousers[]>([]);
@@ -34,7 +35,7 @@ const UserManagementPage = () => {
     try {
       
       const response = await fetchUsers(`/allusers?page=${page}&limit=${5}`);
-      console.log(response);
+      console.log(response,'resis');
       
       setTotal(response.totalpages);
       setUsers(response.data);
@@ -163,7 +164,7 @@ console.log(roleFilter);
     {
       key: "actions",
       header: "Actions",
-      render: () => null, // This will be handled by the component's built-in actions
+      render: (item) =><UserBlockbtn toggleBlock={toggleBlock} user={item} />, // This will be handled by the component's built-in actions
     },
   ];
   return (
@@ -261,11 +262,11 @@ console.log(roleFilter);
           toggleBlock={toggleBlock}
         />
 
-        {filteredUsers.length > 0 && (
+
           <div className="mt-4">
-            <PaginationComponent page={page} setPage={setPage} total={total} />
+            <PaginationComponent page={page} setPage={setPage} total={total} itemsPerPage={5} />
           </div>
-        )}
+        
       </div>
     </div>
   );

@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
     buildActivity: false,  // Removes build activity icon
   },
   images: {
-    domains: ['localhost','dummyimage.com'], // Allow images from localhost
+    domains: ['localhost','dummyimage.com','exi-elarning.s3.ap-south-1.amazonaws.com'], // Allow images from localhost
   },
 };
 
