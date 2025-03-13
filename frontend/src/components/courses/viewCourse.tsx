@@ -13,6 +13,7 @@ import {
   Clock,
   Award,
   AlertCircle,
+  X,
 } from "lucide-react";
 
 import {
@@ -38,20 +39,28 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getSelectedCourse, startChat } from "@/services/fetchdata";
+import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { getSelectedCourse, requestmeeting, startChat } from "@/services/fetchdata";
 import { toast } from "@/hooks/use-toast";
-import {  useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 // Interfaces remain the same
 interface Course {
   _id: string;
   Title: string;
-  Mentor_id: { name: string };
+  Mentor_id: { _id: string, name: string };
   Description: string;
   lessons: Lesson[];
   Duration?: string;
   Level?: string;
-  Category?: string;
+  Category?: { Category: string };
   CreatedAt?: string;
 }
 
@@ -85,6 +94,13 @@ interface TaskProgress {
   isCompleted: boolean;
 }
 
+interface Meeting {
+  _id: string;
+  meetingTime: string;
+  meetingLink?: string;
+  status: string;
+}
+
 // Mock function for submitting quiz answers to backend
 const submitQuizToBackend = async (taskId: string, answer: string) => {
   // This would be replaced with your actual API call
@@ -98,6 +114,7 @@ const submitQuizToBackend = async (taskId: string, answer: string) => {
 };
 
 const CourseView = ({ id }: { id: string }) => {
+  const [meet, setMeet] = useState<Meeting | null>(null);
   const [loading, setLoading] = useState(true);
   const [course, setCourse] = useState<Course | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -107,7 +124,31 @@ const CourseView = ({ id }: { id: string }) => {
   const [quizAnswers, setQuizAnswers] = useState<{ [key: string]: string }>({});
   const [assignmentSubmission, setAssignmentSubmission] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const router=useRouter()
+  const router = useRouter();
+  
+  // Meeting request states
+  const [meetingDialogOpen, setMeetingDialogOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string>(
+    new Date().toISOString().slice(0, 10)
+  );
+  const [selectedTime, setSelectedTime] = useState<string>("10:00");
+  const [requestingMeeting, setRequestingMeeting] = useState(false);
+
+  // Calculate available time slots for today (9AM to 5PM in 30 min increments)
+  const getTimeSlots = () => {
+    const slots = [];
+    for (let hour = 9; hour < 18; hour++) {
+      for (let minute of [0, 30]) {
+        const formattedHour = hour.toString().padStart(2, "0");
+        const formattedMinute = minute.toString().padStart(2, "0");
+        slots.push(`${formattedHour}:${formattedMinute}`);
+      }
+    }
+    return slots;
+  };
+
+  const timeSlots = getTimeSlots();
+
   // Calculate overall course progress
   const calculateProgress = () => {
     if (!course) return 0;
@@ -129,11 +170,11 @@ const CourseView = ({ id }: { id: string }) => {
     const fetchCourseData = async () => {
       try {
         const data = await getSelectedCourse(id);
-        setCourse(data);
-
+        setCourse(data.data);
+        setMeet(data.meet);
         // Initialize task progress
         const initialProgress: { [key: string]: TaskProgress } = {};
-        data.lessons.forEach((lesson) => {
+        data.data.lessons.forEach((lesson) => {
           lesson.Task.forEach((task) => {
             initialProgress[task._id] = {
               id: task._id,
@@ -143,11 +184,12 @@ const CourseView = ({ id }: { id: string }) => {
             };
           });
         });
+        
         setTaskProgress(initialProgress);
 
         // Select first task by default
-        if (data.lessons.length > 0 && data.lessons[0].Task.length > 0) {
-          setSelectedTask(data.lessons[0].Task[0]);
+        if (data.data.lessons.length > 0 && data.data.lessons[0].Task.length > 0) {
+          setSelectedTask(data.data.lessons[0].Task[0]);
         }
 
         setLoading(false);
@@ -197,14 +239,68 @@ const CourseView = ({ id }: { id: string }) => {
       [`${taskId}_${questionIndex}`]: answer,
     }));
   };
+  
   const handleChatmentor = async () => {
     if (course) {
-    const roomid=await startChat(String(course._id));
-    console.log(roomid);
-    router.push('/course/chat/'+roomid)
-    
+      const roomid = await startChat(String(course._id));
+      console.log(roomid);
+      router.push("/course/chat/" + roomid);
     }
   };
+  
+  // Request meeting handler
+  const handleRequestMeeting = async () => {
+    if (!course) return;
+    
+    setRequestingMeeting(true);
+    
+    try {
+      // Create a datetime string from the selected date and time
+      const meetingDateTime = new Date(`${selectedDate}T${selectedTime}:00`);
+      
+      // Call API to request meeting
+      const result = await requestmeeting(
+        course.Mentor_id._id,
+        meetingDateTime.toString(),
+        course._id
+      );
+      
+      // Update meeting state with the new meeting
+      setMeet(result.meeting);
+      
+      toast({
+        title: "Meeting Requested",
+        description: `Your meeting has been scheduled for ${meetingDateTime.toLocaleString()}`,
+        variant: "default",
+      });
+      
+      // Close dialog
+      setMeetingDialogOpen(false);
+    } catch (error) {
+      console.error("Error requesting meeting:", error);
+      toast({
+        title: "Request Failed",
+        description: "There was a problem scheduling your meeting. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setRequestingMeeting(false);
+    }
+  };
+  
+  // Join meeting handler
+  const handleJoinMeeting = () => {
+    if (meet?.meetingLink) {
+      window.open(meet.meetingLink, "_blank");
+    } else {
+      toast({
+        title: "Meeting Link Unavailable",
+        description: "The meeting link is not yet available. Please check back closer to the meeting time.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Submit quiz - updated to use backend function
   const submitQuiz = async (taskId: string) => {
     if (!quizAnswers[`${taskId}_0`]) {
@@ -447,6 +543,38 @@ const CourseView = ({ id }: { id: string }) => {
     }
   };
 
+  // Render meeting status badge
+  const renderMeetingStatusBadge = () => {
+    if (!meet) return null;
+    
+    switch (meet.status) {
+      case "pending":
+        return (
+          <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+            Pending
+          </Badge>
+        );
+      case "confirmed":
+        return (
+          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+            Confirmed
+          </Badge>
+        );
+      case "rejected":
+        return (
+          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+            Rejected
+          </Badge>
+        );
+      default:
+        return (
+          <Badge variant="outline">
+            {meet.status}
+          </Badge>
+        );
+    }
+  };
+
   // Loading state
   if (loading) {
     return (
@@ -507,13 +635,13 @@ const CourseView = ({ id }: { id: string }) => {
                   </div>
                   <div className="flex items-center gap-2">
                     <FileText className="h-4 w-4 text-muted-foreground" />
-                    <span>{course.Category.Category || "Technology"}</span>
+                    <span>{course.Category?.Category || "Technology"}</span>
                   </div>
                 </div>
 
                 <Separator />
 
-                <div className="flex justify-between">
+                <div className="space-y-4">
                   <div>
                     <h3 className="text-sm font-medium mb-2">
                       About this course
@@ -522,8 +650,48 @@ const CourseView = ({ id }: { id: string }) => {
                       {course.Description || "No description available."}
                     </p>
                   </div>
-                  <div>
-                    <Button onClick={handleChatmentor}>Chat With Mentor</Button>
+                  
+                  {/* Meeting status section (if meeting exists) */}
+                  {meet && (
+                    <div className="bg-slate-50 p-3 rounded-lg border">
+                      <div className="flex justify-between items-center mb-2">
+                        <h4 className="text-sm font-medium">Meeting with Mentor</h4>
+                        {renderMeetingStatusBadge()}
+                      </div>
+                      <p className="text-xs text-slate-600 mb-2">
+                        {new Date(meet.meetingTime).toLocaleString()}
+                      </p>
+                      <div className="flex justify-end">
+                        {meet.status === "confirmed" && (
+                          <Button size="sm" onClick={handleJoinMeeting}>
+                            Join Meeting
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Button size="sm" onClick={handleChatmentor} className="flex-1">
+                      <MessageCircle className="h-4 w-4 mr-2" /> Chat
+                    </Button>
+                    {!meet ? (
+                      <Button 
+                        size="sm" 
+                        onClick={() => setMeetingDialogOpen(true)}
+                        className="flex-1"
+                      >
+                        <Calendar className="h-4 w-4 mr-2" /> Request Meeting
+                      </Button>
+                    ) : meet.status === "rejected" ? (
+                      <Button 
+                        size="sm" 
+                        onClick={() => setMeetingDialogOpen(true)}
+                        className="flex-1"
+                      >
+                        <Calendar className="h-4 w-4 mr-2" /> Request Again
+                      </Button>
+                    ) : null}
                   </div>
                 </div>
               </div>
@@ -626,6 +794,60 @@ const CourseView = ({ id }: { id: string }) => {
           )}
         </div>
       </div>
+      
+      {/* Meeting Request Dialog */}
+      <Dialog open={meetingDialogOpen} onOpenChange={setMeetingDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Schedule a Meeting</DialogTitle>
+            <DialogDescription>
+              Select a date and time that works for you to meet with your mentor.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="meeting-date">Date</Label>
+              <Input
+                id="meeting-date"
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                min={new Date().toISOString().split('T')[0]}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="meeting-time">Time</Label>
+              <select
+                id="meeting-time"
+                className="w-full p-2 border rounded-md"
+                value={selectedTime}
+                onChange={(e) => setSelectedTime(e.target.value)}
+              >
+                {timeSlots.map((time) => (
+                  <option key={time} value={time}>
+                    {time}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-muted-foreground">All times are in your local timezone</p>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setMeetingDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleRequestMeeting} 
+              disabled={requestingMeeting}
+            >
+              {requestingMeeting ? "Requesting..." : "Request Meeting"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

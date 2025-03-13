@@ -25,6 +25,8 @@ import { MentorUsecase } from "../app/useCases/mentor";
 import { RepositoryCourses } from "../infra/repositories/RepositoryCourses";
 import { CourseUsecase } from "../app/useCases/CourseUsecase";
 import { SocketuseCase } from "../app/useCases/socketio";
+import MeetingUsecase from "../app/useCases/MeetingUsecase";
+import RepositoryMeeting from "../infra/repositories/RepositoryMeeting";
 
 export const CourseRepositoy=new RepositoryCourses()
 export const Mentorusecase=new MentorUsecase(userRepository,category,CourseRepositoy)
@@ -33,5 +35,6 @@ export const LoginUsecase=new Login(userRepository,jwtTockenProvider)
 export const adminUsecase=new admin(userRepository,category,CourseRepositoy)
 export const userUseCase=new UserUsecase(userRepository,CourseRepositoy)
 export const courseUsecase=new CourseUsecase(userRepository,CourseRepositoy)
-export const socketusecases=new SocketuseCase(chatroomRepo,messagerepo,userUseCase,chatroomRepo)
+export const meetUsecase=new MeetingUsecase(RepositoryMeeting)
+export const socketusecases=new SocketuseCase(chatroomRepo,messagerepo,userUseCase,chatroomRepo,meetUsecase)
 export type adminUsecaseType=typeof adminUsecase

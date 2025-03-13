@@ -16,6 +16,8 @@ import { IUserModel } from "../../infra/database/models/User";
 import bcrypt from "bcrypt";
 import { ICourseUseCase } from "../../domain/interface/courseUsecase";
 import IsocketUsecase from "../../domain/interface/socket";
+import { ImessageUsecase } from "../../domain/interface/ImessageUsecase";
+import { MeetingDto } from "../../app/dtos/MeetingDto";
 
 export interface AuthServices extends Request {
   error?: string;
@@ -31,7 +33,8 @@ export default class UserController {
     private adminUsecase: IAdmin,
     private userUseCase: IuserUseCase,
     private CourseUseCase: ICourseUseCase,
-    private Socketusecase: IsocketUsecase
+    private Socketusecase: IsocketUsecase,
+    private MeetingUsecase: ImessageUsecase
   ) {}
   async create(req: Request, res: Response) {
     try {
@@ -234,11 +237,7 @@ export default class UserController {
       });
       return;
     } catch (error: any) {
-      this.logout(req,res)
-      console.error("Error in glogin:", error);
-      res
-        .status(HttpStatusCode.BAD_REQUEST)
-        .json({ success: false, message: error.message });
+      return this.logout(req, res);
     }
   }
   logout(req: Request, res: Response) {
@@ -249,6 +248,7 @@ export default class UserController {
     res
       .status(HttpStatusCode.OK)
       .json({ success: true, message: "Session cleared, refresh token kept." });
+    return;
   }
   async userData(req: AuthServices, res: Response) {
     try {
@@ -295,15 +295,17 @@ export default class UserController {
       const courseData = await this.getpurchasedCourses(
         data?.purchasedCourses as string[]
       );
-      const progresdata=await this.CourseUseCase.getuserallCourseprogresdata(String(data?._id))
-      console.log(progresdata,'dataisissisisi');
-      
+      const progresdata = await this.CourseUseCase.getuserallCourseprogresdata(
+        String(data?._id)
+      );
+      console.log(progresdata, "dataisissisisi");
+
       res.status(HttpStatusCode.OK).json({
         success: true,
         message: SuccessMessage.FETCH_SUCCESS,
         data: data,
         datas: courseData,
-        progresdata
+        progresdata,
       });
       console.log(data);
     } catch (err) {
@@ -332,7 +334,7 @@ export default class UserController {
   async GetCourse(req: AuthServices, res: Response) {
     try {
       const { courseid } = req.params;
-
+      const { _id } = req.user;
       if (!req.user.email) {
         res.status(HttpStatusCode.NOT_FOUND).json({
           success: false,
@@ -342,6 +344,11 @@ export default class UserController {
       if (!courseid) {
         return;
       }
+      console.log(_id,'ciddd');
+
+      const meetid = await this.MeetingUsecase.getMeetByuserid(_id, courseid);
+console.log(meetid,'meetdatas');
+
       const user = await this.userUseCase.UseProfileByemail(req.user.email);
       const isvalid = user?.purchasedCourses?.includes(courseid);
       console.log(isvalid, "in buy course");
@@ -359,7 +366,8 @@ export default class UserController {
         success: true,
         message: "fetched",
         data: reslt,
-        adredypuchased:isvalid
+        adredypuchased: isvalid,
+        meet: meetid ? meetid : false,
       });
       return;
     } catch (error) {
@@ -423,35 +431,91 @@ export default class UserController {
   }
   async getchats(req: AuthServices, res: Response) {
     try {
-      
-    const { roomid } = req.params;
-    const { email, _id } = req.user;
-    console.log(roomid);
+      const { roomid } = req.params;
+      const { email, _id } = req.user;
+      console.log(roomid);
 
-    const resp = await this.Socketusecase.findChatwithroom(roomid);
-    console.log(_id, "uidss", resp);
+      const resp = await this.Socketusecase.findChatwithroom(roomid);
+      console.log(_id, "uidss", resp);
 
-    const ans =( String(resp?.userId)==String(_id))||(String(resp?.mentorId==String(_id)))
-    console.log(ans, "results",resp?.userId,"  ",_id);
-    if (!ans) {
-      throw new Error("Room not fount");
-    }
-    const data = await this.Socketusecase.getAllmessageByroom(roomid);
-    console.log(data, "chats");
-    res.status(HttpStatusCode.OK).json({
-      success:true,
-      message:'succesfully fetch data',
-      data
-    })
-    return 
+      const ans =
+        String(resp?.userId) == String(_id) ||
+        String(resp?.mentorId == String(_id));
+      console.log(ans, "results", resp?.userId, "  ", _id);
+      if (!ans) {
+        throw new Error("Room not fount");
+      }
+      const data = await this.Socketusecase.getAllmessageByroom(roomid);
+      console.log(data, "chats");
+      res.status(HttpStatusCode.OK).json({
+        success: true,
+        message: "succesfully fetch data",
+        data,
+      });
+      return;
     } catch (error) {
       res.status(HttpStatusCode.BAD_REQUEST).json({
-        success:true,
-        message:'cannot fetch data',
-        
-      }) 
+        success: true,
+        message: "cannot fetch data",
+      });
     }
   }
+  async Requesmeeting(req: AuthServices, res: Response) {
+    try {
+      const { mentorId, courseId } = req.body;
+      const { _id } = req.user;
+      console.log(_id);
+
+      await this.MeetingUsecase.create({
+        courseId,
+        mentorId,
+        participants: [mentorId, _id],
+        scheduledTime: new Date(),
+        userId: _id,
+        status: "pending",
+      });
+      res.status(HttpStatusCode.OK).json({
+        succes: true,
+        message: "succesfully completed",
+      });
+      return;
+    } catch (error: any) {
+      res.status(HttpStatusCode.BAD_REQUEST).json({
+        succes: false,
+        message: error.message,
+      });
+    }
+  }
+  async UpdateTime(req: AuthServices, res: Response) {
+    try {
+      const { UpdateTime } = req.body;
+      const { meetid } = req.params;
+      const { _id } = req.user;
+      console.log(req.user);
+      const scheduledTime = new Date(UpdateTime);
+
+      const meet = await this.MeetingUsecase.fetchMeetmyId(meetid);
+      console.log(meet);
+      if(!meet){
+        throw new Error('Room not found')
+      }
+      const isvalid = meet.participants.includes(_id);
+      console.log(isvalid);
+      if (isvalid) {
+        throw new Error(userError.Unauthorised);
+      }
+      await this.MeetingUsecase.updateMeetTime(meetid, scheduledTime);
+      res.status(HttpStatusCode.OK).json({
+        success: true,
+        message: "Time updated success",
+      });
+    } catch (error: any) {
+      res
+        .status(HttpStatusCode.BAD_REQUEST)
+        .json({ success: false, message: error.message });
+    }
+  }
+
   // async changePassword(req: AuthServices, res: Response) {
   //   const email = req.user.email;
   //   const { oldpass,newpassword } = req.body;

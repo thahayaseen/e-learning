@@ -19,4 +19,5 @@ export default interface IsocketUsecase {
   validatoinUser(roomid: string, email: string): Promise<boolean>;
   findChatwithroom(roomid: string): Promise<IChatroom | null>;
   getAllmessageByroom(roomid: string): Promise<IMessage[]>;
+  valiateMeeting(room:string,userId:string):Promise<boolean>
 }

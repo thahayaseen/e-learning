@@ -30,6 +30,8 @@ router.post('/purchase/:courseId',jwtVerify,controller.BuyCourse.bind(controller
 // router.post('/changepass',controller.)
 router.post('/startchat',jwtVerify,mentorController.startChat.bind(mentorController))
 router.get('/getchat/:roomid',jwtVerify,controller.getchats.bind(controller))
+router.post('/requestmeet',jwtVerify,controller.Requesmeeting.bind(controller))
+router.post('/updatetime/:meetid',jwtVerify,controller.UpdateTime.bind(controller))
 
 
 

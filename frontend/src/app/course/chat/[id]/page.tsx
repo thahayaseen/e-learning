@@ -28,12 +28,15 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { getallchat } from "@/services/fetchdata";
 
 // Import your enum
-export enum chatEnum {
-  error = "error-message",
-  joinRoom = "join-room",
-  disconnect = "disconnect",
-  sendMessage = "sendMessage",
-  receive = "receive_message",
+export enum chatEnum{
+  error='error-message',
+  joinRoom='join-room',
+  disconnect='disconnect',
+  sendMessage='sendMessage',
+  receive="receive_message",
+  joinmeet='join-meet',
+  userConnected='userConnected',
+  signal='signal'
 }
 export interface IMessage {
   chatroomId: string;
@@ -46,7 +49,7 @@ function Chat() {
   const state = useSelector((state: storeType) => state.User.user);
   const params = useParams();
   const roomId = params.id;
-  const socket = useSocket(roomId);
+  const socket = useSocket();
 
   const [messages, setMessages] = useState<IMessage[] | []>([]);
   const [newMessage, setNewMessage] = useState("");

@@ -154,17 +154,26 @@ export const deleteCategory = async (id: string) => {
   return response;
 };
 export const startChat = async (courseid: string) => {
-  const id=await axios.post("/startchat", { courseid });
+  const id = await axios.post("/startchat", { courseid });
   console.log(id);
-  return id.roomid
+  return id.roomid;
 };
-export const getallchat=async (roomid:string)=>{
- const data= await axios.get('/getchat/'+roomid)
- console.log(data);
- return data
-}
-export const getChatrooms=async()=>{
-  const data=await axios.get('/mentor/getchats')
+export const getallchat = async (roomid: string) => {
+  const data = await axios.get("/getchat/" + roomid);
   console.log(data);
-  return data
-}
+  return data;
+};
+export const getChatrooms = async () => {
+  const data = await axios.get("/mentor/getchats");
+  console.log(data);
+  return data;
+};
+export const requestmeeting = async (a, b, c) => {
+  console.log(a, b, c);
+
+  return await axios.post("/requestmeet", {
+    mentorId: a,
+    scheduledTime: b,
+    courseId: c,
+  });
+};

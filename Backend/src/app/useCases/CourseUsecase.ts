@@ -19,7 +19,10 @@ export class CourseUsecase implements ICourseUseCase {
   }
   async getSelectedCourse(id: string, isValid: boolean) {
     try {
-      return await this.CourseRepo.getSingleCourse(id, isValid);
+      const data= await this.CourseRepo.getSingleCourse(id, isValid);
+      console.log(data,'in usecase');
+      
+      return data
     } catch (error: any) {
       throw new Error(error.message);
     }
