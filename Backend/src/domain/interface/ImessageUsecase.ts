@@ -1,3 +1,4 @@
+import { IMessage } from "peer";
 import { MeetingDto } from "../../app/dtos/MeetingDto";
 
 export interface ImessageUsecase {
@@ -11,4 +12,6 @@ export interface ImessageUsecase {
   fetchallMeetsBymentorid(mentorId: string): Promise<MeetingDto[]>;
   getMeetByuserid(userid: string,courseid:string): Promise<MeetingDto|null>;
   fetchMeetmyId(meetid: string): Promise<MeetingDto|null>
+  addUsertomeet(roomid:string,userid:string): Promise<MeetingDto|null>
+  leaveFrommeet(roomid:string,userid:string): Promise<MeetingDto|null>
 }

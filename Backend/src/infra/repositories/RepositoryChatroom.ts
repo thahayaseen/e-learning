@@ -47,7 +47,9 @@ export class ChatroomRepository implements IRchatroom {
     return dat;
   }
   async updateLastchatByid(roomid: string, data: IMessage): Promise<void> {
-      await Chatroom.findByIdAndUpdate(roomid,data)
+
+     
+    await Chatroom.findByIdAndUpdate(roomid,data)
       return 
   }
 }

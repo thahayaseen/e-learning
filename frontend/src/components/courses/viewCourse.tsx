@@ -138,7 +138,7 @@ const CourseView = ({ id }: { id: string }) => {
   const getTimeSlots = () => {
     const slots = [];
     for (let hour = 9; hour < 18; hour++) {
-      for (let minute of [0, 30]) {
+      for (const minute of [0, 30]) {
         const formattedHour = hour.toString().padStart(2, "0");
         const formattedMinute = minute.toString().padStart(2, "0");
         slots.push(`${formattedHour}:${formattedMinute}`);
@@ -170,11 +170,13 @@ const CourseView = ({ id }: { id: string }) => {
     const fetchCourseData = async () => {
       try {
         const data = await getSelectedCourse(id);
-        setCourse(data.data);
+        setCourse(data.data.data);
         setMeet(data.meet);
         // Initialize task progress
         const initialProgress: { [key: string]: TaskProgress } = {};
-        data.data.lessons.forEach((lesson) => {
+        console.log(data.data.data);
+        
+        data.data.data.lessons.forEach((lesson) => {
           lesson.Task.forEach((task) => {
             initialProgress[task._id] = {
               id: task._id,
@@ -188,8 +190,8 @@ const CourseView = ({ id }: { id: string }) => {
         setTaskProgress(initialProgress);
 
         // Select first task by default
-        if (data.data.lessons.length > 0 && data.data.lessons[0].Task.length > 0) {
-          setSelectedTask(data.data.lessons[0].Task[0]);
+        if (data.data.data.lessons.length > 0 && data.data.data.lessons[0].Task.length > 0) {
+          setSelectedTask(data.data.data.lessons[0].Task[0]);
         }
 
         setLoading(false);
@@ -504,13 +506,13 @@ const CourseView = ({ id }: { id: string }) => {
             <CardContent className="p-6">
               <div className="bg-slate-50 p-4 mb-4 rounded-md border">
                 <p className="text-sm leading-relaxed">
-                  {selectedTask.description ||
+                  {selectedTask.Description ||
                     "Complete the assignment based on what you've learned."}
                 </p>
               </div>
               <div className="space-y-4">
                 <Label htmlFor="assignment" className="text-sm font-medium">
-                  Your Solution
+                  Your Solution for 
                 </Label>
                 <textarea
                   id="assignment"

@@ -1,12 +1,12 @@
 import { CourseDTO } from "../../app/dtos/coursesDto";
 import { ICourses } from "../../infra/database/models/course";
 import { ILesson } from "../../infra/database/models/lessone";
-import { ITask } from "../../infra/database/models/tasks";
+import {  IQuizTask,ITask } from "../../infra/database/models/tasks";
 import { CourseInterface } from "../entities/returndata";
 
 export interface ICourseUseCase {
-  getAllCourse(limit?: number): Promise<ICourses[]>;
-  getSelectedCourse(id: string, isValid: boolean): Promise<ICourses | null>;
+  getAllCourse(limit?: number,filter?:boolean): Promise<ICourses[]>;
+  getSelectedCourse(id: string, isValid: boolean,userid?:string): Promise<any>;
   purchaseCourse(userId: string, courseId: string): Promise<void>;
   getByCoursids(CourseIds: string[]): Promise<ICourses[]>;
   addlessons(data: ILesson[]): Promise<any>;
@@ -31,4 +31,5 @@ export interface ICourseUseCase {
   deletedtask(taskid: string,lessonid:string):Promise<void>
   deleteLessonfromcourse(courseId:string,lessonid:string):Promise<void>
   getuserallCourseprogresdata(userid: string):Promise<any>
+  getTaskByid(taskid: string):Promise<ITask|IQuizTask|null>
 }

@@ -7,7 +7,7 @@ export interface ITask extends Document {
 }
 
 // Quiz task interface
-interface IQuizTask extends ITask {
+export interface IQuizTask extends ITask {
   Question: string;
   Options: string[];
   Answer: string;

@@ -32,6 +32,10 @@ const CoursesSchema: Schema = new Schema({
   lessons: [{ type: Schema.Types.ObjectId, ref: "Lesson" }],
   Content: { type: String },
   Offer_id: { type: Schema.Types.ObjectId, ref: "Offer" },
+  duration:{
+    type:Number,
+    default:30000
+  }
 });
 
 const Courses = mongoose.model<ICourses>("Courses", CoursesSchema);

@@ -29,7 +29,7 @@ export const User = new mongoose.Schema<IUserModel>({
   updatedAt:{
     type:Date
   },
-  purchasedCourses: [{ type: mongoose.Schema.Types.ObjectId, ref: "Course" }],
+  purchasedCourses: [{ type: mongoose.Schema.Types.ObjectId, ref: "Courses" }],
   subscription: { type: mongoose.Schema.Types.ObjectId, ref: "Subscription" },
 
 },{timestamps:true});

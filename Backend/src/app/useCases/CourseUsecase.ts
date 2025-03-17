@@ -3,7 +3,7 @@ import { ICoursesRepository } from "../../domain/repository/IRepositoryCourses";
 import IUserReposetory from "../../domain/repository/IUser";
 import { ICourses } from "../../infra/database/models/course";
 import { ILesson } from "../../infra/database/models/lessone";
-import { ITask } from "../../infra/database/models/tasks";
+import { IQuizTask, ITask } from "../../infra/database/models/tasks";
 import { CourseDTO } from "../dtos/coursesDto";
 
 export class CourseUsecase implements ICourseUseCase {
@@ -14,15 +14,30 @@ export class CourseUsecase implements ICourseUseCase {
   async getCourseBymentor(id: string): Promise<ICourses | null> {
     return await this.CourseRepo.getCourseBymentor(id);
   }
-  async getAllCourse(limit: number): Promise<ICourses[]> {
-    return await this.CourseRepo.getCourseUser(limit);
+  async getAllCourse(limit: number, filter?: boolean): Promise<ICourses[]> {
+    return await this.CourseRepo.getCourseUser(limit, filter);
   }
-  async getSelectedCourse(id: string, isValid: boolean) {
+  async getSelectedCourse(
+    id: string,
+    isValid: boolean,
+    userid?: string
+  ): Promise<any> {
     try {
-      const data= await this.CourseRepo.getSingleCourse(id, isValid);
-      console.log(data,'in usecase');
-      
-      return data
+      let progress = null;
+      const data = await this.CourseRepo.getSingleCourse(id, isValid);
+
+      console.log(data, "in usecase");
+      if (userid && data) {
+        const resu = await this.CourseRepo.getSelectedcourseprogress(
+          id,
+          userid
+        );
+        return {
+          data,
+          progress: resu,
+        };
+      }
+      return data;
     } catch (error: any) {
       throw new Error(error.message);
     }
@@ -129,9 +144,6 @@ export class CourseUsecase implements ICourseUseCase {
   ): Promise<void> {
     const datas = await this.CourseRepo.UpdataCourse(courseId, data);
     return;
-    if (!data) {
-      throw new Error("Course Not found");
-    }
   }
   async deleteCourse(courseid: string): Promise<void> {
     await this.CourseRepo.deleteCourse(courseid);
@@ -151,25 +163,28 @@ export class CourseUsecase implements ICourseUseCase {
     this.CourseRepo.DeleteLessonFromCourse(courseId, lessonid);
   }
   async getuserallCourseprogresdata(userid: string) {
-    console.log('in herer');
-    
+    console.log("in herer");
+
     const dat = await this.CourseRepo.getAllprogressByuserid(userid);
     console.log(dat);
-    
+
     let progress = 0;
     let coursesCount = 0;
     let completedCourse = 0;
     dat?.forEach((data) => {
-      console.log(data.Score,'datasss');
-      
+      console.log(data.Score, "datasss");
+
       progress += Number(data.Score);
       coursesCount++;
       if (data.Score == 100) {
         completedCourse++;
       }
     });
-    const pdata=(progress/coursesCount)
-    return {progresPersentage:pdata,coursesCount,completedCourse}
+    const pdata = progress / coursesCount;
+    return { progresPersentage: pdata, coursesCount, completedCourse };
+  }
+  async getTaskByid(taskid: string): Promise<ITask | IQuizTask | null> {
+    return await this.CourseRepo.FindTask(taskid);
   }
 }
 // interface I

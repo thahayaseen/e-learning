@@ -36,7 +36,9 @@ export enum chatEnum{
   receive="receive_message",
   joinmeet='join-meet',
   userConnected='userConnected',
-  signal='signal'
+  signal='signal',
+  joined='joined-user',
+
 }
 export interface IMessage {
   chatroomId: string;

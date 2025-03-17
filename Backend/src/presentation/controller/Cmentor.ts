@@ -364,7 +364,7 @@ export class MentorController {
       const { courseid } = req.body;
       const { email } = req.user;
       const { course } = await this.VarifyUser(email, courseid);
-      course.lessons.forEach(async (id) => {
+      course.lessons.forEach(async (id:string) => {
         if (id) {
           await this.MentoruseCases.DeleteLesson(id);
           console.log("deletd one lesson");
@@ -424,10 +424,11 @@ export class MentorController {
         courseid,
         false
       );
+
       // console.log(!user );
       console.log(!user, !user?._id, !course, !course?.Mentor_id);
 
-      if (!user || !user._id || !course || !course.Mentor_id) {
+      if (!user || !user._id || !course ||course.data|| !course.Mentor_id) {
         console.log("in jere");
 
         throw new Error("user not fount");
@@ -465,7 +466,7 @@ export class MentorController {
   }
   async getRoomsByid(req: AuthServices, res: Response) {
     const { email, _id, role } = req.user;
-    const page=Number(req.query.page)||1
+    const page = Number(req.query.page) || 1;
     if (role !== Roles.MENTOR) {
       res.status(HttpStatusCode.FORBIDDEN).json({
         success: false,
@@ -473,12 +474,39 @@ export class MentorController {
       });
       return;
     }
-    const data = await this.SocketuserCase.getAllroomsByid(_id,page);
+    const data = await this.SocketuserCase.getAllroomsByid(_id, page);
     console.log(data);
     res.status(HttpStatusCode.OK).json({
       success: true,
       message: "Data fetched successfully",
       data,
     });
+  }
+  async studentManagment(req: AuthServices, res: Response) {
+    try {
+      const { page } = req.query;
+      const users = req.user;
+      if (users.role !== Roles.MENTOR) {
+        throw new Error(userError.Unauthorised);
+      }
+      if (!page) {
+        throw new Error("no pages found");
+      }
+      const data = await this.userUsecase.fetchAllUsers(req.query,users._id);
+      console.log(data);
+      res.status(HttpStatusCode.OK).json({
+        success: true,
+        message: "fetched successfully",
+        data:data.data,
+        total:data.total
+      });
+      return;
+    } catch (error: any) {
+      res.status(HttpStatusCode.BAD_REQUEST).json({
+        success: false,
+        message: error.message || "please Make sure all arguments",
+      });
+      return;
+    }
   }
 }

@@ -115,7 +115,7 @@ function Page() {
           const data = await getSelectedCourse(params.id as string);
           console.log(data,'datass');
           setisaldedy(data.adredypuchased)
-          SetCoursData(data.data);
+          SetCoursData(data.data.data);
           setloadin(false);
         }
       } catch (error) {

@@ -94,6 +94,8 @@ export class SocketuseCase implements IsocketUsecase {
     console.log('in herefindihg room,',room,email);
     
     const result = await this.MeetinguseCase.fetchMeetmyId(room);
+    console.log(result);
+    
     if(!result){
       console.log('no result found',result);
       
@@ -107,7 +109,7 @@ export class SocketuseCase implements IsocketUsecase {
     }
     console.log(result.participants,user._id);
     
-    const res = result.participants.includes(user._id);
+    const res = String(result.mentorId)==user._id||String(result.userId)==user._id
     return res;
   }
 }

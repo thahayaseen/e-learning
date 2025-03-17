@@ -26,12 +26,16 @@ router.post('/addcategory',jwtVerify,adminControler.createCategorys.bind(adminCo
 router.delete('/deleteCategory/:categoryid',jwtVerify,adminControler.deleteCategory.bind(adminControler))
 router.post('/editcategory/:categoryid',jwtVerify,adminControler.editCategory.bind(adminControler))
 router.get('/course/:courseid',jwtVerify,controller.GetCourse.bind(controller))
+router.get('/course/:courseid/qustionans/:taskid',jwtVerify,controller.GetCourse.bind(controller))//for task qustion anser
 router.post('/purchase/:courseId',jwtVerify,controller.BuyCourse.bind(controller))
 // router.post('/changepass',controller.)
 router.post('/startchat',jwtVerify,mentorController.startChat.bind(mentorController))
 router.get('/getchat/:roomid',jwtVerify,controller.getchats.bind(controller))
 router.post('/requestmeet',jwtVerify,controller.Requesmeeting.bind(controller))
 router.post('/updatetime/:meetid',jwtVerify,controller.UpdateTime.bind(controller))
+router.get('/meeting/:id',jwtVerify,controller.addUsermeet.bind(controller))
+router.get('/leavemeeting/:id',jwtVerify,controller.leaveMeeting.bind(controller))
+
 
 
 

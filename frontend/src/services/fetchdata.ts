@@ -79,7 +79,7 @@ export const butCousePageData = async (id: string) => {
   } catch (error) {}
 };
 export const getAllcourseUser = async () => {
-  const data = await axios.get("/allcourses?limit=4");
+  const data = await axios.get("/allcourses?limit=4&&most=true");
   return data.data;
 };
 export const getSelectedCourse = async (id: string) => {
@@ -176,4 +176,13 @@ export const requestmeeting = async (a, b, c) => {
     scheduledTime: b,
     courseId: c,
   });
+};
+export const addusertoMeet = async (roomid: string) => {
+  return await axios.get("/meeting/" + roomid);
+};
+export const leaveFrommeet = async (roomid: string) => {
+  return await axios.get("/leavemeeting/" + roomid);
+};
+export const getuserwithperfomence = async (params: string) => {
+  return await axios("/mentor/getusers?" + params);
 };

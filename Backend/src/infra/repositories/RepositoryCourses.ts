@@ -90,16 +90,45 @@ export class RepositoryCourses implements ICoursesRepository {
     await Courses.updateOne({ _id: id }, { Approved_by_admin: types });
     return;
   }
-  async getCourseUser(limit: number = 0): Promise<ICourses[]> {
-    return await Courses.find(
-      { Approved_by_admin: "approved" },
-      { CreatedAt: 0 }
-    )
-      .populate("Mentor_id", "name -_id")
-      .populate("Category", "Category -_id")
-      .limit(limit)
-      .sort({ UpdatedAt: -1 });
-  }
+  async getCourseUser(limit: number = 0, filter: boolean = false): Promise<ICourses[]> {
+    const matchFilter = { Approved_by_admin: "approved" };
+
+    return await Courses.aggregate([
+        { $match: matchFilter }, // Filter only approved courses
+        { 
+            $addFields: { 
+                enrolledCount: { $size: "$Students_enrolled" } // Count the students enrolled
+            }
+        },
+        { $sort: filter ? { enrolledCount: -1 } : { UpdatedAt: -1 } }, // Sort based on filter condition
+        { $limit: limit }, // Apply limit
+        { 
+            $lookup: { 
+                from: "users", 
+                localField: "Mentor_id", 
+                foreignField: "_id", 
+                as: "MentorData" 
+            } 
+        },
+        { 
+            $lookup: { 
+                from: "categories", 
+                localField: "Category", 
+                foreignField: "_id", 
+                as: "CategoryData" 
+            } 
+        },
+        { 
+            $project: { 
+                CreatedAt: 0, 
+                "MentorData._id": 0, 
+                "CategoryData._id": 0 
+            } 
+        }
+    ]);
+}
+
+
   async getSingleCourse(
     id: string,
     isValid: boolean
@@ -225,8 +254,8 @@ export class RepositoryCourses implements ICoursesRepository {
   async getCouseEachuser(CourseIds: string[]): Promise<ICourses[]> {
     return await Courses.find({ _id: { $in: CourseIds } });
   }
-  async getCourseBymentor(user: string): Promise<ICourses | null> {
-    return await Courses.findOne({ Mentor_id: user });
+  async getCourseBymentor(mentorid: string): Promise<ICourses | null> {
+    return await Courses.findOne({ Mentor_id: mentorid });
   }
   async deleteCourse(courseId: string): Promise<void> {
     await Courses.findByIdAndDelete(courseId);
@@ -235,10 +264,27 @@ export class RepositoryCourses implements ICoursesRepository {
   async createProgress(data: IProgressCollection): Promise<void> {
     await ProgressCollection.create(data);
   }
-  async getAllprogressByuserid(userid: string): Promise<IProgressCollection[] | null> {
+  async getAllprogressByuserid(
+    userid: string
+  ): Promise<IProgressCollection[] | null> {
     return await ProgressCollection.find({ Student_id: userid });
   }
-  async getSelectedcourseprogress(courseid:string,userid:string):Promise<IProgressCollection|null>{
-    return await ProgressCollection.findOne({Course_id:courseid,Student_id:userid})
+  async getSelectedcourseprogress(
+    courseid: string,
+    userid: string
+  ): Promise<IProgressCollection | null> {
+    return await ProgressCollection.findOne({
+      Course_id: courseid,
+      Student_id: userid,
+    })
+      .populate({
+        path: "lesson_progress.Lesson_id", // Populate Lesson_id inside lesson_progress array
+      })
+      .exec();
+  }
+  async getUserProgress(userIds: string[]): Promise<IProgressCollection[]> {
+    return await ProgressCollection.find({ Student_id: { $in: userIds } })
+      .populate("Course_id", "Title")
+      .lean();
   }
 }

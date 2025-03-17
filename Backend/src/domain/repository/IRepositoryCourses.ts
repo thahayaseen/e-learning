@@ -2,7 +2,7 @@ import { CourseDTO } from "../../app/dtos/coursesDto";
 import { ICourses } from "../../infra/database/models/course";
 import { ILesson } from "../../infra/database/models/lessone";
 import { IProgressCollection } from "../../infra/database/models/progress";
-import { ITask, Task } from "../../infra/database/models/tasks";
+import { IQuizTask, ITask, Task } from "../../infra/database/models/tasks";
 import { CourseInterface } from "../entities/returndata";
 
 export interface ICoursesRepository {
@@ -18,7 +18,7 @@ export interface ICoursesRepository {
     filter: object
   ): Promise<any>;
   applayAction(id: string, type: boolean): Promise<void>;
-  getCourseUser(limit?: number): Promise<ICourses[]>;
+  getCourseUser(limit?: number,filter?:boolean): Promise<ICourses[]>;
   getSingleCourse(id: string, isValid: boolean): Promise<ICourses | null>;
   AddStudentInCourse(courseId: string, userId: string): Promise<void>;
   UpdataCourse(
@@ -31,7 +31,7 @@ export interface ICoursesRepository {
   DeleteLessonFromCourse(courseId: string, lessonId: string): Promise<void>;
   FindLessonByid(id: string): Promise<ILesson | null>;
   UpdateTask(taskId: string, data: ITask): Promise<ITask | null>;
-  FindTask(id: string): Promise<ITask | null>;
+  FindTask(id: string): Promise<ITask |IQuizTask| null>;
   FindTaskFromlesson(lessonId: string, TaskId: string): Promise<void>;
   getCouseEachuser(CourseIds: string[]): Promise<ICourses[]>;
   getCourseBymentor(user: string): Promise<ICourses | null>;
@@ -44,4 +44,5 @@ export interface ICoursesRepository {
     courseid: string,
     userid: string
   ): Promise<IProgressCollection | null>;
+  getUserProgress(userIds: string[]): Promise<IProgressCollection[]>;
 }

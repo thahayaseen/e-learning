@@ -1,3 +1,4 @@
+import { IMessage } from "peer";
 import { MeetingDto } from "../../app/dtos/MeetingDto";
 import { IRmetting } from "../../domain/repository/IRmeeting";
 import { Meeting } from "../database/models/meeting";
@@ -36,6 +37,27 @@ class RepositoryMeeting implements IRmetting {
     } catch (error: any) {
       return null;
     }
+  }
+  async addUserindrepo(
+    roomid: string,
+    userid: string
+  ): Promise<MeetingDto | null> {
+    console.log(roomid,userid);
+    
+    return await Meeting.findByIdAndUpdate(
+      roomid,
+      { $addToSet: { participants: userid } },
+      { new: true } // Ensures it returns the updated document
+    );
+  }
+  
+  async removeUser(roomid: string, userid: string): Promise<MeetingDto | null> {
+
+    console.log(roomid,userid);
+    
+    return await Meeting.findByIdAndUpdate(roomid, {
+    $pull: { participants: userid }},{new:true}
+    );
   }
 }
 export default new RepositoryMeeting();

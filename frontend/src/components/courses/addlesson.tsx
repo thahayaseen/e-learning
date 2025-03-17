@@ -203,7 +203,7 @@ const AddLessonModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl bg-blue-900 text-white border-blue-700">
+      <DialogContent className="max-w-xl h-[90vh] bg-blue-900 text-white overflow-y-scroll border-blue-700">
         <DialogHeader>
           <DialogTitle className="text-xl text-white flex items-center gap-2">
             <BookOpen size={18} />

@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, ObjectId } from "mongoose";
 export interface IProgressCollection {
-  Student_id: string | null;
+  Student_id: string ;
   Course_id: string | null;
   lesson_progress: {
     Completed?: boolean | null;

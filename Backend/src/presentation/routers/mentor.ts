@@ -17,6 +17,7 @@ router.post('/addlesson',jwtVerify,mentorController.addlesson.bind(mentorControl
 router.post('/course/delete',jwtVerify,mentorController.deleteCourse.bind(mentorController))
 router.post('/task/delete',jwtVerify,mentorController.DeleteTask.bind(mentorController))
 router.get('/getchats',jwtVerify,mentorController.getRoomsByid.bind(mentorController))
+router.get('/getusers',jwtVerify,mentorController.studentManagment.bind(mentorController))
 
 
 export default router

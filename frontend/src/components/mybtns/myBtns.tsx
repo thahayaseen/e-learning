@@ -64,6 +64,7 @@ export function Profile() {
 
 export function Explore({ _id }: { _id: string }) {
   const router = useRouter();
+console.log(_id);
 
   return (
     <Button

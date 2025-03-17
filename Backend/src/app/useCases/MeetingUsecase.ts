@@ -1,3 +1,4 @@
+import { IMessage } from "peer";
 import { ImessageUsecase } from "../../domain/interface/ImessageUsecase";
 import { IRmetting } from "../../domain/repository/IRmeeting";
 import IUserReposetory from "../../domain/repository/IUser";
@@ -5,24 +6,25 @@ import { MeetingDto } from "../dtos/MeetingDto";
 
 class MeetingUsecase implements ImessageUsecase {
   constructor(
-    private MeetingRepo: IRmetting
-  ) // private userRepo: IUserReposetory
-  {}
+    private MeetingRepo: IRmetting // private userRepo: IUserReposetory
+  ) {}
   async create(data: MeetingDto): Promise<void> {
     await this.MeetingRepo.createMeeting(data);
   }
   async fetchallMeetsBymentorid(mentorId: string): Promise<MeetingDto[]> {
     return await this.MeetingRepo.getAllmeeting(mentorId);
   }
-  async fetchMeetmyId(meetid: string): Promise<MeetingDto|null> {
+  async fetchMeetmyId(meetid: string): Promise<MeetingDto | null> {
     const data = await this.MeetingRepo.getMeetingByid(meetid);
-   console.log(data);
-   
+    console.log(data);
+
     return data;
   }
-  async getMeetByuserid(userid: string,courseid:string): Promise<MeetingDto|null> {
-    return await this.MeetingRepo.getMeetingUByid(userid,courseid);
- 
+  async getMeetByuserid(
+    userid: string,
+    courseid: string
+  ): Promise<MeetingDto | null> {
+    return await this.MeetingRepo.getMeetingUByid(userid, courseid);
   }
   async updateMeetTime(meetId: string, scheduledTime: Date): Promise<void> {
     await this.MeetingRepo.updateMeetingTime(meetId, scheduledTime);
@@ -32,6 +34,18 @@ class MeetingUsecase implements ImessageUsecase {
     status: "pending" | "approved" | "rejected" | "canceled"
   ): Promise<void> {
     await this.MeetingRepo.updateStatus(Meetid, status);
+  }
+  async addUsertomeet(
+    roomid: string,
+    userid: string
+  ): Promise<MeetingDto | null> {
+    return await this.MeetingRepo.addUserindrepo(roomid, userid);
+  }
+  async leaveFrommeet(
+    roomid: string,
+    userid: string
+  ): Promise<MeetingDto | null> {
+    return await this.MeetingRepo.removeUser(roomid, userid);
   }
 }
 export default MeetingUsecase;

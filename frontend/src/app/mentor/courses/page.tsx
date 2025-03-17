@@ -943,7 +943,7 @@ const MentorDashboard = () => {
 
         {/* Edit Course Dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-blue-900 text-white border-blue-700">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-blue-900 text-white  border-blue-700">
             <DialogHeader>
               <DialogTitle className="text-2xl text-white">
                 Edit Course
@@ -955,7 +955,7 @@ const MentorDashboard = () => {
 
             {selectedCourse && (
               <form onSubmit={handleSaveChanges}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6  py-4">
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="Title" className="text-white">

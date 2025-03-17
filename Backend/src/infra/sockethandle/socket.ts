@@ -29,7 +29,7 @@ export default class HandleSocket {
     );
     socket.on(chatEnum.joinmeet, async (room, email, username) => {
       try {
-        console.log("inhere");
+        console.log("inhere",room,email,username);
 
         const ans = await this.socketusecase.valiateMeeting(room, email);
         console.log(ans, "res");
@@ -37,6 +37,8 @@ export default class HandleSocket {
         if (!ans) {
           socket.emit(chatEnum.error, "Unable to varify ");
         } else {
+          console.log('in here');
+          
           this.handleJoinRoom(socket, { roomId: room, username, email });
         }
       } catch (error) {}
@@ -49,19 +51,25 @@ export default class HandleSocket {
   ): void {
     try {
       console.log(
-        `User ${room.username} is trying to join room: ${room.roomId}`
+        `User ${room.username} is trying to join room: ${room.roomId} ${socket.id}`
       );
 
       socket.join(room.roomId); // ✅ Ensure user joins first
 
       console.log(`User ${room.username} joined room: ${room.roomId}`);
-
+      socket.emit(chatEnum.joined, { id: socket.id, room });
       // ✅ Send "userConnected" event to everyone EXCEPT the sender
+
+      console.log(room,socket.id,'room is ');
+      
       socket.broadcast.to(room.roomId).emit(chatEnum.userConnected, {
         email: room.email,
         id: socket.id,
+        username: room.username,
+
         message: `${room.username} Joined `,
       });
+      console.log("call this ");
 
       this.handleVidoconnection(socket, room);
 
@@ -94,8 +102,37 @@ export default class HandleSocket {
     socket: Socket,
     room: { roomId: string; username: string; email: string }
   ) {
+    console.log("haloo",room);
+     socket.on(chatEnum.videoState, (data) => {
+      console.log(`Video state change from ${room.username}: ${data.enabled ? "ON" : "OFF"}`)
+
+      // Broadcast to everyone else in the room
+      socket.broadcast.to(room.roomId).emit(chatEnum.videoState, {
+        email: room.email,
+        username: room.username,
+        enabled: data.enabled,
+      })
+    })
+
+    // Handle audio state changes
+    socket.on(chatEnum.audioState, (data) => {
+      console.log(`Audio state change from ${room.username}: ${data.enabled ? "ON" : "OFF"}`)
+
+      // Broadcast to everyone else in the room
+      socket.broadcast.to(room.roomId).emit(chatEnum.audioState, {
+        email: room.email,
+        username: room.username,
+        enabled: data.enabled,
+      })
+    })
+    socket.on(chatEnum.error,(data)=>{
+      this.io.to(data.to).emit(chatEnum.error,{message:data.message})
+    })
     socket.on(chatEnum.signal, (data) => {
-      console.log(data);
+      console.log(";handle signal"+socket.id,data.id);
+      // data.from=socket.id
+      console.log(data, "sgneldatais");
+      this.io.to(data.to).emit(chatEnum.signal, data);
     });
   }
   private async handleSendMessage(

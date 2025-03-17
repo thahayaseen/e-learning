@@ -81,28 +81,18 @@ export default class UserRepository implements IUser {
     }
   );
   findAlluser = catchAsync(
-    async (limit: number, skip: number): Promise<Alluserinterface> => {
-      const data = await UserModel.find({}).skip(skip).limit(limit);
+    async (limit: number, skip: number,filter:any={},sort:any): Promise<Alluserinterface> => {
+      console.log(limit,skip,filter,sort);
+      
+      const data = await UserModel.find(filter).populate('purchasedCourses').skip(skip).limit(limit).select('_id name email role isBlocked updatedAt').lean()
 
       //  const formattedData = data.map(user => new AdminUserDTO(user._id as number,user.name,user.email,user.role,user.isblocked,String(user.updatedAt )));
-      const formattedData = data.map((user) =>
-        Object.assign(
-          {},
-          new AdminUserDTO(
-            user._id as number,
-            user.name,
-            user.email,
-            user.role,
-            user.isBlocked,
-            String(user.updatedAt)
-          )
-        )
-      );
-      console.log(formattedData, "formdatasis");
+     console.log(data,'in reposssssss');
+     
 
-      const toatal = await UserModel.countDocuments();
+      const toatal = await UserModel.countDocuments(filter);
       const totalpages = Math.ceil(toatal / limit);
-      return { formattedData, totalpages };
+      return { formattedData:data, totalpages };
     }
   );
 

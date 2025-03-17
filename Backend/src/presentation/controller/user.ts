@@ -344,10 +344,10 @@ export default class UserController {
       if (!courseid) {
         return;
       }
-      console.log(_id,'ciddd');
+      console.log(_id, "ciddd");
 
       const meetid = await this.MeetingUsecase.getMeetByuserid(_id, courseid);
-console.log(meetid,'meetdatas');
+      console.log(meetid, "meetdatas");
 
       const user = await this.userUseCase.UseProfileByemail(req.user.email);
       const isvalid = user?.purchasedCourses?.includes(courseid);
@@ -356,10 +356,13 @@ console.log(meetid,'meetdatas');
 
       const reslt = await this.CourseUseCase.getSelectedCourse(
         courseid,
-        isvalid
+        isvalid,
+        _id
       );
       console.log("in hjere");
-
+      if (!reslt.progress) {
+        delete reslt.progress;
+      }
       console.log(JSON.stringify(reslt), "om tjos");
 
       res.status(HttpStatusCode.OK).json({
@@ -377,8 +380,19 @@ console.log(meetid,'meetdatas');
   }
   async getAllcourseUser(req: AuthServices, res: Response) {
     try {
-      const { limit } = req.query;
-      const data = await this.CourseUseCase.getAllCourse(Number(limit));
+      const { limit, filter,most } = req.query;
+      let isfilter = false;
+      console.log(most,'most is ')
+      
+      if (most) {
+        isfilter = true;
+      }
+      console.log(isfilter);
+      
+      const data = await this.CourseUseCase.getAllCourse(
+        Number(limit),
+        isfilter
+      );
       console.log(JSON.stringify(data));
       res.status(HttpStatusCode.OK).json({
         success: true,
@@ -469,7 +483,7 @@ console.log(meetid,'meetdatas');
       await this.MeetingUsecase.create({
         courseId,
         mentorId,
-        participants: [mentorId, _id],
+        participants: [],
         scheduledTime: new Date(),
         userId: _id,
         status: "pending",
@@ -496,10 +510,10 @@ console.log(meetid,'meetdatas');
 
       const meet = await this.MeetingUsecase.fetchMeetmyId(meetid);
       console.log(meet);
-      if(!meet){
-        throw new Error('Room not found')
+      if (!meet) {
+        throw new Error("Room not found");
       }
-      const isvalid = meet.participants.includes(_id);
+      const isvalid = meet.userId == _id || meet.mentorId == _id;
       console.log(isvalid);
       if (isvalid) {
         throw new Error(userError.Unauthorised);
@@ -515,7 +529,57 @@ console.log(meetid,'meetdatas');
         .json({ success: false, message: error.message });
     }
   }
+  async addUsermeet(req: AuthServices, res: Response) {
+    try {
+      const { id } = req.params;
+      const { _id } = req.user;
+      const data = await this.MeetingUsecase.addUsertomeet(id, _id);
+      console.log(data, "in form reuslts");
 
+      res.status(HttpStatusCode.OK).json({ success: true, data });
+    } catch (error) {
+      res.status(HttpStatusCode.BAD_REQUEST).json({
+        succss: false,
+        message: SystemError.SystemError,
+      });
+    }
+  }
+  async leaveMeeting(req: AuthServices, res: Response) {
+    try {
+      const { id } = req.params;
+      const { _id } = req.user;
+      console.log(id, _id);
+
+      const data = await this.MeetingUsecase.leaveFrommeet(id, _id);
+      console.log(data);
+    } catch (error) {
+      res.status(HttpStatusCode.BAD_REQUEST).json({
+        succss: false,
+        message: SystemError.SystemError,
+      });
+    }
+  }
+  async getQustionans(req: AuthServices, res: Response) {
+    try {
+      const { taskid } = req.params;
+      const { anser } = req.body;
+      const data = await this.CourseUseCase.getTaskByid(taskid);
+      if (data && "Answer" in data && data.Answer == anser) {
+        res.status(HttpStatusCode.OK).json({
+          success: true,
+          message: "correct Answer",
+        });
+        return;
+      } else {
+        throw new Error("inccorect Answer");
+      }
+    } catch (error: any) {
+      res.status(HttpStatusCode.BAD_REQUEST).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
   // async changePassword(req: AuthServices, res: Response) {
   //   const email = req.user.email;
   //   const { oldpass,newpassword } = req.body;

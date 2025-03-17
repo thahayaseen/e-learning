@@ -31,9 +31,9 @@ const CoursePurchasePage = () => {
         console.log(params.id, "id is");
 
         const data = await getSelectedCourse(params.id as string);
-        console.log(data.data);
+        console.log(data.data.data );
 
-        SetcourseDetails(data.data);
+        SetcourseDetails(data.data.data);
         setLoading(false);
       }
     };
