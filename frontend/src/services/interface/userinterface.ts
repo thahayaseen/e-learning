@@ -1,8 +1,8 @@
 export interface Adminshousers{
-    id: number|string;
+    _id: number|string;
     name: string;
     email: string;
     role: string;
-    blocked: boolean;
+    isBlocked: boolean;
     lastActive: string;
 }

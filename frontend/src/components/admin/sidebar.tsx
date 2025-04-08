@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { clearGs } from "@/lib/auth";
+import { storeType } from "@/lib/store";
 import {
   Users,
   Shield,
@@ -17,6 +18,7 @@ import {
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { delete_cookie } from "@/lib/features/cookie";
+import { useSelector } from "react-redux";
 
 const Sidebar = ({
   Content,
@@ -28,9 +30,10 @@ const Sidebar = ({
   const router = useRouter();
   const [expanded, setExpanded] = useState(true);
   const dispatch = useDispatch();
+  const data = useSelector((state: storeType) => state);
   const menuItems = [
     { icon: Home, label: "Dashboard", badge: null, path: "/admin" },
-    { icon: Users, label: "User Management", badge: "12", path: "/admin/user" },
+    { icon: Users, label: "User Management", path: "/admin/user" },
     {
       icon: CarTaxiFront,
       label: "Category",
@@ -43,18 +46,19 @@ const Sidebar = ({
       badge: null,
       path: "/admin/courseaprovel",
     },
-    { icon: Mail, label: "Messages", badge: "5" },
-    { icon: Bell, label: "Notifications", badge: "3" },
-    { icon: Settings, label: "Settings", badge: null },
+    { icon: Mail, label: "BeMentor", badge: `${data.Messages.length}`, path: '/admin/mentor-requst' },
+    // { icon: Bell, label: "Notifications", badge: "3" },
+    // { icon: Settings, label: "Settings", badge: null },
   ];
+  console.log('client logintn in admin');
 
   return (
-    <div className="flex min-h-screen">
-      {/* Sidebar */}
+    <div className="flex h-screen overflow-hidden">
+      {/* Sidebar - fixed position */}
       <div
         className={`${
-          expanded ? "w-64" : "w-16"
-        } bg-slate-900 text-white transition-all duration-300 flex flex-col border-r border-blue-800`}>
+          expanded ? "w-64" : "w-[4.8rem]"
+        } bg-slate-900 text-white transition-all duration-300 h-screen flex flex-col border-r border-blue-800 fixed left-0 top-0`}>
         {/* Header */}
         <div className="p-4 border-b border-blue-800 flex items-center justify-between">
           {expanded && (
@@ -68,7 +72,7 @@ const Sidebar = ({
         </div>
 
         {/* Navigation Items */}
-        <nav className="flex-1 p-4  space-y-2">
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
           {menuItems.map((item, index) => (
             <button
               key={index}
@@ -113,9 +117,14 @@ const Sidebar = ({
         </div>
       </div>
 
-      {/* Main Content Area */}
-      <div className="flex-1 bg-slate-900">
-        {Content ? Content : <h2>haloo</h2>}
+      {/* Main Content Area - with left margin to accommodate sidebar */}
+      <div 
+        className={`flex-1 bg-slate-900 overflow-y-auto h-screen ${
+          expanded ? "ml-64" : "ml-[4.8rem]"
+        } transition-all duration-300`}>
+        <div className="p-4">
+          {Content ? Content : <h2>haloo</h2>}
+        </div>
       </div>
     </div>
   );

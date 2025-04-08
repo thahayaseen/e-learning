@@ -1,54 +1,56 @@
-"use client"
-import React, { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Eye, EyeOff, Lock } from 'lucide-react';
-import toast from 'react-hot-toast';
-import axios from '@/services/asios';
-import { useRouter } from 'next/navigation';
-import { delete_cookie, get_cookie } from '@/lib/features/cookie';
+"use client";
+import React, { useState } from "react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Eye, EyeOff, Lock } from "lucide-react";
+import toast from "react-hot-toast";
+import axios from "@/services/asios";
+import { useRouter } from "next/navigation";
+import { delete_cookie, get_cookie } from "@/lib/features/cookie";
 const ChangePasswordForm = () => {
-    const router=useRouter()
+  const router = useRouter();
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
-   
-    newPassword: '',
-    confirmPassword: ''
+    newPassword: "",
+    confirmPassword: "",
   });
 
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
-    if(formData.confirmPassword!==formData.newPassword){
-        toast.error('Password not match')
-        return 
+    if (formData.confirmPassword !== formData.newPassword) {
+      toast.error("Password not match");
+      return;
     }
-    console.log('Password change submitted:', formData);
-    const token=get_cookie('reset_Token2')
-    console.log('Password  submitted:', token);
-    
-   try {
-    await axios.post('/changepassword',{
-      // token:get_cookie('reset_Token2'),
-      
-        password:formData.newPassword
-    },{
-      headers:{
-        Authorization:`Baere ${token}`
-      }
-    })
-    delete_cookie('reset_Token2')
-    router.push('/auth')
-   } catch (error) {
-    console.log(error.response.data.message);
-    toast.error(error.response.data.message);
-    
-   }
+    console.log("Password change submitted:", formData);
+    const token = get_cookie("reset_Token2");
+    console.log("Password  submitted:", token);
+
+    try {
+      await axios.post(
+        "/changepassword",
+        {
+          // token:get_cookie('reset_Token2'),
+
+          password: formData.newPassword,
+        },
+        {
+          headers: {
+            Authorization: `Baere ${token}`,
+          },
+        }
+      );
+      delete_cookie("reset_Token2");
+      router.push("/auth");
+    } catch (error: any) {
+      console.log(error.response.data.message);
+      toast.error(error.response.data.message);
+    }
   };
 
-  const handleChange = (e) => {
+  const handleChange = (e: any) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -63,8 +65,6 @@ const ChangePasswordForm = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-           
-
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-200">
                 New Password
@@ -81,8 +81,7 @@ const ChangePasswordForm = () => {
                 <button
                   type="button"
                   onClick={() => setShowNewPassword(!showNewPassword)}
-                  className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-200"
-                >
+                  className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-200">
                   {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
@@ -104,17 +103,19 @@ const ChangePasswordForm = () => {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-200"
-                >
-                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-200">
+                  {showConfirmPassword ? (
+                    <EyeOff size={20} />
+                  ) : (
+                    <Eye size={20} />
+                  )}
                 </button>
               </div>
             </div>
 
             <button
               type="submit"
-              className="w-full px-4 py-2 mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors duration-200"
-            >
+              className="w-full px-4 py-2 mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors duration-200">
               Update Password
             </button>
           </form>

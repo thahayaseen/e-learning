@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import {
   Card,
   CardContent,
@@ -16,10 +16,11 @@ import {
   CheckCircle,
   BookOpen,
   Clock,
-  Gift,
-  Award,
   Users,
+  Award,
   Shield,
+  Gift,
+  UserCircle,
 } from "lucide-react";
 import {
   Accordion,
@@ -35,7 +36,6 @@ import GotoCoursebtn from "../mybtns/gotoCoursebtn";
 
 const CourseBuyPage = ({ course, aldredypurchased }) => {
   const router = useRouter();
-  const [selectedLesson, setSelectedLesson] = useState(null);
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat("en-US", {
@@ -79,6 +79,19 @@ const CourseBuyPage = ({ course, aldredypurchased }) => {
           </div>
 
           <CardContent className="p-6">
+            {/* Mentor Information */}
+            <div className="mb-6 bg-slate-50 p-4 rounded-lg flex items-center space-x-4">
+              <UserCircle className="w-16 h-16 text-primary" />
+              <div>
+                <h4 className="text-lg font-semibold text-gray-800">
+                  Mentor: {course.Mentor_id?.name || "Unknown Mentor"}
+                </h4>
+                <p className="text-sm text-gray-600">
+                  Expert in {course.Category?.Category || "the field"}
+                </p>
+              </div>
+            </div>
+
             {/* Course Highlights */}
             <div className="grid grid-cols-3 gap-4 mb-6 bg-slate-50 p-4 rounded-lg">
               <div className="flex flex-col items-center p-3 bg-white rounded-md shadow-sm">
@@ -89,12 +102,14 @@ const CourseBuyPage = ({ course, aldredypurchased }) => {
               </div>
               <div className="flex flex-col items-center p-3 bg-white rounded-md shadow-sm">
                 <Clock className="w-6 h-6 text-primary mb-2" />
-                <span className="text-sm font-medium">4 Week Duration</span>
+                <span className="text-sm font-medium">
+                  {Math.round(course.duration / (1000 * 60 * 60 * 24)) || 4} Days Duration
+                </span>
               </div>
               <div className="flex flex-col items-center p-3 bg-white rounded-md shadow-sm">
                 <Users className="w-6 h-6 text-primary mb-2" />
                 <span className="text-sm font-medium">
-                  {course.Students_enrolled?.length || 0} Students
+                  {course.Students_enrolled?.length || 0} Students Enrolled
                 </span>
               </div>
             </div>
@@ -105,7 +120,7 @@ const CourseBuyPage = ({ course, aldredypurchased }) => {
                 Course Description
               </h3>
               <p className="text-gray-600 leading-relaxed">
-                {course.Description}
+                {course.Description || "No description available."}
               </p>
             </div>
 
@@ -116,30 +131,17 @@ const CourseBuyPage = ({ course, aldredypurchased }) => {
                 What You'll Learn
               </h3>
               <div className="grid grid-cols-2 gap-3">
-                <div className="flex items-start">
-                  <CheckCircle className="w-4 h-4 text-green-500 mt-1 mr-2" />
-                  <span className="text-sm">
-                    Master key concepts through hands-on lessons
-                  </span>
-                </div>
-                <div className="flex items-start">
-                  <CheckCircle className="w-4 h-4 text-green-500 mt-1 mr-2" />
-                  <span className="text-sm">
-                    Complete practical assignments and quizzes
-                  </span>
-                </div>
-                <div className="flex items-start">
-                  <CheckCircle className="w-4 h-4 text-green-500 mt-1 mr-2" />
-                  <span className="text-sm">
-                    Receive a certificate upon completion
-                  </span>
-                </div>
-                <div className="flex items-start">
-                  <CheckCircle className="w-4 h-4 text-green-500 mt-1 mr-2" />
-                  <span className="text-sm">
-                    Access to resources and community support
-                  </span>
-                </div>
+                {[
+                  "Master key concepts through hands-on lessons",
+                  "Complete practical assignments and quizzes",
+                  "Receive a certificate upon completion",
+                  "Access to resources and community support"
+                ].map((item, index) => (
+                  <div key={index} className="flex items-start">
+                    <CheckCircle className="w-4 h-4 text-green-500 mt-1 mr-2" />
+                    <span className="text-sm">{item}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </CardContent>
@@ -175,21 +177,25 @@ const CourseBuyPage = ({ course, aldredypurchased }) => {
                     <div className="p-4 bg-slate-50 rounded-lg">
                       <p className="mb-4 text-gray-600">{lesson.Content}</p>
 
-                      <div className="space-y-2">
-                        {lesson.Task?.map((task) => (
-                          <div
-                            key={task._id}
-                            className="flex items-center justify-between p-3 bg-white border border-gray-100 rounded-md shadow-sm hover:shadow transition-shadow">
-                            <div className="flex items-center space-x-3">
-                              <div className="p-2 rounded-full bg-slate-100">
-                                {renderTaskIcon(task.Type)}
+                      {lesson.Task && lesson.Task.length > 0 ? (
+                        <div className="space-y-2">
+                          {lesson.Task.map((task) => (
+                            <div
+                              key={task._id}
+                              className="flex items-center justify-between p-3 bg-white border border-gray-100 rounded-md shadow-sm hover:shadow transition-shadow">
+                              <div className="flex items-center space-x-3">
+                                <div className="p-2 rounded-full bg-slate-100">
+                                  {renderTaskIcon(task.Type)}
+                                </div>
+                                <span className="font-medium">{task.Type}</span>
                               </div>
-                              <span className="font-medium">{task.Type}</span>
+                              <Lock className="w-4 h-4 text-gray-400" />
                             </div>
-                            <Lock className="w-4 h-4 text-gray-400" />
-                          </div>
-                        ))}
-                      </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-gray-500 italic">No tasks available for this lesson</p>
+                      )}
                     </div>
                   </AccordionContent>
                 </AccordionItem>
@@ -222,24 +228,17 @@ const CourseBuyPage = ({ course, aldredypurchased }) => {
             <Separator className="my-6" />
 
             <div className="space-y-3 mb-6">
-              <div className="flex items-start space-x-3">
-                <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                <span className="text-sm">
-                  Lifetime access to all course materials
-                </span>
-              </div>
-              <div className="flex items-start space-x-3">
-                <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                <span className="text-sm">Certificate of completion</span>
-              </div>
-              <div className="flex items-start space-x-3">
-                <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                <span className="text-sm">Access to future updates</span>
-              </div>
-              <div className="flex items-start space-x-3">
-                <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                <span className="text-sm">Community support</span>
-              </div>
+              {[
+                "Lifetime access to all course materials",
+                "Certificate of completion",
+                "Access to future updates",
+                "Community support"
+              ].map((benefit, index) => (
+                <div key={index} className="flex items-start space-x-3">
+                  <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm">{benefit}</span>
+                </div>
+              ))}
             </div>
 
             {!aldredypurchased ? (
@@ -271,6 +270,3 @@ const CourseBuyPage = ({ course, aldredypurchased }) => {
 };
 
 export default CourseBuyPage;
-
-// Example usage:
-// <CourseBuyPage course={courseObject} />

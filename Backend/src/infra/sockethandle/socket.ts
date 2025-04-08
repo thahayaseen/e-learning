@@ -6,6 +6,17 @@ export default class HandleSocket {
   constructor(private io: Server, private socketusecase: IsocketUsecase) {}
 
   public registerEvent(socket: Socket) {
+    console.log('reached herer');
+    
+    socket.on("sendNotification", (data) => {
+      this.io.emit("receiveNotification", data);
+    });
+    socket.on('SubmitForm',(data)=>{
+      console.log('data is fasd',data);
+      
+      this.io.emit('adminNotification',data)
+      
+    })
     socket.on(
       chatEnum.joinRoom,
       async (room: { roomId: string; username: string; email: string }) => {
@@ -19,7 +30,7 @@ export default class HandleSocket {
           if (res) {
             this.handleJoinRoom(socket, room);
           } else {
-            socket.emit(chatEnum.error, "unknow user");
+            socket.emit(chatEnum.error, "unknown user");
           }
         } catch (error: any) {
           console.error("Error joining room:", error);
@@ -27,25 +38,27 @@ export default class HandleSocket {
         }
       }
     );
+
     socket.on(chatEnum.joinmeet, async (room, email, username) => {
       try {
-        console.log("inhere",room,email,username);
-
+        console.log("inhere", room, email, username);
         const ans = await this.socketusecase.valiateMeeting(room, email);
         console.log(ans, "res");
 
         if (!ans) {
-          socket.emit(chatEnum.error, "Unable to varify ");
+          socket.emit(chatEnum.error, "Unable to verify");
         } else {
-          console.log('in here');
-          
+          console.log("in here");
           this.handleJoinRoom(socket, { roomId: room, username, email });
         }
-      } catch (error) {}
+      } catch (error: any) {
+        console.error("Error in joinmeet:", error);
+        socket.emit(chatEnum.error, error.message || "An error occurred");
+      }
     });
   }
 
-  handleJoinRoom(
+  private handleJoinRoom(
     socket: Socket,
     room: { roomId: string; username: string; email: string }
   ): void {
@@ -54,23 +67,18 @@ export default class HandleSocket {
         `User ${room.username} is trying to join room: ${room.roomId} ${socket.id}`
       );
 
-      socket.join(room.roomId); // ✅ Ensure user joins first
-
+      socket.join(room.roomId);
       console.log(`User ${room.username} joined room: ${room.roomId}`);
       socket.emit(chatEnum.joined, { id: socket.id, room });
-      // ✅ Send "userConnected" event to everyone EXCEPT the sender
 
-      console.log(room,socket.id,'room is ');
-      
       socket.broadcast.to(room.roomId).emit(chatEnum.userConnected, {
         email: room.email,
         id: socket.id,
         username: room.username,
-
-        message: `${room.username} Joined `,
+        message: `${room.username} Joined`,
       });
-      console.log("call this ");
 
+      console.log("call this ");
       this.handleVidoconnection(socket, room);
 
       socket.on(
@@ -89,52 +97,73 @@ export default class HandleSocket {
           });
         }
       );
-    } catch (error: unknown) {
-      console.error("Error in handleJoinRoom:", error);
 
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to join room";
-      socket.emit(chatEnum.error, errorMessage);
+      socket.on("leave-room", (data) => {
+        console.log("User leaving room:", data.roomId);
+        socket.to(data.roomId).emit("u-disconnect", room.username);
+        socket.leave(data.roomId);
+      });
+
+      socket.on("disconnect", () => {
+        console.log("User disconnected unexpectedly");
+        if (room && room.roomId) {
+          socket.to(room.roomId).emit("u-disconnect", room.username);
+        }
+      });
+    } catch (error: any) {
+      console.error("Error in handleJoinRoom:", error);
+      socket.emit(chatEnum.error, error.message || "Failed to join room");
     }
   }
 
-  private async handleVidoconnection(
+  private handleVidoconnection(
     socket: Socket,
     room: { roomId: string; username: string; email: string }
   ) {
-    console.log("haloo",room);
-     socket.on(chatEnum.videoState, (data) => {
-      console.log(`Video state change from ${room.username}: ${data.enabled ? "ON" : "OFF"}`)
+    console.log("haloo", room);
 
-      // Broadcast to everyone else in the room
+    socket.on(chatEnum.videoState, (data) => {
+      console.log(
+        `Video state change from ${room.username}: ${
+          data.enabled ? "ON" : "OFF"
+        }`
+      );
       socket.broadcast.to(room.roomId).emit(chatEnum.videoState, {
         email: room.email,
         username: room.username,
         enabled: data.enabled,
-      })
-    })
+      });
+    });
 
-    // Handle audio state changes
     socket.on(chatEnum.audioState, (data) => {
-      console.log(`Audio state change from ${room.username}: ${data.enabled ? "ON" : "OFF"}`)
-
-      // Broadcast to everyone else in the room
+      console.log(
+        `Audio state change from ${room.username}: ${
+          data.enabled ? "ON" : "OFF"
+        }`
+      );
       socket.broadcast.to(room.roomId).emit(chatEnum.audioState, {
         email: room.email,
         username: room.username,
         enabled: data.enabled,
-      })
-    })
-    socket.on(chatEnum.error,(data)=>{
-      this.io.to(data.to).emit(chatEnum.error,{message:data.message})
-    })
+      });
+    });
+
+    socket.on(chatEnum.error, (data) => {
+      this.io.to(data.to).emit(chatEnum.error, { message: data.message });
+    });
+
     socket.on(chatEnum.signal, (data) => {
-      console.log(";handle signal"+socket.id,data.id);
-      // data.from=socket.id
-      console.log(data, "sgneldatais");
-      this.io.to(data.to).emit(chatEnum.signal, data);
+      console.log("Handling signal from", socket.id, "to", data.to);
+
+      if (data.to !== socket.id) {
+        this.io.to(data.to).emit(chatEnum.signal, {
+          ...data,
+          from: socket.id,
+        });
+      }
     });
   }
+
   private async handleSendMessage(
     socket: Socket,
     {
@@ -146,7 +175,6 @@ export default class HandleSocket {
   ): Promise<void> {
     try {
       console.log(`Sending message in room ${roomId}: ${message}`);
-      console.log(roomId);
 
       const savedMessage = await this.socketusecase.sendMessage(
         roomId,

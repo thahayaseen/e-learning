@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import {
   BookOpen,
   Calendar,
@@ -31,19 +32,70 @@ import {
   Sparkles,
   Clock8,
 } from "lucide-react";
-import { fetchUsers } from "@/services/fetchdata";
+const dummyOrders = [
+  {
+    _id: "660d1f9e4b3d2f0012345671",
+    userId: "650d1f9e4b3d2f0012345678",
+    courseId: "650d1fae4b3d2f0012345679",
+    paymentId: "pay_1234567890abcdef",
+    paymentStatus: "paid",
+    amount: 4999,
+    currency: "inr",
+    planType: "premium",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    _id: "660d1f9e4b3d2f0012345672",
+    userId: "650d1f9e4b3d2f0012345678",
+    courseId: "650d1fae4b3d2f0012345680",
+    paymentId: "pay_abcdef1234567890",
+    paymentStatus: "pending",
+    amount: 2999,
+    currency: "usd",
+    planType: "basic",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    _id: "660d1f9e4b3d2f0012345673",
+    userId: "650d1f9e4b3d2f0012345681",
+    courseId: "650d1fae4b3d2f0012345682",
+    paymentId: "pay_7890abcdef123456",
+    paymentStatus: "failed",
+    amount: 1999,
+    currency: "inr",
+    planType: "standard",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    _id: "660d1f9e4b3d2f0012345674",
+    userId: "650d1f9e4b3d2f0012345683",
+    courseId: "650d1fae4b3d2f0012345684",
+    paymentId: "pay_4567890abcdef123",
+    paymentStatus: "paid",
+    amount: 9999,
+    currency: "usd",
+    planType: "pro",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+];
+
+import { fetchorders, fetchUsers } from "@/services/fetchdata";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  Overview,
-  Courses,
-  Account,
-} from "@/components/Profilecomponents/tables";
+import { Orders } from "@/components/Profilecomponents/Orders";
+import { Overview } from "@/components/Profilecomponents/profile-overview";
 import { setloading } from "@/lib/features/User";
 import { storeType } from "@/lib/store";
 import ShimmerUI from "@/components/Profilecomponents/Profileshimmerui";
 // import { headers } from "next/headers";
 import Header from "@/components/header/header";
 import { UserDTO } from "@/services/interface/CourseDto";
+import { Imentorrequst } from "@/services/interface/mentorReqst";
+import { Account } from "@/components/Profilecomponents/profile-Account";
+import { Courses } from "@/components/Profilecomponents/profile-Courses";
 
 export interface Iprogress {
   progresPersentage: number;
@@ -59,6 +111,7 @@ const UserProfilePage = () => {
   const dispatch = useDispatch();
   const [userData, setUserData] = useState<UserDTO | null>(null);
   const [courses, setCourse] = useState([]);
+  const [Beamentor, setBementor] = useState<Imentorrequst | null>(null);
   const [progressdata, setProgress] = useState<Iprogress>({
     progresPersentage: 0,
     completedCourse: 0,
@@ -68,21 +121,32 @@ const UserProfilePage = () => {
     const fetchdata = async () => {
       dispatch(setloading(true));
       const dat = await fetchUsers("/profile");
+      const orders = await fetchorders();
+      console.log(orders, "odatais ");
+
       console.log(isloading.current, "ref is ");
       console.log("done");
-
+      if (dat.mentorRequst) {
+        setBementor(dat.mentorRequst);
+        console.log("it is ", dat.mentorRequst);
+      }
       if (dat.data) {
         console.log(dat, "udaa is ");
         setCourse(dat.datas);
         setUserData(dat.data);
         setProgress(dat.progresdata);
         console.log("progressdata", dat.progresdata);
+        // if(dat.data)
       }
       dispatch(setloading(false));
     };
     fetchdata();
   }, []);
+  const onsave = (data) => {
+    console.log("up data is ", data);
 
+    setUserData((prev) => ({ ...prev, ...data }));
+  };
   return (
     <div className="h-screen ">
       <Header isLoggedIn={isAuthenticated} forceFixed={false} />
@@ -124,24 +188,34 @@ const UserProfilePage = () => {
                 <CardContent className="pt-6">
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">
-                      <Mail className="text-indigo-400 h-5 w-5" />
-                      <span>{userData.email}</span>
+                      <Mail className="text-indigo-100 h-5 w-5" />
+                      <span className="font-mono text-sm text-indigo-50">
+                        {userData.email}
+                      </span>
                     </div>
                     {userData.profile?.social_link && (
                       <div className="flex items-center gap-2">
                         <Link className="text-indigo-400 h-5 w-5" />
                         <a
                           href={userData.profile.social_link}
-                          className="text-indigo-400 hover:text-indigo-300 hover:underline"
+                          className="text-indigo-50 font-mono hover:text-indigo-300 hover:underline"
                           target="_blank"
                           rel="noopener">
-                          Github Profile
+                          {userData.profile.social_link
+                            .split("/")[2]
+                            .split(".")[1][0]
+                            .toUpperCase() +
+                            userData.profile.social_link
+                              .split("/")[2]
+                              .split(".")[1]
+                              .slice(1) || "Social Link"}{" "}
+                          Profile
                         </a>
                       </div>
                     )}
                     <div className="flex items-center gap-2">
                       <Shield className="text-indigo-400 h-5 w-5" />
-                      <span>
+                      <span className="text-indigo-50 font-mono">
                         Account Status:{" "}
                         {userData.isBlocked ? (
                           <Badge variant="destructive">Blocked</Badge>
@@ -156,51 +230,45 @@ const UserProfilePage = () => {
                     </div>
                     <div className="flex items-center gap-2">
                       <CheckCircle2
-                        className={`h-5 w-5 ${
+                        color={`${userData.verified ? "green" : "gray"}`}
+                        className={`h-5 w-5 f${
                           userData.verified ? "text-green-400" : "text-gray-400"
                         }`}
                       />
-                      <span>
+                      <span className="font-mono text-indigo-100">
                         {userData.verified
                           ? "Email Verified"
                           : "Email Not Verified"}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Clock8 className="text-indigo-400 h-5 w-5" />
-                      <span>Member for {} days</span>
-                    </div>
+
                     <div className="pt-4">
-                      <p className="text-sm font-medium text-gray-400 mb-1">
-                        Experience
-                      </p>
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm">
-                          {/* {userData.profile.experience} XP */}
-                        </span>
                         <span className="text-sm">
                           {/* {experienceToNextLevel} XP to Level {currentLevel + 1} */}
                         </span>
                       </div>
                       <Progress
-                        // value={experienceProgress}
-                        className="h-2 bg-gray-700">
-                        <div
-                          className="h-full bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full"
-                          // style={{ width: `${experienceProgress}%` }}
-                        />
-                      </Progress>
+                        value={progressdata.progresPersentage}
+                        className="h-2 bg-blue-100"></Progress>
                     </div>
                     <div className="flex justify-between pt-4 mt-2 border-t border-gray-700">
                       <div className="text-center">
-                        <p className="text-xl font-bold">{courses.length}</p>
+                        <p className="text-xl text-indigo-100 font-bold">
+                          {progressdata.coursesCount}
+                        </p>
                         <p className="text-xs text-gray-400">Courses</p>
                       </div>
                       <div className="text-center">
+                        <p className="text-xl text-indigo-100 font-bold">
+                          {progressdata.completedCourse}
+                        </p>
                         <p className="text-xs text-gray-400">Completed</p>
                       </div>
                       <div className="text-center">
-                        {/* <p className="text-xl font-bold">{overallProgress}%</p> */}
+                        <p className="text-xl text-indigo-100 font-bold">
+                          {progressdata.progresPersentage}%
+                        </p>
                         <p className="text-xs text-gray-400">Overall</p>
                       </div>
                     </div>
@@ -209,9 +277,9 @@ const UserProfilePage = () => {
               </Card>
 
               {/* User progress & courses section */}
-              <div className="w-full lg:w-2/3">
+              <div className="w-full lg:w-3/4">
                 <Tabs defaultValue="overview" className="w-full">
-                  <TabsList className="grid grid-cols-3 mb-6 bg-gray-800">
+                  <TabsList className="grid grid-cols-4 mb-6 bg-gray-800">
                     <TabsTrigger
                       value="overview"
                       className="data-[state=active]:bg-indigo-900 data-[state=active]:text-white">
@@ -227,6 +295,11 @@ const UserProfilePage = () => {
                       className="data-[state=active]:bg-indigo-900 data-[state=active]:text-white">
                       Account
                     </TabsTrigger>
+                    <TabsTrigger
+                      value="orders"
+                      className="data-[state=active]:bg-indigo-900 data-[state=active]:text-white">
+                      order
+                    </TabsTrigger>
                   </TabsList>
 
                   <Overview
@@ -235,8 +308,13 @@ const UserProfilePage = () => {
                     key={1}
                     progress={progressdata}
                   />
+                  <Account
+                    userData={userData}
+                    Beamentor={Beamentor}
+                    onSave={onsave}
+                  />
                   <Courses courses={courses} key={2} />
-                  <Account userData={userData} />
+                  <Orders />
                 </Tabs>
               </div>
             </div>

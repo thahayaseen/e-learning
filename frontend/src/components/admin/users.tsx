@@ -29,12 +29,13 @@ const UserManagementPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [roleFilter, setRoleFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [limit,setLimit]=useState(5)
 
   const fetchUser = async () => {
     setIsLoading(true);
     try {
       
-      const response = await fetchUsers(`/allusers?page=${page}&limit=${5}`);
+      const response = await fetchUsers(`/allusers?page=${page}&limit=${limit}`);
       console.log(response,'resis');
       
       setTotal(response.totalpages);
@@ -76,32 +77,34 @@ console.log(roleFilter);
 
     // Apply status filter
     if (statusFilter === "Active") {
-      result = result.filter((user) => !user.blocked);
-    } else if (statusFilter === "Blocked") {
-      result = result.filter((user) => user.blocked);
+      result = result.filter((user) => !user.isBlocked);
+    } else if (statusFilter === "isBlocked") {
+      result = result.filter((user) => user.isBlocked);
     }
 
     setFilteredUsers(result);
   };
 
   const toggleBlock = async (id:string, type) => {
-    console.log(id);
+    console.log(id,'user id is ');
     try {
-      const response = await axios.post("/blockuser", {
+      const response = await axios.put("/blockuser", {
         userid: id,
         type: !type,
       });
 
       setUsers(
         users.map((user) =>
-          user.id == id ? { ...user, blocked: !user.blocked } : user
+          user._id == id ? { ...user, isBlocked: !user.isBlocked } : user
         )
       );
-      console.log(response);
+      console.log(response,'responce afblocking');
 
       toast.success(response.message || "User status updated");
     } catch (error) {
-      toast.error("Failed to update user status");
+      console.log(error.message);
+      
+      toast.error(error.message||"Failed to update user status");
       console.error("Error updating user status:", error);
     }
   };
@@ -113,11 +116,11 @@ console.log(roleFilter);
   };
 
   const activeUsers = useMemo(
-    () => (users.filter((user) => !user.blocked).length),
+    () => (users.filter((user) => !user.isBlocked).length),
     [users]
   );
   const blockedUsers = useMemo(
-    () => users.filter((user) => user.blocked).length,
+    () => users.filter((user) => user.isBlocked).length,
     [users]
   );
   const userColumns = [
@@ -127,7 +130,7 @@ console.log(roleFilter);
       render: (user: Adminshousers) => (
         <>
           {user.name}
-          {user.blocked && (
+          {user.isBlocked && (
             <Badge className="ml-2 bg-red-900/30 text-red-300 border-red-500">
               Blocked
             </Badge>
@@ -239,7 +242,7 @@ console.log(roleFilter);
                 <SelectContent className="bg-blue-800 border-blue-700 text-white">
                   <SelectItem value="All">All Status</SelectItem>
                   <SelectItem value="Active">Active</SelectItem>
-                  <SelectItem value="Blocked">Blocked</SelectItem>
+                  <SelectItem value="isBlocked">Blocked</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -264,7 +267,7 @@ console.log(roleFilter);
 
 
           <div className="mt-4">
-            <PaginationComponent page={page} setPage={setPage} total={total} itemsPerPage={5} />
+            <PaginationComponent page={page} setPage={setPage} total={total} itemsPerPage={limit} />
           </div>
         
       </div>

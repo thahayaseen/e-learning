@@ -21,13 +21,13 @@ const ForgotPasswordPage = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log(email);
-  const data=  await axios.post("/forgotpass", {
+    const data: any = await axios.post("/forgotpass", {
       email: email,
     });
     console.log(data.token.token);
-    save_cookie('reset_Token',data.token.token)
-    console.log(JSON.stringify(get_cookie('reset_Token')));
-    
+    save_cookie("reset_Token", data.token.token);
+    console.log(JSON.stringify(get_cookie("reset_Token")));
+
     router.push("/auth/forgetpassword/otp/");
   };
 

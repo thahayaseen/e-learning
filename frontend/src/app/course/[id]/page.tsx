@@ -106,21 +106,21 @@ function Page() {
   const [loading, setloadin] = useState(false);
   const params = useParams();
   const [CourseData, SetCoursData] = useState(null);
-  const [isaldredy,setisaldedy]=useState(false)
+  const [isaldredy, setisaldedy] = useState(false);
   useEffect(() => {
     const fn = async () => {
       try {
         if (params.id) {
           setloadin(true);
-          const data = await getSelectedCourse(params.id as string);
-          console.log(data,'datass');
-          setisaldedy(data.adredypuchased)
+          const data: any = await getSelectedCourse(params.id as string);
+          console.log(data, "datass");
+          setisaldedy(data.adredypuchased);
           SetCoursData(data.data.data);
           setloadin(false);
         }
       } catch (error) {
-        console.log('here');
-        
+        console.log("here");
+
         setloadin(false);
       }
     };
@@ -140,7 +140,7 @@ function Page() {
     <>
       {CourseData && (
         <div>
-          <CourseBuyPage course={CourseData} aldredypurchased={isaldredy}/>
+          <CourseBuyPage course={CourseData} aldredypurchased={isaldredy} />
         </div>
       )}
     </>

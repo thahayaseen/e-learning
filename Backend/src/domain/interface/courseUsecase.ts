@@ -1,14 +1,32 @@
 import { CourseDTO } from "../../app/dtos/coursesDto";
+import { orderDto } from "../../app/dtos/orderDto";
 import { ICourses } from "../../infra/database/models/course";
 import { ILesson } from "../../infra/database/models/lessone";
-import {  IQuizTask,ITask } from "../../infra/database/models/tasks";
+import { IProgressCollection } from "../../infra/database/models/progress";
+import { IReview } from "../../infra/database/models/reiview";
+import { IQuizTask, ITask } from "../../infra/database/models/tasks";
+import { IPaginationResult } from "../../infra/repositories/RepositoryCourses";
 import { CourseInterface } from "../entities/returndata";
 
 export interface ICourseUseCase {
-  getAllCourse(limit?: number,filter?:boolean): Promise<ICourses[]>;
-  getSelectedCourse(id: string, isValid: boolean,userid?:string): Promise<any>;
+  getAllCourse(
+    page: number,
+    limit: number,
+    sort: any,
+    filter?: any
+  ): Promise<IPaginationResult<any>>;
+  getSelectedCourse(
+    id: string,
+    isValid: boolean,
+    userid?: string
+  ): Promise<any>;
+  Conformpayment(
+    updateData: Partial<orderDto>,
+    orderid: string
+  ): Promise<orderDto>;
   purchaseCourse(userId: string, courseId: string): Promise<void>;
-  getByCoursids(CourseIds: string[]): Promise<ICourses[]>;
+  createOrder(course: orderDto): Promise<orderDto>;
+  getByCoursids(CourseIds: string[], userid: string): Promise<ICourses[]>;
   addlessons(data: ILesson[]): Promise<any>;
   createCourse(datas: Omit<ICourses, "_id">): Promise<any>;
   createTaskandaddtoLesson(
@@ -17,19 +35,59 @@ export interface ICourseUseCase {
   ): Promise<ILesson | null>;
   getCourseBymentor(id: string): Promise<ICourses | null>;
   getLesson(lessonid: string): Promise<ILesson | null>;
-  updateTaskinRepo(data: ITask, taskId: string): Promise<ITask | null>;
+  updateTaskProgress(
+    studentId: string,
+    courseId: string,
+    lessonId: string,
+    taskId: string,
+    taskType: string,
+    // response: string,
+    updateData: {
+      watchTime?: number;
+      isCompleted?: boolean;
+      response?: string;
+      score?: number;
+    }
+  ): Promise<IProgressCollection>;
   updateLesson(
     lessonid: string,
     data: Omit<ILesson, "Task">
   ): Promise<ILesson | null>;
   updateCourse(courseId: string, data: CourseDTO): Promise<void>;
-  addLessoninCourse(
+  addLessoninCourse(courseId: string, lessonid: string): Promise<void>;
+  deleteCourse(courseid: string): Promise<void>;
+  deletedtask(taskid: string, lessonid: string): Promise<void>;
+  deleteLessonfromcourse(courseId: string, lessonid: string): Promise<void>;
+  getuserallCourseprogresdata(userid: string): Promise<any>;
+  getTaskByid(taskid: string): Promise<ITask | IQuizTask | null>;
+  updateOrder(
+    updateData: Partial<orderDto>,
+    orderid: string
+  ): Promise<orderDto>;
+
+  updateTaskinRepo(data: ITask, taskId: string): Promise<ITask | null>;
+  markLessonCompleteduseCase(
+    studentId: string,
     courseId: string,
-    lessonid: string
+    lessonId: string
+  ): Promise<IProgressCollection>;
+  getSelectedProgress(
+    courseid: string,
+    userid: string
+  ): Promise<IProgressCollection | null>;
+  addRating(
+    userid: string,
+    courseid: string,
+    rating: number,
+    title: string,
+    comment: string
   ): Promise<void>;
-  deleteCourse(courseid: string): Promise<void>
-  deletedtask(taskid: string,lessonid:string):Promise<void>
-  deleteLessonfromcourse(courseId:string,lessonid:string):Promise<void>
-  getuserallCourseprogresdata(userid: string):Promise<any>
-  getTaskByid(taskid: string):Promise<ITask|IQuizTask|null>
+  getallReviews(courseid: string): Promise<IReview[]>;
+  checkOrderDupication(
+    userid: string,
+    courseid: string,
+    type: boolean
+  ): Promise<orderDto | null>;
+  repayOrder(userid: string, orderid: string): Promise<Partial<orderDto>>;
+  // getActiveOrder(_id: string, courseId: string): Promise<any>;
 }

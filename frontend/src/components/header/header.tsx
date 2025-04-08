@@ -75,10 +75,8 @@ function Header({ forceFixed = false }: { isLoggedIn?: boolean, forceFixed?: boo
 
   // Navigation links array for DRY code
   const navLinks = [
-    { text: "Courses", href: "/courses" },
-    { text: "Instructors", href: "/instructors" },
-    { text: "Resources", href: "/resources" },
-    { text: "About", href: "/about" }
+    { text: "Courses", href: "/course" },
+   
   ];
 
   return (

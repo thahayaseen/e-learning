@@ -12,13 +12,15 @@ import { CourseUsecase } from "../../app/useCases/CourseUsecase";
 import { UserUsecase } from "../../app/useCases/User";
 import { ICourseUseCase } from "../../domain/interface/courseUsecase";
 import IsocketUsecase from "../../domain/interface/socket";
+import MeetingUsecase from "../../app/useCases/MeetingUsecase";
 
 export class MentorController {
   constructor(
     private MentoruseCases: MentorUsecase,
     private userUsecase: UserUsecase,
     private CourseUsecase: ICourseUseCase,
-    private SocketuserCase: IsocketUsecase
+    private SocketuserCase: IsocketUsecase,
+    private MeetUsecase: MeetingUsecase
   ) {}
   async getcategorys(req: Request, res: Response) {
     const data = await this.MentoruseCases.getallCategory();
@@ -59,6 +61,7 @@ export class MentorController {
         });
         return;
       }
+
       let results;
       if (Coursdata) {
         const validation = CourseSchema.safeParse(Coursdata);
@@ -102,8 +105,10 @@ export class MentorController {
         .json({ success: false, message: userError.Unauthorised });
       return;
     }
-    const data = await this.MentoruseCases.getallCourses(userid._id);
-    console.log("all course of this user", data);
+    let data = await this.MentoruseCases.getallCourses(userid._id, req.query);
+    console.log("all course of this user", data[0]);
+    data = data[0];
+    data.total = data?.total[0]?.count || data.total;
     res.status(HttpStatusCode.OK).json({
       success: true,
       message: "fetched success",
@@ -257,19 +262,33 @@ export class MentorController {
     // this.CourseUsecase.updateTaskinRepo();
   }
   async updateCoursecontroler(req: AuthServices, res: Response) {
-    if (req.user.role != Roles.MENTOR) {
-      res.status(HttpStatusCode.UNAUTHORIZED).json({
-        success: false,
-        message: userError.Unauthorised,
+    try {
+      if (req.user.role != Roles.MENTOR) {
+        res.status(HttpStatusCode.UNAUTHORIZED).json({
+          success: false,
+          message: userError.Unauthorised,
+        });
+        return;
+      }
+      const { courseid } = req.params;
+      const { data } = req.body;
+      if (data.lessons) {
+        delete data.lessons;
+      }
+      console.log(data, courseid);
+
+      await this.MentoruseCases.updataCourse(courseid, data);
+      res.status(HttpStatusCode.OK).json({
+        success: true,
+        message: "updated Successfull",
       });
       return;
+    } catch (error) {
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "Unable to update",
+      });
     }
-    const { courseid } = req.params;
-    const { data } = req.body;
-    if (data.lessons) {
-      delete data.lessons;
-    }
-    this.MentoruseCases.updataCourse(courseid, data);
   }
   async deleteLesson(req: AuthServices, res: Response) {
     if (req.user.role != Roles.MENTOR) {
@@ -342,7 +361,7 @@ export class MentorController {
       }
       const { data, courseId } = req.body;
       await this.VarifyUser(email, courseId);
-      console.log(data);
+      console.log(data, courseId, "idis sdfas");
 
       const lessonId = await this.CourseUsecase.addlessons([data]);
       console.log(lessonId, courseId);
@@ -364,7 +383,7 @@ export class MentorController {
       const { courseid } = req.body;
       const { email } = req.user;
       const { course } = await this.VarifyUser(email, courseid);
-      course.lessons.forEach(async (id:string) => {
+      course.lessons.forEach(async (id: string) => {
         if (id) {
           await this.MentoruseCases.DeleteLesson(id);
           console.log("deletd one lesson");
@@ -428,7 +447,7 @@ export class MentorController {
       // console.log(!user );
       console.log(!user, !user?._id, !course, !course?.Mentor_id);
 
-      if (!user || !user._id || !course ||course.data|| !course.Mentor_id) {
+      if (!user || !user._id || !course || course.data || !course.Mentor_id) {
         console.log("in jere");
 
         throw new Error("user not fount");
@@ -492,13 +511,13 @@ export class MentorController {
       if (!page) {
         throw new Error("no pages found");
       }
-      const data = await this.userUsecase.fetchAllUsers(req.query,users._id);
+      const data = await this.userUsecase.fetchAllUsers(req.query, users._id);
       console.log(data);
       res.status(HttpStatusCode.OK).json({
         success: true,
         message: "fetched successfully",
-        data:data.data,
-        total:data.total
+        data: data.data,
+        total: data.total,
       });
       return;
     } catch (error: any) {
@@ -507,6 +526,153 @@ export class MentorController {
         message: error.message || "please Make sure all arguments",
       });
       return;
+    }
+  }
+  async getorderMentorId(req: AuthServices, res: Response) {
+    try {
+      const { _id, role } = req.user;
+      if (role !== Roles.MENTOR) {
+        throw new Error(userError.Unauthorised);
+      }
+
+      const { page, limit } = req.query;
+      console.log(limit);
+      const data = await this.MentoruseCases.getOrderBymentor(
+        _id,
+        Number(page),
+        Number(limit)
+      );
+      console.log(data, "order By mentor");
+      res.status(HttpStatusCode.OK).json({
+        success: true,
+        message: "Successfully fetch data",
+        data,
+      });
+    } catch (error) {
+      res.status(HttpStatusCode.BAD_REQUEST).json({
+        success: false,
+        message:
+          error instanceof Error
+            ? error.message
+            : "an Unexptected Error fetchign data",
+      });
+    }
+  }
+  async getState(req: AuthServices, res: Response) {
+    try {
+      const { _id, role } = req.user;
+      if (role !== Roles.MENTOR) {
+        throw new Error(userError.Unauthorised);
+      }
+      const data = await this.MentoruseCases.getState(_id);
+      console.log(data, "stateis ");
+
+      res.status(HttpStatusCode.OK).json({
+        success: true,
+        message: "successfully ",
+        data,
+      });
+    } catch (error) {
+      res.status(HttpStatusCode.BAD_REQUEST).json({
+        success: false,
+        message: error instanceof Error ? error.message : "cannto get state",
+      });
+    }
+  }
+  async getRevenue(req: AuthServices, res: Response) {
+    try {
+      const { _id, role } = req.user;
+      if (role !== Roles.MENTOR) {
+        throw new Error(userError.Unauthorised);
+      }
+      const data = await this.MentoruseCases.getRevenueData(_id);
+      res.status(HttpStatusCode.OK).json({
+        success: true,
+        message: "successfully ",
+        data,
+      });
+    } catch (error) {
+      res.status(HttpStatusCode.BAD_REQUEST).json({
+        success: false,
+        message: error instanceof Error ? error.message : "cannto get state",
+      });
+    }
+  }
+  async updateMeetingStatus(req: AuthServices, res: Response) {
+    try {
+      const { _id, role } = req.user;
+      if (role !== Roles.MENTOR) {
+        throw new Error("You dont have access");
+      }
+      const { status } = req.query;
+      const { meetid } = req.params;
+      const validStatuses = [
+        "approved",
+        "rejected",
+        "canceled",
+        "pending",
+        "completed",
+      ] as const;
+
+      if (
+        typeof status !== "string" ||
+        !validStatuses.includes(status as any)
+      ) {
+        throw new Error("Does Not match status");
+      }
+
+      const typedStatus = status as (typeof validStatuses)[number];
+
+      const data = await this.MeetUsecase.updateSatus(
+        String(meetid),
+        typedStatus,
+        _id
+      );
+      console.log(data, "upstatus");
+      res.status(HttpStatusCode.OK).json({
+        success: true,
+        message: "updated Success",
+      });
+      return;
+    } catch (error) {
+      res.status(HttpStatusCode.BAD_REQUEST).json({
+        success: false,
+        message:
+          error instanceof Error ? error.message : "Unable to update Data",
+      });
+    }
+  }
+  async getMeetings(req: AuthServices, res: Response) {
+    try {
+      const { _id, role } = req.user;
+      console.log("entere fadfsd");
+
+      if (role !== Roles.MENTOR) {
+        throw new Error(userError.Unauthorised);
+      }
+      const { page, limit, search, status } = req.query;
+      let filter = {
+        search,
+        status,
+      };
+      const result = await this.MeetUsecase.fetchallMeetsBymentorid(
+        _id,
+        Number(page),
+        Number(limit),
+        filter
+      );
+      console.log("data is ", result);
+      res.status(HttpStatusCode.OK).json({
+        success: true,
+        message: "fetched success",
+        result,
+      });
+    } catch (error) {
+      res.status(HttpStatusCode.BAD_REQUEST).json({
+        success: false,
+        message:
+          error instanceof Error ? error.message : "Cannot find the Data",
+      });
     }
   }
 }

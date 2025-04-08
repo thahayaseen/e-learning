@@ -1,11 +1,8 @@
-import React from 'react'
+import MentorDashboard from "@/components/mentor/MentorDash";
+import React from "react";
 
 function MentorPanel() {
-  return (
-    <div>
-      
-    </div>
-  )
+  return <MentorDashboard />;
 }
 
-export default MentorPanel
+export default MentorPanel;

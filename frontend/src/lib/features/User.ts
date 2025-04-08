@@ -17,20 +17,20 @@ export const Varify = createAsyncThunk(
     try {
       console.log("clicked");
 
-      const reponse = await axios.get("/autherisation", { 
-    
-        withCredentials: true 
-      })
+      const reponse = await axios.get("/autherisation", {
+        withCredentials: true,
+      });
       console.log(reponse);
 
-
       return reponse;
-    } catch (error:any) {
-    // toast.error( error.response.data.message)
-    console.log(error,"from axios");
-    
-      axios.post('/logout')
-    throw new Error(error.response.data.message)
+    } catch (error: any) {
+      // toast.error( error.response.data.message)
+      console.log(error, "from axios");
+
+      axios.post("/logout");
+      console.log(error,'error in affter logit');
+      
+      throw new Error(error instanceof Error ?error.message:error?.response?.data?.message||'Unexpexted Error');
     }
   }
 );
@@ -51,6 +51,7 @@ const slices = createSlice({
     },
     logout: (state) => {
       state.isAuthenticated = false;
+      state.user = null;
 
       console.log("removed");
     },

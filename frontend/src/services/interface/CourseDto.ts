@@ -16,6 +16,7 @@ export interface ICategory {
   Category: string ;
   CourseId?: string[] | null;
   Description: string ;
+  unlist:boolean;
   UpdatedAt?: string | null;
   createdAt?: string | null|Date;
 }
@@ -49,7 +50,7 @@ export interface ICourses {
   Title: string | null;
   Mentor_id: UserDTO | null;
   Description: string | null;
-  createdAt: string | null;
+  CreatedAt: string | null;
   Category: ICategory | null;
   Price: number | null;
   Approved_by_admin: 'pending'|'rejected'|'approved' ;

@@ -34,7 +34,7 @@ export default class Admin implements IAdmin {
   }
   async Blockuser(id: string, type: boolean) {
     try {
-      console.log(id);
+      console.log(id, "id is");
 
       await this.UserRepository.Blockuser(id, type);
       return;
@@ -42,6 +42,9 @@ export default class Admin implements IAdmin {
     } catch (error: any) {
       new AppError(error.message, 404);
     }
+  }
+  async getCategoryNameUsecase(name: string): Promise<ICategory | null> {
+    return await this.CategoryRepo.getCategorywithname(name);
   }
   async createCategory(
     name: string,
@@ -69,13 +72,17 @@ export default class Admin implements IAdmin {
 
     return await this.CourseRepo.getUnaproved({ limit, skip }, filter);
   }
-  async changeCategory(id: string, data: ICategory):Promise<void> {
+  async changeCategory(id: string, data: ICategory): Promise<void> {
     await this.CategoryRepo.editCategoy(id, data);
     return;
   }
-  async deleteCourse(id:string):Promise<void>{
-    await this.CategoryRepo.deleteCategory(id)
-    return  
+  async actionCourse(id: string, type: boolean): Promise<void> {
+    const courses = await this.CourseRepo.getCourseByCategory(id);
+    courses.forEach(async (data) => {
+      await this.CourseRepo.UpdataCourse(String(data._id), { unlist: type });
+    });
+    await this.CategoryRepo.action(id, type);
+    return;
   }
 }
 export type IAdminUsecase = InstanceType<typeof Admin>;

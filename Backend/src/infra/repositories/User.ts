@@ -7,6 +7,8 @@ import bcrypt from "bcrypt";
 import AdminUserDTO from "../../app/dtos/adminDTOUsers";
 import { UserDTO } from "../../app/dtos/Duser";
 import Courses from "../database/models/course";
+import { OrderSchemas } from "../database/models/order";
+import { Roles } from "../../app/useCases/enum/User";
 
 export default class UserRepository implements IUser {
   constructor() {}
@@ -62,6 +64,7 @@ export default class UserRepository implements IUser {
       subscription: userdata.subscription,
       verified: userdata.verified,
       password: userdata.password,
+      username: userdata.username,
     };
     return obj;
   });
@@ -81,18 +84,27 @@ export default class UserRepository implements IUser {
     }
   );
   findAlluser = catchAsync(
-    async (limit: number, skip: number,filter:any={},sort:any): Promise<Alluserinterface> => {
-      console.log(limit,skip,filter,sort);
-      
-      const data = await UserModel.find(filter).populate('purchasedCourses').skip(skip).limit(limit).select('_id name email role isBlocked updatedAt').lean()
+    async (
+      limit: number,
+      skip: number,
+      filter: any = {},
+      sort: any
+    ): Promise<Alluserinterface> => {
+      console.log(limit, skip, filter, sort);
+
+      const data = await UserModel.find(filter)
+        .populate("purchasedCourses")
+        .skip(skip)
+        .limit(limit)
+        .select("_id name email role isBlocked updatedAt")
+        .lean();
 
       //  const formattedData = data.map(user => new AdminUserDTO(user._id as number,user.name,user.email,user.role,user.isblocked,String(user.updatedAt )));
-     console.log(data,'in reposssssss');
-     
+      console.log(data, "in reposssssss");
 
       const toatal = await UserModel.countDocuments(filter);
       const totalpages = Math.ceil(toatal / limit);
-      return { formattedData:data, totalpages };
+      return { formattedData: data, totalpages };
     }
   );
 
@@ -163,6 +175,53 @@ export default class UserRepository implements IUser {
       { $push: { purchasedCourses: courseId } } // Correct placement of `$push`
     );
     return;
-}
+  }
+  async changeUserdata(userid: string, data: any): Promise<void> {
+    const qury: any = {};
 
+    if (data.name) {
+      qury["name"] = data.name.trim();
+    }
+
+    console.log(data, "data is");
+
+    if (data["profile.social_link"]) {
+      console.log(data["profile.social_link"]);
+      qury["profile.social_link"] = data["profile.social_link"];
+    }
+
+    if (data.avathar) {
+      qury["profile.avatar"] = data.avathar;
+    }
+
+    console.log(qury, "query is");
+
+    const datass = await UserModel.findByIdAndUpdate(
+      userid,
+      { $set: qury }, // Update only the specific fields
+      { new: true }
+    );
+
+    console.log(datass, "updated user data");
+  }
+  async getAllorders(
+    userId: string,
+    page: number,
+    limit: number
+  ): Promise<any> {
+    console.log(userId,page,limit,'in repsdatais');
+    
+    const orders = await OrderSchemas.find({ userId: userId })
+      .populate("userId", "name email") // Select specific user fields
+      .populate("courseId", "Title")
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .sort({ createdAt: -1 }); // Latest orders first
+    const totalCount = await OrderSchemas.countDocuments({ userId: userId });
+    return { orders, totalCount };
+  }
+  async changeUserRole(userid:string,role:'mentor'|'admin'|'user'):Promise<void>{
+    await UserModel.findByIdAndUpdate(userid,{role})
+    return 
+  } 
 }

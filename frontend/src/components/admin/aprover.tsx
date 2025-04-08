@@ -1,11 +1,6 @@
 "use client";
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-import {
-  Check,
-  X,
-  Eye,
-  Loader2,
-} from "lucide-react";
+import { Check, X, Eye, Loader2 } from "lucide-react";
 
 import {
   Card,
@@ -34,7 +29,9 @@ import PaginationComponent from "../default/pagination";
 const AdminCourseManagement: React.FC = () => {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const [typeOfList, setTypeOfList] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
+  const [typeOfList, setTypeOfList] = useState<
+    "all" | "pending" | "approved" | "rejected"
+  >("all");
   const { loading } = useSelector((state: storeType) => state.User);
   const dispatch = useDispatch();
   const [courses, setCourses] = useState<ICourses[]>([]);
@@ -46,7 +43,8 @@ const AdminCourseManagement: React.FC = () => {
     try {
       dispatch(setloading(true));
       const response = await getunaprovedCourse(page, typeOfList);
-      
+      console.log(response, "respo is ");
+
       setTotal(response.total);
       setCourses(response.data);
     } catch (error) {
@@ -62,31 +60,37 @@ const AdminCourseManagement: React.FC = () => {
   }, [fetchCourses]);
 
   // Memoized course action handler
-  const handleCourseAction = useCallback(async (courseId: string, action: boolean) => {
-    try {
-      console.log('actiopn ionitecd');
-      await actionCourse(courseId, action);
-      console.log('actiopn ionitecd2');
-      
-      setCourses(prevCourses => 
-        prevCourses.map(course => 
-          course._id === courseId
-            ? { ...course, Approved_by_admin: action ? "approved" : "rejected" }
-            : course
-        )
-      );
-    } catch (error) {
-      console.error("Failed to update course status:", error);
-      // Optionally show error notification
-    }
-  }, []);
+  const handleCourseAction = useCallback(
+    async (courseId: string, action: boolean) => {
+      try {
+        console.log("actiopn ionitecd");
+        await actionCourse(courseId, action);
+        console.log("actiopn ionitecd2");
+
+        setCourses((prevCourses) =>
+          prevCourses.map((course) =>
+            course._id === courseId
+              ? {
+                  ...course,
+                  Approved_by_admin: action ? "approved" : "rejected",
+                }
+              : course
+          )
+        );
+      } catch (error) {
+        console.error("Failed to update course status:", error);
+        // Optionally show error notification
+      }
+    },
+    []
+  );
 
   // Memoized course view handler
   const handleCourseView = useCallback(async (course: ICourses) => {
     try {
       const data = await getlessons(course._id);
       const courseWithLessons = { ...course, lessons: data.data };
-      
+
       setSelectedCourse(courseWithLessons);
       setOpenCourse(true);
     } catch (error) {
@@ -97,8 +101,8 @@ const AdminCourseManagement: React.FC = () => {
 
   // Filtered courses based on current tab
   const filteredCourses = useMemo(() => {
-    if (typeOfList === 'all') return courses;
-    return courses.filter(course => course.Approved_by_admin === typeOfList);
+    if (typeOfList === "all") return courses;
+    return courses.filter((course) => course.Approved_by_admin === typeOfList);
   }, [courses, typeOfList]);
 
   // Loading state component
@@ -116,9 +120,9 @@ const AdminCourseManagement: React.FC = () => {
   return (
     <div className="container mx-auto p-6">
       {openCourse && (
-        <AdminCourseLessonTaskView 
-          selectedcourse={selectedCourse} 
-          onClose={() => setOpenCourse(false)} 
+        <AdminCourseLessonTaskView
+          selectedcourse={selectedCourse}
+          onClose={() => setOpenCourse(false)}
         />
       )}
       <Card>
@@ -129,16 +133,15 @@ const AdminCourseManagement: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs 
-            defaultValue={typeOfList} 
+          <Tabs
+            defaultValue={typeOfList}
             onValueChange={(value) => {
-              const validTypes = ['all', 'pending', 'approved', 'rejected'];
+              const validTypes = ["all", "pending", "approved", "rejected"];
               if (validTypes.includes(value)) {
-                setPage(1)
+                setPage(1);
                 setTypeOfList(value as typeof typeOfList);
               }
-            }}
-          >
+            }}>
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="all">All Courses</TabsTrigger>
               <TabsTrigger value="pending">Pending Courses</TabsTrigger>
@@ -153,10 +156,17 @@ const AdminCourseManagement: React.FC = () => {
                     key={course._id}
                     className={`
                       hover:shadow-lg transition-shadow
-                      ${course.Approved_by_admin === 'approved' ? 'opacity-80' : ''}
-                      ${course.Approved_by_admin === 'rejected' ? 'opacity-60' : ''}
-                    `}
-                  >
+                      ${
+                        course.Approved_by_admin === "approved"
+                          ? "opacity-80"
+                          : ""
+                      }
+                      ${
+                        course.Approved_by_admin === "rejected"
+                          ? "opacity-60"
+                          : ""
+                      }
+                    `}>
                     <Image
                       priority
                       src={course.image || "/default.png"}
@@ -168,7 +178,8 @@ const AdminCourseManagement: React.FC = () => {
                     <CardHeader>
                       <CardTitle>{course.Title}</CardTitle>
                       <CardDescription>
-                        By {course.Mentor_id.name}
+                       
+                        By {course.Mentor_id?.name||'Thaha'}
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -176,25 +187,23 @@ const AdminCourseManagement: React.FC = () => {
                         <Badge variant="outline">
                           {course.Category.Category}
                         </Badge>
-                        <span className="font-semibold">${course.Price}</span>
+                        <span className="font-semibold">₹{course.Price}</span>
                       </div>
                     </CardContent>
                     <CardFooter className="flex justify-between">
                       <div
                         className="border p-2 border-solid border-black rounded-sm cursor-pointer"
-                        onClick={() => handleCourseView(course)}
-                      >
+                        onClick={() => handleCourseView(course)}>
                         <Eye className="h-4 w-4" />
                       </div>
-                      {course.Approved_by_admin === "approved" || 
-                       course.Approved_by_admin === "rejected" ? (
+                      {course.Approved_by_admin === "approved" ||
+                      course.Approved_by_admin === "rejected" ? (
                         <Badge
                           variant={
                             course.Approved_by_admin === "approved"
                               ? "default"
                               : "destructive"
-                          }
-                        >
+                          }>
                           {course.Approved_by_admin}
                         </Badge>
                       ) : (
@@ -202,15 +211,17 @@ const AdminCourseManagement: React.FC = () => {
                           <Button
                             variant="outline"
                             size="icon"
-                            onClick={() => handleCourseAction(course._id, false)}
-                          >
+                            onClick={() =>
+                              handleCourseAction(course._id, false)
+                            }>
                             <X className="h-4 w-4 text-destructive" />
                           </Button>
                           <Button
                             variant="outline"
                             size="icon"
-                            onClick={() => handleCourseAction(course._id, true)}
-                          >
+                            onClick={() =>
+                              handleCourseAction(course._id, true)
+                            }>
                             <Check className="h-4 w-4 text-green-500" />
                           </Button>
                         </div>
@@ -223,7 +234,12 @@ const AdminCourseManagement: React.FC = () => {
           </Tabs>
         </CardContent>
       </Card>
-      <PaginationComponent page={page} setPage={setPage} total={total} itemsPerPage={5} />
+      <PaginationComponent
+        page={page}
+        setPage={setPage}
+        total={total}
+        itemsPerPage={5}
+      />
     </div>
   );
 };

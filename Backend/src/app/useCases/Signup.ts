@@ -31,16 +31,23 @@ export default class Signup {
   constructor(
     private userRepository: IUserReposetory,
     private jwtTockenProvider: IJwtService
-  ) {}
+  ) // private uid = uuid()
+  {}
+  uniqueusername(name: string) {
+    const uuids = uuid();
+    return name.split(" ").join("").toLowerCase() + uuids.slice(0, 6);
+  }
   async create(users: User): Promise<userCreateDTO> {
+    const uid = uuid();
     try {
-      const uid = uuid();
       const newUser: UserType & {
         profile: Profile;
         gid: null;
         isBlocked: boolean;
+        username: string;
       } = {
         name: users.name,
+        username: this.uniqueusername(users.name),
         email: users.email,
         profile: users.profile,
         password: users.password,
@@ -91,7 +98,9 @@ export default class Signup {
       }
 
       console.log(`User created with ID: ${uid}`);
-      const token = await this.jwtTockenProvider.accsessToken({ userid: uid });
+      const token = await this.jwtTockenProvider.accsessToken({
+        userid: uid,
+      });
       if (!token) {
         throw new AppError(
           SystemError.SystemError,
@@ -212,12 +221,14 @@ export default class Signup {
   async glogin(user: GoogleLoginDTO) {
     try {
       console.log(user, "in datas");
-      const myprofile={ avatar: user.picture }
+      const myprofile = { avatar: user.picture };
       console.log(myprofile);
-      
+
       const useremail = await this.userRepository.findByEmail(user.email);
-      if(useremail?.isBlocked){
-        throw new Error('user has been blocked')
+      console.log(useremail,'data is when login');
+      
+      if (useremail?.isBlocked) {
+        throw new Error("user has been blocked");
         // return {success:false,message:'user has been blocked'}
       }
       user.role = useremail?.role || "student";
@@ -229,10 +240,10 @@ export default class Signup {
       if (!useremail) {
         const passwords = uuid();
         const pass = await this.userRepository.hashpass(passwords);
-       const adta= await this.userRepository.create({
+        const adta = await this.userRepository.create({
           name: user.name,
           email: user.email,
-
+          username: this.uniqueusername(user.name),
           profile: myprofile,
           password: pass,
           verified: true,
@@ -240,7 +251,7 @@ export default class Signup {
           purchasedCourses: [],
           subscription: null,
         });
-console.log(adta);
+        console.log(adta);
 
         return { success: true, message: "User created successfully", token };
       }

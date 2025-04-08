@@ -6,7 +6,7 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { useParams,useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -26,12 +26,10 @@ function Page() {
   const [timer, setTimer] = useState(60);
   const [value, setValue] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
-  const router=useRouter()
-  const {id}=useParams()
+  const router = useRouter();
+  const { id } = useParams();
 
- 
-
-  const handleChanges = (e) => {
+  const handleChanges = (e: any) => {
     console.log("here");
 
     if (/^\d*$/.test(e)) {
@@ -42,29 +40,31 @@ function Page() {
   };
   const handleResend = async () => {
     try {
-      console.log(get_cookie('varifyToken'));
-      
-      const data = await axios.post("/resent", {
-        userid: get_cookie('varifyToken'),
-      },{
-        headers:{
-          Authorization:`Baerer ${get_cookie('varifyToken')}`
+      console.log(get_cookie("varifyToken"));
+
+      const data: any = await axios.post(
+        "/resent",
+        {
+          userid: get_cookie("varifyToken"),
+        },
+        {
+          headers: {
+            Authorization: `Baerer ${get_cookie("varifyToken")}`,
+          },
         }
-      });
+      );
       console.log(data);
-      toast.success(data.message)
-      console.log('sened');
-      setRopt(prev=>!prev)
-      
-      setTimer(60)
-    } catch (error) {
+      toast.success(data.message);
+      console.log("sened");
+      setRopt((prev) => !prev);
+
+      setTimer(60);
+    } catch (error: any) {
       console.log(error);
-      
+
       toast.error(error.response.data.message);
     }
   };
-  
-
 
   useEffect(() => {
     if (timer > 0) {
@@ -82,24 +82,26 @@ function Page() {
     setIsVerifying(true);
     console.log(value);
     console.log(id);
-    
+
     try {
-      const response = await axios.post("/verify", {
-       token:get_cookie('varifyToken'),
+      const response: any = await axios.post("/verify", {
+        token: get_cookie("varifyToken"),
         otp: value,
       });
       console.log(response);
-      delete_cookie('varifyToken')
-      if(response.success){
-      toast.success('Sucessfully varifyed')
-      console.log(response);
-      // save_cookie('access',response.tocken)
-      router.push('/')
+      delete_cookie("varifyToken");
+      if (response.success) {
+        toast.success("Sucessfully varifyed");
+        console.log(response);
+        // save_cookie('access',response.tocken)
+        router.push("/");
       }
       setIsVerifying(false);
-    } catch (error) {
-      console.log(error.response.data.message);
-      toast.error(error.response.data.message);
+    } catch (error: any) {
+      console.log(error.message);
+      toast.error(error.message);
+      setIsVerifying(false);
+    } finally {
       setIsVerifying(false);
     }
   };

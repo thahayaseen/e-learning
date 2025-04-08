@@ -27,13 +27,13 @@ const ELearningAuth: React.FC<ELearningAuthProps> = ({ places }) => {
     name: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
   const [errors, setErrors] = useState({
     name: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -46,26 +46,31 @@ const ELearningAuth: React.FC<ELearningAuthProps> = ({ places }) => {
   // Toggle functions
   const toggleLogin = () => setIsLogin(!isLogin);
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
-  const toggleConfirmPasswordVisibility = () => setShowConfirmPassword(!showConfirmPassword);
+  const toggleConfirmPasswordVisibility = () =>
+    setShowConfirmPassword(!showConfirmPassword);
 
   // Handle input changes - FIXED to prevent losing focus
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    
-    setFormData(prev => ({
+
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    
+
     // Clear error when user types
     if (errors[name as keyof typeof errors]) {
-      setErrors(prev => ({
-        ...prev, 
-        [name]: ""
+      setErrors((prev) => ({
+        ...prev,
+        [name]: "",
       }));
     }
   };
-
+  function isStrongPassword(password: string) {
+    const strongPasswordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return strongPasswordRegex.test(password);
+  }
   // Form validation
   const validateForm = () => {
     let valid = true;
@@ -92,9 +97,12 @@ const ELearningAuth: React.FC<ELearningAuthProps> = ({ places }) => {
     } else {
       newErrors.password = "";
     }
-
-    // Additional validations for registration
+    if (!isLogin && !isStrongPassword(formData.password)) {
+      newErrors.password = "make sure it strong password";
+      valid = false;
+    }
     if (!isLogin) {
+      // Additional validations for registration
       if (!formData.name) {
         newErrors.name = "Name is required";
         valid = false;
@@ -120,30 +128,35 @@ const ELearningAuth: React.FC<ELearningAuthProps> = ({ places }) => {
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
-    
+
     setIsSubmitting(true);
-    
+
     try {
       if (isLogin) {
         const result = await loginUser(
-          { email: formData.email, password: formData.password }, 
+          { email: formData.email, password: formData.password },
           dispatch
         );
-        if (result&&result.success) {
-          router.push(routeing);
+        console.log(result.data.user.role, "after logined");
+
+        if (result && result.success) {
+          router.push(
+            result.data.user.role == "student"
+              ? "/"
+              : "/" + result.data.user.role
+          );
         }
-          return
-        
+        return;
       } else {
         const registerData = {
           name: formData.name,
           email: formData.email,
-          password: formData.password
+          password: formData.password,
         };
         const result = await registerUser(registerData, dispatch);
-        
+
         if (result.success) {
           router.push("/auth/otp");
         }
@@ -160,9 +173,15 @@ const ELearningAuth: React.FC<ELearningAuthProps> = ({ places }) => {
     if (session && session?.accsessToken) {
       const handleGoogleLogin = async () => {
         const result = await googleLogin(session.accsessToken, dispatch);
+        console.log(result, "from glogin");
+
         if (result.success) {
           await signOut({ redirect: false });
-          router.push(routeing);
+          router.push(
+            result.data.user.role == "student"
+              ? "/"
+              : "/" + result.data.user.role
+          );
         }
       };
       handleGoogleLogin();
@@ -170,7 +189,6 @@ const ELearningAuth: React.FC<ELearningAuthProps> = ({ places }) => {
   }, [session, router, dispatch, routeing]);
 
   // Custom input component with error message - FIXED to maintain focus
-  
 
   return (
     <div className="min-h-screen bg-login-gradient flex items-center justify-center p-6">

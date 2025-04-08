@@ -16,21 +16,23 @@ import { Avatar } from "@/components/ui/avatar";
 import { getallchat, getChatrooms } from "@/services/fetchdata";
 import { useSocket } from "@/hooks/socketio";
 import { useSelector } from "react-redux";
-import { chatEnum, IMessage } from "@/app/course/chat/[id]/page";
+import { chatEnum } from "@/lib/chat-enums";
+import { IMessage } from "@/app/course/chat/[id]/page";
 import PaginationComponent from "@/components/default/pagination";
 import { useSearchParams } from "next/navigation";
+import Image from "next/image";
 
 const MessageAdminDashboard = () => {
-    const [chatrooms, setChatrooms] = useState([]);
-    const state = useSelector((state) => state.User.user);
-    const [isLoading, setIsLoading] = useState(true);
-    const [selectedChat, setSelectedChat] = useState(null);
-    const [messages, setMessages] = useState<IMessage[]>([]);
-    const [newMessage, setNewMessage] = useState("");
-    const messagesEndRef = useRef(null);
-    const socket = useSocket();
-    const [total,setTotal]=useState(0)
-    const [page,setPage]=useState(1)
+  const [chatrooms, setChatrooms] = useState([]);
+  const state = useSelector((state: any) => state.User.user);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedChat, setSelectedChat] = useState<any>(null);
+  const [messages, setMessages] = useState<any[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+  const messagesEndRef = useRef<any>(null);
+  const socket = useSocket();
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   useEffect(() => {
     fetchChatrooms();
 
@@ -72,7 +74,7 @@ const MessageAdminDashboard = () => {
     try {
       setIsLoading(true);
       const data = await getChatrooms();
-      setTotal(data.data.total)
+      setTotal(data.data.total);
       setChatrooms(data.data.data);
       setIsLoading(false);
     } catch (error) {
@@ -81,7 +83,7 @@ const MessageAdminDashboard = () => {
     }
   };
 
-  const fetchMessages = async (chatroomId) => {
+  const fetchMessages = async (chatroomId: any) => {
     try {
       console.log(chatroomId);
 
@@ -109,7 +111,7 @@ const MessageAdminDashboard = () => {
     console.log(messages);
   };
 
-  const handleChatroomUpdated = (updatedChatroom) => {
+  const handleChatroomUpdated = (updatedChatroom: any) => {
     console.log(updatedChatroom);
   };
 
@@ -117,7 +119,7 @@ const MessageAdminDashboard = () => {
     if (newMessage.trim() && selectedChat && socket) {
       console.log(selectedChat._id);
 
-      const messageData = {
+      const messageData: any = {
         message: newMessage,
         chatroomId: String(selectedChat._id),
         userEmail: state.email,
@@ -134,7 +136,7 @@ const MessageAdminDashboard = () => {
         state.name
       );
       messageData.createdAt = new Date();
-    //   handleNewMessage(messageData);
+      //   handleNewMessage(messageData);
       // Clear input
       setNewMessage("");
     }
@@ -144,7 +146,7 @@ const MessageAdminDashboard = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: any) => {
     const date = new Date(dateString);
     return date.toLocaleString([], {
       month: "short",
@@ -154,12 +156,12 @@ const MessageAdminDashboard = () => {
     });
   };
 
-  const formatTime = (dateString) => {
+  const formatTime = (dateString: any) => {
     const date = new Date(dateString);
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
-  const selectChat = (chatroom) => {
+  const selectChat = (chatroom: any) => {
     setSelectedChat(chatroom);
   };
 
@@ -173,8 +175,9 @@ const MessageAdminDashboard = () => {
       <div className="grid grid-cols-3 lg:grid-cols-3 gap-6">
         {/* Messages table section */}
         <div
-          className={`${selectedChat && "hidden lg:block"} h-[70vh] col-span-${
-            selectedChat ? "2" : "3"
+          className={`${selectedChat && "hidden lg:block"} h-[70vh] ${
+            !selectedChat ? "col-span-3" : "col-span-2"
+          }
           }`}>
           <Card className="bg-slate-800 border-slate-700 shadow-lg w-full h-full">
             <CardHeader className="border-b border-slate-700 bg-slate-800">
@@ -206,7 +209,7 @@ const MessageAdminDashboard = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {chatrooms.map((chatroom) => (
+                      {chatrooms.map((chatroom: any) => (
                         <TableRow
                           key={chatroom._id}
                           className="border-b border-slate-700 hover:bg-slate-700/50">
@@ -283,7 +286,9 @@ const MessageAdminDashboard = () => {
                       <ArrowLeft size={20} />
                     </Button>
                     <Avatar className="h-10 w-10 mr-3 bg-slate-600">
-                      <img
+                      <Image
+                        width={100}
+                        height={100}
                         src={
                           selectedChat.userId.name?.avatar ||
                           "/api/placeholder/30/30"
@@ -372,7 +377,12 @@ const MessageAdminDashboard = () => {
           </div>
         )}
       </div>
-      <PaginationComponent page={page} setPage={setPage} total={total} itemsPerPage={10}/>
+      <PaginationComponent
+        page={page}
+        setPage={setPage}
+        total={total}
+        itemsPerPage={10}
+      />
     </div>
   );
 };

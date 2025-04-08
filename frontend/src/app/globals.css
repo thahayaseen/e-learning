@@ -5,6 +5,7 @@
 body {
   font-family: Arial, Helvetica, sans-serif;
 }
+
 @layer base {
   :root {
     --sidebar-background: 220 70% 10%;
@@ -18,17 +19,43 @@ body {
   }
 
   .dark {
-    --sidebar-background: 220 70% 5%;
-    --sidebar-foreground: 210 15% 95%;
-    --sidebar-primary: 220 80% 60%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 50% 15%;
-    --sidebar-accent-foreground: 210 15% 95%;
-    --sidebar-border: 220 40% 20%;
-    --sidebar-ring: 220 80% 65%;
-  }
+    --foreground: 255 100% 100%; /* White text */
+    --card-foreground: 255 100% 100%;
+    --popover-foreground: 255 100% 100%;
+    --primary-foreground: 255 100% 100%;
+    --secondary-foreground: 255 100% 100%;
+    --muted-foreground: 255 100% 80%;
+    --accent-foreground: 255 100% 100%;
+    --destructive-foreground: 255 100% 100%;
+    --sidebar-foreground: 255 100% 100%;
+    --sidebar-primary-foreground: 255 100% 100%;
+    --sidebar-accent-foreground: 255 100% 100%;
 }
 
+}
+.card{
+  overflow: visible;
+}
+.dark .card {
+  @apply bg-card/70 backdrop-blur-sm border-border/50 
+         shadow-xl hover:shadow-2xl transition-all duration-300;
+}
+.progress {
+  @apply bg-secondary/30 rounded-full overflow-hidden;
+}
+
+.progress-bar {
+  @apply h-full rounded-full transition-all duration-500 ease-out;
+}
+
+.badge {
+  @apply px-2 py-1 rounded-md text-xs font-medium 
+         transition-colors duration-200;
+}
+.interactive-element {
+  @apply transition-all duration-200 
+         hover:scale-[1.02] active:scale-[0.98];
+}
 @layer base {
   :root {
     --background: 220 70% 10%;
@@ -69,13 +96,13 @@ body {
   }
   .dark {
     --background: 224 71.4% 4.1%;
-    --foreground: 210 20% 98%;
+    --foreground: 255 100% 100%; 
     --card: 224 71.4% 4.1%;
     --card-foreground: 210 20% 98%;
     --popover: 224 71.4% 4.1%;
     --popover-foreground: 210 20% 98%;
     --primary: 210 20% 98%;
-    --primary-foreground: 220.9 39.3% 11%;
+    --primary-foreground: 220 20% 98%;
     --secondary: 215 27.9% 16.9%;
     --secondary-foreground: 210 20% 98%;
     --muted: 249, 33%, 35%;

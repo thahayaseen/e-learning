@@ -23,9 +23,9 @@ const PaginationComponent: React.FC<PaginationComponentProps> = ({
   setPage,
 }) => {
   console.log(total);
-  
+
   const totalPages = Math.ceil(total / itemsPerPage);
-  console.log('total pages', totalPages);
+  console.log("total pages", totalPages);
 
   const nextPage = useCallback(() => {
     if (page < totalPages) {
@@ -47,7 +47,9 @@ const PaginationComponent: React.FC<PaginationComponentProps> = ({
           <PaginationPrevious
             onClick={previousPage}
             aria-label="Go to previous page"
-            className={page === 1 ? "pointer-events-none opacity-50" : ""}
+            className={
+              page === 1 ? "pointer-events-none opacity-50 text-white" : ""
+            }
           />
         </PaginationItem>
 
@@ -59,7 +61,7 @@ const PaginationComponent: React.FC<PaginationComponentProps> = ({
               <PaginationLink
                 isActive={page === i + 1}
                 onClick={() => setPage(i + 1)}
-              >
+                className="text-white">
                 {i + 1}
               </PaginationLink>
             </PaginationItem>
@@ -68,10 +70,7 @@ const PaginationComponent: React.FC<PaginationComponentProps> = ({
           // Show pagination with ellipsis for more than 5 pages
           <>
             <PaginationItem>
-              <PaginationLink
-                isActive={page === 1}
-                onClick={() => setPage(1)}
-              >
+              <PaginationLink isActive={page === 1} onClick={() => setPage(1)}>
                 1
               </PaginationLink>
             </PaginationItem>
@@ -89,7 +88,7 @@ const PaginationComponent: React.FC<PaginationComponentProps> = ({
                 <PaginationLink
                   onClick={() => setPage(page)}
                   isActive
-                >
+                  className="text-white">
                   {page}
                 </PaginationLink>
               </PaginationItem>
@@ -106,8 +105,7 @@ const PaginationComponent: React.FC<PaginationComponentProps> = ({
             <PaginationItem>
               <PaginationLink
                 isActive={page === totalPages}
-                onClick={() => setPage(totalPages)}
-              >
+                onClick={() => setPage(totalPages)}>
                 {totalPages}
               </PaginationLink>
             </PaginationItem>
@@ -119,7 +117,11 @@ const PaginationComponent: React.FC<PaginationComponentProps> = ({
           <PaginationNext
             onClick={nextPage}
             aria-label="Go to next page"
-            className={page === totalPages ? "pointer-events-none opacity-50" : ""}
+            className={
+              page === totalPages
+                ? "pointer-events-none opacity-50 text-white"
+                : ""
+            }
           />
         </PaginationItem>
       </PaginationContent>

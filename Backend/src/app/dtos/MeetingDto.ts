@@ -4,5 +4,5 @@ export interface MeetingDto {
   scheduledTime: Date;
   courseId: string;
   participants: string[];
-  status:"pending"|"approved"|"rejected"|"canceled"
+  status:"pending"|"approved"|"rejected"|"canceled"|"completed"
 }

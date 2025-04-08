@@ -26,7 +26,12 @@ import type {
   IAssignmentTask,
   IVideoTask,
 } from "@/services/interface/CourseDto";
-import { addNewTaskDb, deleteCourse, deleteLesson, deleteTask } from "@/services/fetchdata";
+import {
+  addNewTaskDb,
+
+  deleteTask,
+  savelessonchanges,
+} from "@/services/fetchdata";
 import { toast } from "sonner";
 
 interface EditLessonDialogProps {
@@ -49,6 +54,7 @@ const EditLessonDialog = ({
   setCourses,
 }: EditLessonDialogProps) => {
   const [updatedLesson, setUpdatedLesson] = useState<ILesson | null>(null);
+  const [updateLesson, setUpdatLessons] = useState<ILesson | null>(null);
   const [tasks, setTasks] = useState<
     (IQuizTask | IAssignmentTask | IVideoTask)[]
   >([]);
@@ -67,6 +73,7 @@ const EditLessonDialog = ({
     answer: "",
     videoURL: "",
   });
+  console.log(updateLesson, "thsi is the lessons");
 
   // Initialize the form with lesson data when it changes
   useEffect(() => {
@@ -74,9 +81,6 @@ const EditLessonDialog = ({
       console.log(lesson, "lesson is ");
 
       setUpdatedLesson({ ...lesson });
-
-      // In a real implementation, you would fetch tasks based on lesson.Task array
-      // For now, we'll create dummy tasks for demonstration
 
       setTasks(lesson.Task);
     }
@@ -91,6 +95,10 @@ const EditLessonDialog = ({
       ...updatedLesson,
       [e.target.name]: e.target.value,
     });
+    setUpdatLessons((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
   };
 
   const handleTaskInputChange = (
@@ -178,7 +186,7 @@ const EditLessonDialog = ({
         VideoURL: newTask.videoURL || "",
       };
     }
-    await addNewTaskDb(taskToAdd,updatedLesson._id,courseid);
+    await addNewTaskDb(taskToAdd, updatedLesson._id, courseid);
     setTasks([...tasks, taskToAdd]);
 
     // Reset the new task form
@@ -191,9 +199,14 @@ const EditLessonDialog = ({
     });
   };
 
-  const removeTask = async(index: number,taskid:string,courseid:string,lessonid:string) => {
+  const removeTask = async (
+    index: number,
+    taskid: string,
+    courseid: string,
+    lessonid: string
+  ) => {
     console.log(lessonid);
-    await deleteTask(taskid,lessonid,courseid)
+    await deleteTask(taskid, lessonid, courseid);
 
     const updatedTasks = [...tasks];
     updatedTasks.splice(index, 1);
@@ -205,14 +218,15 @@ const EditLessonDialog = ({
 
     setIsLoading(true);
     try {
-      // In a real implementation, you would save tasks separately
-      // and update the lesson.Task array with the task IDs
-
-      // For now, we'll just update the lesson
+      if (updateLesson) {
+        await savelessonchanges(lesson?._id, updateLesson,course?._id);
+        setUpdatLessons(null);
+      }
       await onSave(updatedLesson);
       onClose();
-    } catch (error) {
+    } catch (error:any) {
       console.error("Error saving lesson:", error);
+      toast.error(error.message)
     } finally {
       setIsLoading(false);
     }
@@ -361,7 +375,14 @@ const EditLessonDialog = ({
                               variant="ghost"
                               size="sm"
                               className="text-blue-300 hover:text-red-300 hover:bg-blue-600"
-                              onClick={() => removeTask(index,task._id,course._id,updatedLesson._id)}>
+                              onClick={() =>
+                                removeTask(
+                                  index,
+                                  task._id,
+                                  course._id,
+                                  updatedLesson._id
+                                )
+                              }>
                               <Trash2 size={16} />
                             </Button>
                           </CardHeader>

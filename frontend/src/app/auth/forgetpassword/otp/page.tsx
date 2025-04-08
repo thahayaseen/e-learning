@@ -27,7 +27,7 @@ function Page() {
 
  
 
-  const handleChanges = (e) => {
+  const handleChanges = (e:any) => {
     console.log("here");
 
     if (/^\d*$/.test(e)) {
@@ -40,7 +40,7 @@ function Page() {
     try {
      console.log(get_cookie('reset_Token'));
      
-      const data = await axios.post("/resent", {},{
+      const data:any = await axios.post("/resent", {},{
         headers:{
           Authorization:`Bearer ${get_cookie('reset_Token')}`
         }
@@ -49,7 +49,7 @@ function Page() {
       toast.success(data.message)
       setRopt(prev=>!prev)
       setTimer(60)
-    } catch (error) {
+    } catch (error:any) {
       console.log(error);
       
       toast.error(error.response.data.message);
@@ -79,7 +79,7 @@ function Page() {
     console.log(id);
     
     try {
-      const response = await axios.post("/forgtotp", {
+      const response:any = await axios.post("/forgtotp", {
        token:get_cookie('reset_Token'),
         otp: value,
       });
@@ -92,7 +92,7 @@ function Page() {
       router.push('/auth/forgetpassword/changepass')
       }
       setIsVerifying(false);
-    } catch (error) {
+    } catch (error:any) {
       console.log(error.response.data.message);
       toast.error(error.response.data.message);
       setIsVerifying(false);

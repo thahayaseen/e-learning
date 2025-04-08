@@ -3,6 +3,7 @@
 import React from "react";
 import { clearGs } from "@/lib/auth";
 import { useDispatch } from "react-redux";
+import { logout } from "@/lib/features/User";
 import { useRouter } from "next/navigation";
 import { delete_cookie } from "@/lib/features/cookie";
 import { Button } from "../ui/button";
@@ -64,7 +65,7 @@ export function Profile() {
 
 export function Explore({ _id }: { _id: string }) {
   const router = useRouter();
-console.log(_id);
+  console.log(_id);
 
   return (
     <Button
@@ -76,20 +77,68 @@ console.log(_id);
   );
 }
 
-export function Continue({ id }: { id: string }) {
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import axios from "axios";
+
+export function Continue({
+  id,
+  className = "",
+  variant = "default",
+  size = "sm",
+}: {
+  id: string;
+  className?: string;
+  variant?: "default" | "outline" | "ghost";
+  size?: "default" | "sm" | "lg" | "icon";
+}) {
   const router = useRouter();
 
-  return (
-    <div className="flex"
-      onClick={() => {
-        console.log("in datass");
+  const handleContinue = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent event bubbling
+    try {
+      router.push(`/course/view/${id}`);
+    } catch (error) {
+      console.error("Navigation error:", error);
+      // Optional: Add error handling toast or notification
+    }
+  };
 
-        router.push("/course/view/" + id);
-      }}>
-      <PlayCircle className="h-4 w-4" />
-      Continue
-    </div>
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant={variant}
+            size={size}
+            className={`flex items-center gap-2 ${className}`}
+            onClick={handleContinue}
+            aria-label="Continue Course">
+            <PlayCircle className="h-4 w-4" />
+            <span className="hidden sm:inline">Continue</span>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="top" className="z-auto">
+          Continue learning this course
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
 
 export const User = () => {};
+export const LogoutBtn = () => {
+  const dispatch = useDispatch();
+  return (
+    <Button
+      onClick={async () => {
+        await clearGs(dispatch);
+      }}>
+      Logout
+    </Button>
+  );
+};

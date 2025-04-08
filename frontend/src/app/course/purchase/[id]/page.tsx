@@ -15,70 +15,41 @@ import {
   IndianRupee,
 } from "lucide-react";
 import { getSelectedCourse, purchaseCourse } from "@/services/fetchdata";
-import { useParams ,useRouter} from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { loadStripe } from "@stripe/stripe-js";
+
+// Initialize Stripe with your publishable key
+const stripePromise = await loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
+);
 
 const CoursePurchasePage = () => {
   const [selectedPlan, setSelectedPlan] = useState("standard");
   const [paymentMethod, setPaymentMethod] = useState("credit");
-  const [courseDetails, SetcourseDetails] = useState();
+  const [courseDetails, setCourseDetails] = useState<any>();
   const [loading, setLoading] = useState(true);
+  const [processingPayment, setProcessingPayment] = useState(false);
   const params = useParams();
-  const router=useRouter()
+  const router = useRouter();
+
   useEffect(() => {
-    const fn = async () => {
-      if (params.id) {
-        console.log(params.id, "id is");
-
-        const data = await getSelectedCourse(params.id as string);
-        console.log(data.data.data );
-
-        SetcourseDetails(data.data.data);
-        setLoading(false);
+    const fetchCourseDetails = async () => {
+      if (params.id && typeof params.id == "string") {
+        try {
+          const data = await getSelectedCourse(params.id);
+          setCourseDetails(data.data.data);
+        } catch (error) {
+          toast.error("Failed to load course details");
+          console.error(error);
+        } finally {
+          setLoading(false);
+        }
       }
     };
-    fn();
-  }, []);
-  //   const courseDetails = {
-  //     title: "Master Web Development: Full Stack Bootcamp",
-  //     instructor: "Alex Rodriguez",
-  //     rating: 4.8,
-  //     students: 5200,
-  //     duration: "36 hours",
-  //     description: "Comprehensive web development course covering frontend, backend, and deployment. Learn modern technologies and build real-world projects from scratch.",
-  //     curriculum: [
-  //       "HTML5 & CSS3 Fundamentals",
-  //       "JavaScript ES6+",
-  //       "React.js Development",
-  //       "Node.js & Express Backend",
-  //       "Database Design with MongoDB",
-  //       "REST API Development",
-  //       "Deployment & DevOps Basics"
-  //     ],
-  //     plans: {
-  //       standard: {
-  //         price: 199,
-  //         features: [
-  //           "Full Course Access",
-  //           "22 Detailed Modules",
-  //           "Project Templates",
-  //           "Q&A Support",
-  //           "6-Month Access"
-  //         ]
-  //       },
-  //       premium: {
-  //         price: 299,
-  //         features: [
-  //           "Everything in Standard",
-  //           "1:1 Mentorship (4 Sessions)",
-  //           "Career Guidance",
-  //           "Certificate of Completion",
-  //           "Lifetime Course Updates",
-  //           "Priority Support"
-  //         ]
-  //       }
-  //     }
-  //   };
+    fetchCourseDetails();
+  }, [params.id]);
+
   if (loading) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -89,23 +60,74 @@ const CoursePurchasePage = () => {
       </div>
     );
   }
-  const handlePurchase = async () => {
-  try {
-    const dat= await purchaseCourse(params.id as string);
-    console.log(dat,'ansis');
-    if(dat){
-        toast.success('purchase success')
-        router.push('/')
+
+  const handleStripeCheckout = async () => {
+    try {
+      setProcessingPayment(true);
+
+      const datas = {
+        courseId: params.id,
+        planType: selectedPlan,
+        price:
+          selectedPlan === "premium"
+            ? courseDetails.PremiumPrice || courseDetails.Price * 1.5
+            : courseDetails.Price,
+        courseName: courseDetails.Title,
+      };
+      console.log(datas, "data issisisisisi");
+      if (params.id && typeof params.id == "string") {
+        const session: any = await purchaseCourse(params.id, datas);
+        console.log(session);
+        if (!session?.success) {
+          const errorData = await session.data;
+          throw new Error(
+            errorData?.message || "Failed to create checkout session"
+          );
+        }
+        if (session.orderid) {
+          localStorage.setItem("orderid", session.orderid);
+        }
+
+        console.log(session, "sesstopj is ");
+
+        if (!session || !session.id) {
+          throw new Error("Invalid checkout session");
+        }
+        if (stripePromise) {
+          const { error } = await stripePromise.redirectToCheckout({
+            sessionId: session.id,
+          });
+          if (error) {
+            throw new Error(error.message);
+          }
+          console.log(error);
+        }
+      }
+    } catch (error: any) {
+      toast.error(error.message || error.data.message || "Payment failed");
+      console.error("Payment error:", error);
+    } finally {
+      setProcessingPayment(false);
     }
-  } catch (error) {
-    console.log('here');
-    toast.error(error.message)
-    router.push('/')
-    // console.log(error.message);
-    
-  }
-   
   };
+
+  const handlePurchase = async () => {
+    // Handle PayPal or other payment methods
+    try {
+      if (paymentMethod === "credit") {
+        handleStripeCheckout();
+      }
+      // const result = await purchaseCourse(params.id);
+      // if (result) {
+      //   toast.success("Purchase successful");
+      //   router.push("/");
+      // }
+    } catch (error: any) {
+      toast.error(error.message || "Purchase failed");
+      router.push("/");
+    }
+  };
+
   return (
     <div className="bg-[#0F172A] text-white min-h-screen py-12 px-4">
       <div className="max-w-6xl mx-auto bg-[#1E293B] rounded-2xl shadow-2xl overflow-hidden">
@@ -122,19 +144,19 @@ const CoursePurchasePage = () => {
                 <div className="flex items-center">
                   <Star className="text-yellow-500 mr-2" size={24} />
                   <span className="text-blue-100">
-                    {/* {courseDetails.rating} Rating */}
+                    {courseDetails.rating || "No ratings yet"}
                   </span>
                 </div>
                 <div className="flex items-center">
                   <Users className="text-green-500 mr-2" size={24} />
                   <span className="text-blue-100">
-                    {/* {courseDetails.students} Students */}
+                    {courseDetails.students || "0"} Students
                   </span>
                 </div>
                 <div className="flex items-center">
                   <Clock className="text-purple-500 mr-2" size={24} />
                   <span className="text-blue-100">
-                    {/* {courseDetails.duration} */}
+                    {courseDetails.duration || "Self-paced"}
                   </span>
                 </div>
               </div>
@@ -147,12 +169,13 @@ const CoursePurchasePage = () => {
                 Course Lessons
               </h3>
               <ul className="space-y-2">
-                {courseDetails.lessons.map((item, index) => (
-                  <li key={index} className="flex items-center text-blue-100">
-                    <Check className="text-green-500 mr-2" size={20} />
-                    <span>{item.Lessone_name}</span>
-                  </li>
-                ))}
+                {courseDetails.lessons &&
+                  courseDetails.lessons.map((item: any, index: number) => (
+                    <li key={index} className="flex items-center text-blue-100">
+                      <Check className="text-green-500 mr-2" size={20} />
+                      <span>{item.Lessone_name}</span>
+                    </li>
+                  ))}
               </ul>
             </div>
           </div>
@@ -182,7 +205,7 @@ const CoursePurchasePage = () => {
                 </button>
               </div>
 
-              <div className="text-center  mb-6">
+              <div className="text-center mb-6">
                 <div className="flex justify-center align-middle items-center">
                   <IndianRupee color="blue" />
                   <h2 className="text-4xl font-bold text-blue-400">
@@ -196,18 +219,47 @@ const CoursePurchasePage = () => {
                 <h3 className="text-xl font-semibold mb-3 text-blue-300">
                   Plan Features
                 </h3>
-                {/* <ul className="space-y-3">
-                  {courseDetails.plans[selectedPlan].features.map(
-                    (feature, index) => (
-                      <li
-                        key={index}
-                        className="flex items-center text-blue-100">
+                <ul className="space-y-3">
+                  {selectedPlan === "standard" ? (
+                    <>
+                      <li className="flex items-center text-blue-100">
                         <Check className="text-green-500 mr-2" size={20} />
-                        <span>{feature}</span>
+                        <span>Full course access</span>
                       </li>
-                    )
+                      <li className="flex items-center text-blue-100">
+                        <Check className="text-green-500 mr-2" size={20} />
+                        <span>Basic exercise solutions</span>
+                      </li>
+                      <li className="flex items-center text-blue-100">
+                        <Check className="text-green-500 mr-2" size={20} />
+                        <span>Certificate of completion</span>
+                      </li>
+                    </>
+                  ) : (
+                    <>
+                      <li className="flex items-center text-blue-100">
+                        <Check className="text-green-500 mr-2" size={20} />
+                        <span>Full course access</span>
+                      </li>
+                      <li className="flex items-center text-blue-100">
+                        <Check className="text-green-500 mr-2" size={20} />
+                        <span>Advanced exercise solutions</span>
+                      </li>
+                      <li className="flex items-center text-blue-100">
+                        <Check className="text-green-500 mr-2" size={20} />
+                        <span>Certificate of completion</span>
+                      </li>
+                      <li className="flex items-center text-blue-100">
+                        <Check className="text-green-500 mr-2" size={20} />
+                        <span>1-on-1 instructor support</span>
+                      </li>
+                      <li className="flex items-center text-blue-100">
+                        <Check className="text-green-500 mr-2" size={20} />
+                        <span>Lifetime updates</span>
+                      </li>
+                    </>
                   )}
-                </ul> */}
+                </ul>
               </div>
             </div>
 
@@ -245,47 +297,23 @@ const CoursePurchasePage = () => {
                 </button>
               </div>
 
-              {/* Payment Form */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-blue-200 mb-2">
-                    Card Number
-                  </label>
-                  <div className="flex items-center bg-[#1E293B] rounded-lg p-3">
-                    <CreditCard className="text-blue-400 mr-2" size={20} />
-                    <input
-                      type="text"
-                      placeholder="1234 5678 9012 3456"
-                      className="bg-transparent w-full text-blue-100 outline-none"
-                    />
+              {paymentMethod === "credit" && (
+                <div className="bg-[#1E293B] rounded-lg p-4 mb-6">
+                  <p className="text-blue-200 mb-2">
+                    You'll be redirected to our secure payment partner Stripe to
+                    complete your purchase.
+                  </p>
+                  <div className="flex items-center">
+                    <Lock className="text-green-500 mr-2" size={20} />
+                    <span className="text-blue-100">
+                      256-bit SSL encrypted payment
+                    </span>
                   </div>
                 </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-blue-200 mb-2">Expiry</label>
-                    <input
-                      type="text"
-                      placeholder="MM/YY"
-                      className="w-full bg-[#1E293B] text-blue-100 p-3 rounded-lg outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-blue-200 mb-2">CVV</label>
-                    <div className="flex items-center bg-[#1E293B] rounded-lg p-3">
-                      <Lock className="text-blue-400 mr-2" size={20} />
-                      <input
-                        type="text"
-                        placeholder="123"
-                        className="bg-transparent w-full text-blue-100 outline-none"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
+              )}
 
               {/* Coupon and Promo */}
-              <div className="mt-6 bg-[#1E293B] rounded-lg p-4 flex items-center">
+              {/* <div className="mt-6 bg-[#1E293B] rounded-lg p-4 flex items-center">
                 <Gift className="text-blue-400 mr-3" size={24} />
                 <input
                   type="text"
@@ -295,14 +323,26 @@ const CoursePurchasePage = () => {
                 <button className="bg-blue-600 text-white px-4 py-2 rounded-lg ml-2">
                   Apply
                 </button>
-              </div>
+              </div> */}
 
               {/* Enroll Button */}
               <button
-                className="w-full bg-blue-600 text-white py-4 rounded-lg hover:bg-blue-700 transition mt-6 flex items-center justify-center"
-                onClick={() => handlePurchase()}>
-                Complete Purchase
-                <ArrowRight className="ml-2" size={20} />
+                className={`w-full bg-blue-600 text-white py-4 rounded-lg hover:bg-blue-700 transition mt-6 flex items-center justify-center ${
+                  processingPayment ? "opacity-70 cursor-not-allowed" : ""
+                }`}
+                onClick={handlePurchase}
+                disabled={processingPayment}>
+                {processingPayment ? (
+                  <>
+                    <Loader2 className="animate-spin mr-2" size={20} />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    Complete Purchase
+                    <ArrowRight className="ml-2" size={20} />
+                  </>
+                )}
               </button>
             </div>
           </div>

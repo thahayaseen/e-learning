@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-
+import Stripe from "stripe";
 import { handleError } from "../../utils/handleerror";
 
 import axios from "axios";
@@ -18,6 +18,8 @@ import { ICourseUseCase } from "../../domain/interface/courseUsecase";
 import IsocketUsecase from "../../domain/interface/socket";
 import { ImessageUsecase } from "../../domain/interface/ImessageUsecase";
 import { MeetingDto } from "../../app/dtos/MeetingDto";
+import { orderDto } from "../../app/dtos/orderDto";
+import RevenueUseCase from "../../app/useCases/revenue.usecase";
 
 export interface AuthServices extends Request {
   error?: string;
@@ -27,6 +29,7 @@ interface CustomError {
   message: string;
 }
 export default class UserController {
+  private stripe;
   constructor(
     private signUpUser: IsignUpUser,
     private LoginUsecase: ILogin,
@@ -34,8 +37,11 @@ export default class UserController {
     private userUseCase: IuserUseCase,
     private CourseUseCase: ICourseUseCase,
     private Socketusecase: IsocketUsecase,
-    private MeetingUsecase: ImessageUsecase
-  ) {}
+    private MeetingUsecase: ImessageUsecase,
+    private revenueUseCase: RevenueUseCase
+  ) {
+    this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+  }
   async create(req: Request, res: Response) {
     try {
       console.log(req.body);
@@ -194,7 +200,7 @@ export default class UserController {
       .json({ success: true, message: "varified success", user: req.user });
     return;
   }
-  async glogin(req: AuthServices, res: Response) {
+  async glogin(req: AuthServices, res: Response, next: NextFunction) {
     try {
       const token = req.headers.authorization?.split(" ")[1];
       console.log(token, "now nwo;");
@@ -237,17 +243,44 @@ export default class UserController {
       });
       return;
     } catch (error: any) {
-      return this.logout(req, res);
+      console.log(error.message, "message is ");
+      res.clearCookie("refresh", {
+        path: "/",
+        httpOnly: true, // Ensures security
+        secure: true, // Required for HTTPS
+        sameSite: "none", // Allows cross-site access
+      });
+      res.clearCookie("access", {
+        path: "/",
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+      });
+      res.status(HttpStatusCode.BAD_REQUEST).json({
+        success: false,
+        message:
+          error instanceof Error ? error.message : "An unexpted error occured",
+      });
+      return;
+      // return this.logout(req, res,next,error.message);
     }
   }
-  logout(req: Request, res: Response) {
+  logout(req: Request, res: Response, next: NextFunction) {
+    console.log("logouting");
+
     res.clearCookie("refresh", { path: "/" });
     console.log(req.cookies);
-    console.log("deleted");
-
-    res
-      .status(HttpStatusCode.OK)
-      .json({ success: true, message: "Session cleared, refresh token kept." });
+    // console.log("deleted", message);
+    res.clearCookie("access", {
+      path: "/",
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
+    res.status(HttpStatusCode.OK).json({
+      success: true,
+      message: "Session cleared, refresh token kept.",
+    });
     return;
   }
   async userData(req: AuthServices, res: Response) {
@@ -293,12 +326,16 @@ export default class UserController {
 
       const data = await this.userUseCase.UseProfileByemail(email);
       const courseData = await this.getpurchasedCourses(
-        data?.purchasedCourses as string[]
+        data?.purchasedCourses as string[],
+        String(data?._id)
       );
       const progresdata = await this.CourseUseCase.getuserallCourseprogresdata(
         String(data?._id)
       );
-      console.log(progresdata, "dataisissisisi");
+      const mentorRequst = await this.userUseCase.getuserMentorRequst(
+        String(data?._id)
+      );
+      console.log(mentorRequst, "fdafsdasfsdfa");
 
       res.status(HttpStatusCode.OK).json({
         success: true,
@@ -306,6 +343,7 @@ export default class UserController {
         data: data,
         datas: courseData,
         progresdata,
+        mentorRequst,
       });
       console.log(data);
     } catch (err) {
@@ -380,34 +418,87 @@ export default class UserController {
   }
   async getAllcourseUser(req: AuthServices, res: Response) {
     try {
-      const { limit, filter,most } = req.query;
-      let isfilter = false;
-      console.log(most,'most is ')
-      
-      if (most) {
-        isfilter = true;
+      const {
+        limit,
+        page,
+        search,
+        level,
+        category,
+        priceMin,
+        priceMax,
+        mentor,
+        sort,
+        order,
+      } = req.query;
+      const { _id, role } = req.user;
+      // Build filter object
+      const filter: any = {};
+
+      // Add search filter
+      if (search) {
+        filter.search = search as string;
       }
-      console.log(isfilter);
-      
+
+      // Add level filter
+      if (level) {
+        filter.level = level as string;
+      }
+
+      // Add category filter
+      if (category) {
+        filter.category = category as string;
+      }
+
+      // Add mentor filter
+      if (mentor) {
+        filter.mentor = mentor as string;
+      }
+
+      // Add price filter
+      if (priceMin || priceMax) {
+        filter.price = {};
+        if (priceMin) {
+          filter.price.min = Number(priceMin);
+        }
+        if (priceMax) {
+          filter.price.max = Number(priceMax);
+        }
+      }
+
+      // Build sort configuration
+      const sortConfig = {
+        field: (sort as string) || "UpdatedAt",
+        order: (order as "asc" | "desc") || "desc",
+      };
+      if ([Roles.STUDENT].includes(role) || !_id || !role) {
+        filter.fromUser = true;
+      }
+      // Get courses with pagination, filtering and sorting
       const data = await this.CourseUseCase.getAllCourse(
-        Number(limit),
-        isfilter
+        Number(page || 1),
+        Number(limit || 10),
+        sortConfig,
+        filter
       );
-      console.log(JSON.stringify(data));
+
       res.status(HttpStatusCode.OK).json({
         success: true,
         message: "fetched success",
         data,
       });
-      return;
-    } catch (error) {
-      res.status(HttpStatusCode.BAD_REQUEST);
+    } catch (error: any) {
+      console.error("Error fetching courses:", error);
+      res.status(HttpStatusCode.BAD_REQUEST).json({
+        success: false,
+        message: "Failed to fetch courses",
+        error: error.message,
+      });
     }
   }
   async BuyCourse(req: AuthServices, res: Response) {
     try {
       let userId;
-      const { email } = req.user;
+      const { email, _id } = req.user;
       const { courseId } = req.params;
       if (!courseId) {
         res.status(HttpStatusCode.BAD_REQUEST).json({
@@ -416,6 +507,14 @@ export default class UserController {
         });
         return;
       }
+      const requestData = req.body.data;
+      console.log(requestData);
+      console.log(req.user);
+
+      if (!_id || !email) {
+        throw new Error("cannot get uesr data");
+      }
+
       const user = await this.userUseCase.UseProfileByemail(email);
       if (user?.purchasedCourses?.includes(courseId)) {
         res.status(HttpStatusCode.CONFLICT).json({
@@ -424,20 +523,69 @@ export default class UserController {
         });
         return;
       }
+      await this.CourseUseCase.checkOrderDupication(_id, courseId, true);
 
-      await this.CourseUseCase.purchaseCourse(String(user?._id), courseId);
+      const session = await this.stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        line_items: [
+          {
+            price_data: {
+              currency: "inr",
+              product_data: {
+                name: requestData.courseName,
+              },
+              unit_amount: requestData.price * 100, // Stripe expects amount in cents/paise
+            },
+            quantity: 1,
+          },
+        ],
+        mode: "payment",
+        success_url: `http://${process.env.NEXT_PUBLIC_SERVER}/paymentstatus?status=true&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `http://${process.env.NEXT_PUBLIC_SERVER}/paymentstatus?status=false&session_id={CHECKOUT_SESSION_ID}`,
+        metadata: {
+          courseId: requestData.courseId,
+          planType: requestData.planType,
+        },
+      });
+      let results = await this.CourseUseCase.checkOrderDupication(
+        _id,
+        courseId,
+        false
+      );
+      if (!results) {
+        results = await this.CourseUseCase.createOrder({
+          amount: requestData.price,
+          courseId: requestData.courseId,
+          currency: "inr",
+          planType: requestData.planType,
+          userId: _id,
+          paymentId: String(session.payment_intent),
+          sessionId: session.id,
+        });
+      }
       res.status(HttpStatusCode.OK).json({
-        succes: true,
-        message: "order succes",
+        success: true,
+        message: "order created ",
+        url: session.url,
+        id: session.id,
+        orderid: results._id,
       });
       return;
-    } catch (error) {
-      handleError(res, "An error occupied", HttpStatusCode.BAD_REQUEST);
+    } catch (error: any) {
+      console.log(error.message);
+
+      handleError(
+        res,
+        error || "An error occupied",
+        HttpStatusCode.BAD_REQUEST
+      );
     }
   }
-  async getpurchasedCourses(data: string[]) {
+  async getpurchasedCourses(data: string[], userid: string) {
     try {
-      const datas = await this.CourseUseCase.getByCoursids(data);
+      console.log("course id is", userid);
+
+      const datas = await this.CourseUseCase.getByCoursids(data, userid);
       return datas;
     } catch (error) {
       throw new Error("An error occupied");
@@ -476,7 +624,7 @@ export default class UserController {
   }
   async Requesmeeting(req: AuthServices, res: Response) {
     try {
-      const { mentorId, courseId } = req.body;
+      const { mentorId, courseId, scheduledTime } = req.body;
       const { _id } = req.user;
       console.log(_id);
 
@@ -484,7 +632,7 @@ export default class UserController {
         courseId,
         mentorId,
         participants: [],
-        scheduledTime: new Date(),
+        scheduledTime: new Date(scheduledTime),
         userId: _id,
         status: "pending",
       });
@@ -504,8 +652,11 @@ export default class UserController {
     try {
       const { UpdateTime } = req.body;
       const { meetid } = req.params;
-      const { _id } = req.user;
+      const { _id, role } = req.user;
       console.log(req.user);
+      if (role !== Roles.MENTOR) {
+        throw new Error("Mentor have only access");
+      }
       const scheduledTime = new Date(UpdateTime);
 
       const meet = await this.MeetingUsecase.fetchMeetmyId(meetid);
@@ -562,9 +713,12 @@ export default class UserController {
   async getQustionans(req: AuthServices, res: Response) {
     try {
       const { taskid } = req.params;
-      const { anser } = req.body;
+      const { answer } = req.body;
       const data = await this.CourseUseCase.getTaskByid(taskid);
-      if (data && "Answer" in data && data.Answer == anser) {
+      console.log(data, answer);
+      console.log(data && "Answer" in data && data.Answer == answer);
+
+      if (data && "Answer" in data && data.Answer == answer) {
         res.status(HttpStatusCode.OK).json({
           success: true,
           message: "correct Answer",
@@ -580,15 +734,471 @@ export default class UserController {
       });
     }
   }
-  // async changePassword(req: AuthServices, res: Response) {
-  //   const email = req.user.email;
-  //   const { oldpass,newpassword } = req.body;
-  //   const user = await this.userUseCase.UseProfileByemail(email);
-  //   const fonform = await bcrypt.compare(user?.password as string, oldpass as string);
-  //   if(fonform){
-  //     const newpass=await bcrypt.hash(newpassword,10)
-  //     user?.password=newpass as string
-  //     user.save()
-  //   }
-  // }
+  async stripeSesstion(req: AuthServices, res: Response) {
+    try {
+      const requestData = req.body.data;
+      console.log(requestData);
+
+      const session = await this.stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        line_items: [
+          {
+            price_data: {
+              currency: "inr",
+              product_data: {
+                name: requestData.courseName,
+              },
+              unit_amount: requestData.price * 100, // Stripe expects amount in cents/paise
+            },
+            quantity: 1,
+          },
+        ],
+        mode: "payment",
+        success_url: `http://${process.env.NEXT_PUBLIC_SERVER}/paymentsuccess?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `http://${process.env.NEXT_PUBLIC_SERVER}/courses/${requestData.courseId}`,
+        metadata: {
+          courseId: requestData.courseId,
+          planType: requestData.planType,
+        },
+      });
+      res.status(200).json({
+        success: true,
+        message: "created",
+        url: session.url,
+        id: session.id,
+      });
+      return;
+    } catch (error: any) {
+      console.log(error.message);
+      res.status(HttpStatusCode.BAD_REQUEST).json({
+        success: false,
+        message: SystemError.SystemError,
+      });
+    }
+  }
+  async paymentsuccss(req: AuthServices, res: Response) {
+    try {
+      const { _id, purchasedCourses } = req.user;
+      const sesstion = req.query.session_id;
+      const orderid = req.query.orderid;
+      const status = req.query.status == "true";
+      console.log(orderid, "oid is ", status);
+      if (!orderid) {
+        throw new Error("Order id cannot Found");
+      }
+
+      const data = await this.stripe.checkout.sessions.listLineItems(
+        String(sesstion)
+      );
+      const session = await this.stripe.checkout.sessions.retrieve(
+        String(sesstion)
+      );
+      console.log(session);
+      const courseid = session.metadata?.courseId;
+      console.log(courseid);
+      if (!courseid) {
+        throw new Error("Cannot Find Course");
+      }
+      console.log(purchasedCourses, courseid, "datassd");
+
+      if (purchasedCourses.includes(String(courseid))) {
+        throw new Error("User aldredy purchased");
+      }
+      let updata: Partial<orderDto> = {
+        paymentStatus: status ? "paid" : "failed",
+        paymentId: String(session.payment_intent),
+      };
+
+      const result = await this.CourseUseCase.Conformpayment(
+        updata,
+        String(orderid)
+      );
+      console.log(result, "resut is ");
+
+      await this.CourseUseCase.purchaseCourse(
+        String(result?.userId),
+        result.courseId
+      );
+
+      console.log("Course ID:", session.metadata?.courseId); // Access stored metadata
+      console.log("Plan Type:", session.metadata?.planType);
+    } catch (error: any) {
+      console.log(error, "the error is ");
+
+      res
+        .status(HttpStatusCode.BAD_REQUEST)
+        .json({ message: error.message || "Failed" });
+    }
+  }
+
+  async updateVideoProgress(req: AuthServices, res: Response) {
+    try {
+      // Extract data from the request
+      const { _id } = req.user;
+      const {
+        courseId,
+        lessonId,
+        taskId,
+        taskType,
+        watchTime,
+        isCompleted,
+        response,
+      } = req.body;
+
+      const updateData = {
+        watchTime,
+        isCompleted,
+        response,
+      };
+      console.log(
+        _id, // studentId
+        courseId,
+        lessonId,
+        taskId,
+        taskType,
+        updateData
+      );
+
+      // Update video progress using the use case
+      const updatedData = await this.CourseUseCase.updateTaskProgress(
+        _id, // studentId
+        courseId,
+        lessonId,
+        taskId,
+        taskType,
+        updateData
+      );
+
+      console.log("Video progress updated:", updatedData);
+
+      // Send success response
+      res.status(HttpStatusCode.OK).json({
+        success: true,
+        message: "Video progress updated successfully.",
+        data: updatedData,
+      });
+    } catch (error: any) {
+      console.error("Error updating video progress:", error);
+
+      // Send error response
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message:
+          error.message || "An error occurred while updating video progress.",
+      });
+    }
+  }
+  async updatacompleteLesson(req: AuthServices, res: Response) {
+    try {
+      const { _id } = req.user;
+      const { courseId, lessonId } = req.body;
+      const data = await this.CourseUseCase.markLessonCompleteduseCase(
+        _id,
+        courseId,
+        lessonId
+      );
+      res.status(200).json({ success: true, data });
+      return;
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: error.message || "Failed to update progress",
+      });
+      return;
+    }
+  }
+  async getSelectedProgressContorller(req: AuthServices, res: Response) {
+    try {
+      const { courseid } = req.params;
+      const { _id } = req.user;
+      console.log(_id, "id is ");
+
+      const data = await this.CourseUseCase.getSelectedProgress(courseid, _id);
+      if (!data) {
+        throw new Error("Progress Not found");
+      }
+      res.status(HttpStatusCode.OK).json({
+        success: true,
+        message: "succesfuly fetched data",
+        data,
+      });
+      return;
+    } catch (error: any) {
+      res.status(HttpStatusCode.BAD_REQUEST).json({
+        success: false,
+        message: error.message || SystemError.SystemError,
+      });
+      return;
+    }
+  }
+  async addReivews(req: AuthServices, res: Response) {
+    try {
+      const { _id } = req.user;
+      const { courseid, rating, title, comment } = req.body;
+      await this.CourseUseCase.addRating(_id, courseid, rating, title, comment);
+      res.status(HttpStatusCode.OK).json({
+        success: true,
+        message: "addes success",
+      });
+    } catch (error: any) {
+      res.status(HttpStatusCode.BAD_REQUEST).json({
+        success: false,
+        message: error.message || "Unable to complete",
+      });
+    }
+  }
+  async getAllReviews(req: AuthServices, res: Response) {
+    try {
+      const { courseid } = req.params;
+      if (!courseid) throw new Error("course not found");
+      const data = await this.CourseUseCase.getallReviews(courseid);
+      res.status(HttpStatusCode.OK).json({
+        success: true,
+        message: "succesfully Fetch data",
+        data,
+      });
+      return;
+    } catch (error) {
+      res.status(HttpStatusCode.OK).json({
+        success: false,
+        message: "Failed to fetch data",
+      });
+      return;
+    }
+  }
+  async requestMentor(req: AuthServices, res: Response) {
+    try {
+      const { _id } = req.user;
+      const data = req.body;
+      console.log(data);
+
+      await this.userUseCase.requstbeMentor(_id, data);
+      res.status(HttpStatusCode.OK).json({
+        successa: true,
+        message: "succesfuly created",
+      });
+    } catch (error: any) {
+      console.log(error);
+
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: error.message || SystemError.SystemError,
+      });
+    }
+  }
+  async changeProfile(req: AuthServices, res: Response) {
+    try {
+      const { _id } = req.user;
+      const data = req.body;
+      console.log(data, "resutl is ");
+
+      await this.userUseCase.updateUserdata(_id, data);
+      res.status(HttpStatusCode.OK).json({ success: true, message: "updated" });
+      return;
+    } catch (error: any) {
+      console.log(error.message);
+
+      res.status(HttpStatusCode.BAD_REQUEST).json({
+        success: false,
+        message: "Some error occured",
+      });
+      return;
+    }
+  }
+  async changePassword(req: AuthServices, res: Response) {
+    try {
+      const { _id } = req.user;
+      const { oldPassoword, newPassword } = req.body;
+      await this.userUseCase.changePawword(_id, oldPassoword, newPassword);
+      res.status(HttpStatusCode.OK).json({
+        success: true,
+        message: "Password updated",
+      });
+    } catch (error: any) {
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+        message: error.message || "Some Error Occured",
+      });
+      return;
+    }
+  }
+  async orders(req: AuthServices, res: Response) {
+    try {
+      const { page, limit } = req.query;
+      const { _id, role } = req.user;
+      console.log(_id, page, limit, "datasss");
+      if (!_id || !page || !limit) {
+        throw new Error("Please send valid data");
+      }
+      console.log("data senidng");
+
+      const result = await this.userUseCase.AllOrders(
+        role == Roles.ADMIN ? "all" : _id,
+        Number(page),
+        Number(limit)
+      );
+      console.log(result, "orders is ");
+
+      res.status(HttpStatusCode.OK).json({
+        success: true,
+        message: "fetched successfully",
+        result,
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log(error.message);
+
+        res.status(HttpStatusCode.BAD_REQUEST).json({
+          success: false,
+          message: error.message || "Unable to fetch ",
+        });
+      }
+    }
+  }
+  async Coursecetrificate(req: AuthServices, res: Response) {
+    try {
+      const { courseId } = req.params;
+      const { _id, name } = req.user;
+      if (!_id || !courseId) {
+        throw new Error("Please shere valid information");
+      }
+      const result = await this.userUseCase.certificate(_id, courseId);
+      if (!result.completed) {
+        throw new Error("please Compleate course");
+      }
+      res.status(HttpStatusCode.OK).json({
+        success: true,
+        message: "Succesfuly varified",
+        data: {
+          ...result,
+          name,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(HttpStatusCode.BAD_REQUEST).json({
+          success: false,
+          message: error.message || "some error occured",
+        });
+      }
+    }
+  }
+  async reOrder(req: AuthServices, res: Response) {
+    const { _id } = req.user;
+    const { orderid } = req.params;
+    console.log(orderid, "oid is ");
+
+    if (!_id) {
+      throw new Error("User not found");
+    }
+    if (!orderid) {
+      throw new Error("Order not found");
+    }
+    const data = await this.CourseUseCase.repayOrder(_id, orderid);
+    if (!data.sessionId) {
+      throw new Error("cannot get the order");
+    }
+    const session = await this.stripe.checkout.sessions.retrieve(
+      data.sessionId
+    );
+    res.status(200).json({
+      success: true,
+      message: "created",
+      url: session.url,
+      id: session.id,
+    });
+  }
+  async getTotalRevenue(req: AuthServices, res: Response) {
+    try {
+      if (req.user.role !== Roles.ADMIN) {
+        throw new Error(userError.Unauthorised);
+      }
+      const totalRevenue = await this.revenueUseCase.getTotalRevenue();
+      res.status(200).json({ totalRevenue });
+    } catch (error) {
+      res.status(500).json({
+        message: "Failed to fetch total revenue",
+        error: error instanceof Error ? error.message : "An Error ",
+      });
+    }
+  }
+
+  async getMentorRevenue(req: AuthServices, res: Response) {
+    try {
+      if (req.user.role !== Roles.ADMIN) {
+        throw new Error(userError.Unauthorised);
+      }
+      const mentorRevenue = await this.revenueUseCase.getMentorRevenue();
+      res.status(200).json({ mentorRevenue });
+    } catch (error) {
+      res.status(500).json({
+        message: "Failed to fetch mentor revenue",
+        error: error instanceof Error ? error.message : "An Error ",
+      });
+    }
+  }
+
+  async getTimeRevenue(req: AuthServices, res: Response) {
+    try {
+      if (req.user.role !== Roles.ADMIN) {
+        throw new Error(userError.Unauthorised);
+      }
+      const { period } = req.query;
+      const timeRevenue = await this.revenueUseCase.getTimeRevenue(
+        typeof period == "string"
+          ? (period as "daily" | "weekly" | "monthly")
+          : "monthly"
+      );
+      res.status(200).json({ timeRevenue });
+    } catch (error) {
+      res.status(500).json({
+        message: "Failed to fetch time-based revenue",
+        error: error instanceof Error ? error.message : "An Error ",
+      });
+    }
+  }
+
+  async getMentorRevenueById(req: AuthServices, res: Response) {
+    try {
+      const { mentorId } = req.params;
+      // && req.user._id !== mentorId
+      if (req.user.role !== Roles.ADMIN || req.user.role !== Roles.MENTOR) {
+        throw new Error(userError.Unauthorised);
+      }
+      if (!mentorId) {
+        return res.status(400).json({ message: "Mentor ID is required" });
+      }
+
+      const revenue = await this.revenueUseCase.getMentorRevenueById(mentorId);
+      res.status(200).json(revenue);
+    } catch (error) {
+      res.status(500).json({
+        message: "Failed to fetch mentor revenue",
+        error: error instanceof Error ? error.message : "An Error ",
+      });
+    }
+  }
+
+  async getMentorTimeRevenue(req: AuthServices, res: Response) {
+    try {
+      const { mentorId } = req.params;
+      const { period = "monthly" } = req.query;
+
+      if (!mentorId) {
+        return res.status(400).json({ message: "Mentor ID is required" });
+      }
+
+      const revenue = await this.revenueUseCase.getMentorTimeRevenue(
+        mentorId,
+        typeof period == "string"
+          ? (period as "daily" | "weekly" | "monthly")
+          : "monthly"
+      );
+      res.status(200).json({ timeRevenue: revenue });
+    } catch (error) {
+      res.status(500).json({
+        message: "Failed to fetch mentor time-based revenue",
+        error: error instanceof Error ? error.message : "An Error ",
+      });
+    }
+  }
 }

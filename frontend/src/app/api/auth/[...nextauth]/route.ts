@@ -1,4 +1,4 @@
-
+import { Session } from "inspector/promises";
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
@@ -27,8 +27,7 @@ const handler = NextAuth({
 
       return token;
     },
-    async session({ session, token }) {
-      
+    async session({ session, token }: { session: any; token: any }) {
       session.accsessToken = token.accsessToken;
 
       return session;

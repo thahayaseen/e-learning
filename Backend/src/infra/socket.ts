@@ -11,6 +11,7 @@ export function socketconfig(server: http.Server) {
     console.log("connected success fully", socket.id);
 
     const handlesocket = new handleSocket(io, socketusecases);
+    
     handlesocket.registerEvent(socket);
   });
 }

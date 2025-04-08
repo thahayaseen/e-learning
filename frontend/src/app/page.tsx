@@ -20,10 +20,10 @@ const ELearningPlatform = () => {
       if (!state.isAuthenticated) {
         await dispatch(Varify());
       }
-      const datas = await getAllcourseUser();
+      const datas = await getAllcourseUser({page:1,limit:4});
       console.log(datas);
 
-      setCouse(datas);
+      setCouse(datas.courses);
     };
     varify();
   }, [dispatch, state.isAuthenticated]);
@@ -52,7 +52,7 @@ const ELearningPlatform = () => {
             {courses.map((course,index) => (
               <Products
 
-                category={course.Category?.Category}
+                category={course.Title}
                 orderCount={100}
                 id={course._id}
                 

@@ -14,7 +14,11 @@ import { Textarea } from "@/components/ui/textarea";
 
 import AdminTable from "@/components/admin/adminuserTable";
 import { ICategory } from "@/services/interface/CourseDto";
-import { addCategory, allCategorys, deleteCategory } from "@/services/fetchdata";
+import {
+  addCategory,
+  allCategorys,
+  actionCategory,
+} from "@/services/fetchdata";
 import { InputField } from "../auth/inputFeiled";
 import toast from "react-hot-toast";
 import EditcategoryComponent from "./editcategoryComponent";
@@ -39,17 +43,24 @@ const AdminPanel = () => {
   }, []);
   const [newCategory, setNewCategory] = useState({ name: "", Description: "" });
   const [errors, setError] = useState({ name: "", Description: "" });
-  const handleDelete=async (id:string)=>{
-   await deleteCategory(id)
-    setCategories(prev=>
-      prev.filter(data=>data._id!==id)
-    )
-
-  }
+  const handleList = async (id: string, type: boolean) => {
+    console.log(type);
+    
+    await actionCategory(id, type);
+    setCategories((prev) =>
+      prev.map((data) =>
+        data._id == id
+          ? {
+              ...data,
+              unlist: type,
+            }
+          : data
+      )
+    );
+  };
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-  
-    
+
     setNewCategory({
       ...newCategory,
       [name]: value,
@@ -64,13 +75,13 @@ const AdminPanel = () => {
     }
   };
   const handleEdit = (data) => {
-    setCategories(prev => 
-      prev.map(category => 
+    setCategories((prev) =>
+      prev.map((category) =>
         category._id === data._id ? { ...category, ...data } : category
       )
     );
   };
-  
+
   const validate = () => {
     const Nerror = { ...errors };
     let valid = true;
@@ -97,9 +108,8 @@ const AdminPanel = () => {
 
       setCategories((prev) => [...prev, data.data]);
       toast.success(data.message);
+      setNewCategory({ name: "", Description: "" });
     }
-
-    setNewCategory({ name: "", Description: "" });
   };
   const categoryColumns = [
     {
@@ -147,8 +157,12 @@ const AdminPanel = () => {
             className="px-3 py-1 bg-blue-600 text-white rounded">
             Edit
           </button>
-          <button onClick={()=>{handleDelete(String(category._id))}} className="px-3 py-1 bg-red-600 text-white rounded">
-            Delete
+          <button
+            onClick={() => {
+              handleList(String(category._id), !category.unlist);
+            }}
+            className={`px-3 py-1  ${category.unlist?'bg-red-600':'bg-green-600'} text-white rounded`}>
+            {category.unlist ? "unListed" : "listed"}
           </button>
         </div>
       ),

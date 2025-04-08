@@ -119,11 +119,12 @@ const videoFormSchema = z.object({
 
 interface MentorCourseCreationProps {
   toggle: () => void;
-  setCourses:any
+  setCourses: any;
 }
-
+import useUploadS3 from "@/hooks/addtis3";
 const MentorCourseCreation: React.FC<MentorCourseCreationProps> = ({
-  toggle,setCourses
+  toggle,
+  setCourses,
 }) => {
   const [courseData, setCourseData] = useState({
     Title: "",
@@ -135,7 +136,7 @@ const MentorCourseCreation: React.FC<MentorCourseCreationProps> = ({
     image: "",
     imagssss: "",
   });
-
+  const { uploading, uploadingVideo, uploadtos3 } = useUploadS3();
   const [categories, setCategory] = useState<any[]>([]);
   const [currentLessonIndex, setCurrentLessonIndex] = useState<number | null>(
     null
@@ -148,13 +149,13 @@ const MentorCourseCreation: React.FC<MentorCourseCreationProps> = ({
   // Image upload states
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState("");
-  const [uploading, setUploading] = useState(false);
+  // const [uploading, setUploading] = useState(false);
 
   // Video upload states
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoPreview, setVideoPreview] = useState("");
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [uploadingVideo, setUploadingVideo] = useState(false);
+  // const [uploadingVideo, setUploadingVideo] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
@@ -210,72 +211,72 @@ const MentorCourseCreation: React.FC<MentorCourseCreationProps> = ({
   });
 
   // Upload file to S3 using pre-signed URL
-  const uploadToS3 = async (file: File, fileType = "image") => {
-    if (!file) return null;
+  // const uploadToS3 = async (file: File, fileType = "image") => {
+  //   if (!file) return null;
 
-    try {
-      setUploading(fileType === "image");
-      setUploadingVideo(fileType === "video");
+  //   try {
+  //     setUploading(fileType === "image");
+  //     setUploadingVideo(fileType === "video");
 
-      // 1. Get Pre-signed URL from API Route
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fileName: file.name,
-          fileType: file.type,
-          fileCategory: fileType, // Add category to differentiate between image and video
-        }),
-      });
+  //     // 1. Get Pre-signed URL from API Route
+  //     const res = await fetch("/api/upload", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({
+  //         fileName: file.name,
+  //         fileType: file.type,
+  //         fileCategory: fileType, // Add category to differentiate between image and video
+  //       }),
+  //     });
 
-      if (!res.ok) {
-        throw new Error("Failed to get upload URL");
-      }
+  //     if (!res.ok) {
+  //       throw new Error("Failed to get upload URL");
+  //     }
 
-      const { uploadUrl } = await res.json();
-      console.log(uploadUrl);
-      console.log(file);
-      console.log("type is ", file.type);
+  //     const { uploadUrl } = await res.json();
+  //     console.log(uploadUrl);
+  //     console.log(file);
+  //     console.log("type is ", file.type);
 
-      // 2. Upload file to S3 using pre-signed URL
-      const uploadRes = await fetch(uploadUrl, {
-        method: "PUT",
-        body: file,
-        headers: { "Content-Type": file.type },
-      });
-      console.log(uploadRes);
+  //     // 2. Upload file to S3 using pre-signed URL
+  //     const uploadRes = await fetch(uploadUrl, {
+  //       method: "PUT",
+  //       body: file,
+  //       headers: { "Content-Type": file.type },
+  //     });
+  //     console.log(uploadRes);
 
-      if (!uploadRes.ok) {
-        throw new Error("Failed to upload file to S3");
-      }
+  //     if (!uploadRes.ok) {
+  //       throw new Error("Failed to upload file to S3");
+  //     }
 
-      // Get actual S3 image URL (remove query parameters)
-      const fileUrl = uploadUrl.split("?")[0];
+  //     // Get actual S3 image URL (remove query parameters)
+  //     const fileUrl = uploadUrl.split("?")[0];
 
-      if (fileType === "image") {
-        console.log("Image URL:", fileUrl);
+  //     if (fileType === "image") {
+  //       console.log("Image URL:", fileUrl);
 
-        // Update courseData with the new image URL
-        setCourseData((prevData) => ({
-          ...prevData,
-          image: fileUrl,
-        }));
-      } else if (fileType === "video") {
-        setVideoUrl(fileUrl);
-      }
+  //       // Update courseData with the new image URL
+  //       setCourseData((prevData) => ({
+  //         ...prevData,
+  //         image: fileUrl,
+  //       }));
+  //     } else if (fileType === "video") {
+  //       setVideoUrl(fileUrl);
+  //     }
 
-      return fileUrl;
-    } catch (error) {
-      console.error(`Error uploading ${fileType}:`, error);
-      toast.error("Upload Error", {
-        description: `Failed to upload ${fileType}. Please try again.`,
-      });
-      return null;
-    } finally {
-      setUploading(false);
-      setUploadingVideo(false);
-    }
-  };
+  //     return fileUrl;
+  //   } catch (error) {
+  //     console.error(`Error uploading ${fileType}:`, error);
+  //     toast.error("Upload Error", {
+  //       description: `Failed to upload ${fileType}. Please try again.`,
+  //     });
+  //     return null;
+  //   } finally {
+  //     setUploading(false);
+  //     setUploadingVideo(false);
+  //   }
+  // };
 
   // Handle image upload
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -341,10 +342,18 @@ const MentorCourseCreation: React.FC<MentorCourseCreationProps> = ({
       // Upload image if exists
       let finalImageUrl = courseData.image;
       if (imageFile && !courseData.image) {
-        finalImageUrl = await uploadToS3(imageFile, "image");
+        finalImageUrl = await uploadtos3(imageFile, "image");
         if (!finalImageUrl) {
           throw new Error("Failed to upload image");
         }
+
+        console.log("Image URL:", finalImageUrl);
+
+        // Update courseData with the new image URL
+        setCourseData((prevData) => ({
+          ...prevData,
+          image: finalImageUrl,
+        }));
       }
       console.log("Final image URL:", finalImageUrl);
 
@@ -499,9 +508,10 @@ const MentorCourseCreation: React.FC<MentorCourseCreationProps> = ({
 
       let finalVideoUrl = videoUrl;
       if (videoFile && !videoUrl) {
-        setUploadingVideo(true);
-        finalVideoUrl = await uploadToS3(videoFile, "video");
-        setUploadingVideo(false);
+        // setUploadingVideo(true);
+        finalVideoUrl = await uploadtos3(videoFile, "video");
+        setVideoUrl(finalVideoUrl);
+        // setUploadingVideo(false);
       }
 
       saveTaskData({
@@ -593,7 +603,7 @@ const MentorCourseCreation: React.FC<MentorCourseCreationProps> = ({
       // Send data to API
       const result = await addCourse(finalCourseData);
       console.log("API response:", result.results);
-      setCourses(prev=>[...prev,result.results])
+      setCourses((prev) => [...prev, result.results]);
 
       if (result.success) {
         toast.success("Success", {
@@ -842,8 +852,8 @@ const MentorCourseCreation: React.FC<MentorCourseCreationProps> = ({
                             </div>
                           ) : null}
                           <Image
-                          width={100}
-                          height={10}
+                            width={100}
+                            height={10}
                             src={imagePreview || "/placeholder.svg"}
                             alt="Course cover preview"
                             className="w-full h-32 object-cover rounded-md"

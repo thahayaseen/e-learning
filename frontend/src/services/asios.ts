@@ -9,17 +9,16 @@ const api: AxiosInstance = axios.create({
 api.interceptors.request.use(
   (config) => {
     console.log("Requset Intercepto", config);
-    const tocken = get_cookie('access')
-    config.withCredentials=true
- 
-    
+    const tocken = get_cookie("access");
+    config.withCredentials = true;
+
     if (tocken) {
-      console.log('tojen in access',tocken);
-      
+      console.log("tojen in access", tocken);
+
       config.headers["Authorization"] = `Bearer ${tocken}`;
       return config;
     }
-    return config
+    return config;
   },
   (error) => {
     console.log("error in request" + error);
@@ -32,10 +31,10 @@ api.interceptors.response.use(
     return response.data;
   },
   (error) => {
-    console.log("error is", error.response);
+    console.log("error is", error);
     // toast.error( error.response.data.message)
     // return Promise.reject(error);
-    throw new Error(error.response.data.message)
+    throw new Error(error?.response?.data.message || error.message);
   }
 );
 

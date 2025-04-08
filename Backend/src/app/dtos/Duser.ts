@@ -23,15 +23,16 @@ export interface UserDTO {
   _id?: string;
   name: string;
   email: string;
+  username?: string;
   password?: string; // Optional if using OAuth
   profile?: ProfileDTO; // Optional profile
-  gid?: string|null; // Google ID for OAuth users
+  gid?: string | null; // Google ID for OAuth users
   verified?: boolean;
   isBlocked?: boolean;
   role?: "admin" | "student" | "mentor";
   purchasedCourses?: string[];
   subscription?: string | null;
-  updatedAt?  :string
+  updatedAt?: string;
 }
 
 export interface ProfileDTO {

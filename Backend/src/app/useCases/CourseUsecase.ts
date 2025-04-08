@@ -1,21 +1,37 @@
+import mongoose from "mongoose";
 import { ICourseUseCase } from "../../domain/interface/courseUsecase";
 import { ICoursesRepository } from "../../domain/repository/IRepositoryCourses";
+import { IReviewRepo } from "../../domain/repository/IReviewRepositroy";
 import IUserReposetory from "../../domain/repository/IUser";
 import { ICourses } from "../../infra/database/models/course";
 import { ILesson } from "../../infra/database/models/lessone";
+import {
+  ILessonProgress,
+  IProgressCollection,
+  ITaskProgress,
+} from "../../infra/database/models/progress";
+import { IReview } from "../../infra/database/models/reiview";
 import { IQuizTask, ITask } from "../../infra/database/models/tasks";
+import { IPaginationResult } from "../../infra/repositories/RepositoryCourses";
 import { CourseDTO } from "../dtos/coursesDto";
+import { orderDto } from "../dtos/orderDto";
 
 export class CourseUsecase implements ICourseUseCase {
   constructor(
     private userRepo: IUserReposetory,
-    private CourseRepo: ICoursesRepository
+    private CourseRepo: ICoursesRepository,
+    private ReviewRepo: IReviewRepo
   ) {}
   async getCourseBymentor(id: string): Promise<ICourses | null> {
     return await this.CourseRepo.getCourseBymentor(id);
   }
-  async getAllCourse(limit: number, filter?: boolean): Promise<ICourses[]> {
-    return await this.CourseRepo.getCourseUser(limit, filter);
+  async getAllCourse(
+    page: number,
+    limit: number,
+    sort: any,
+    filter?: any
+  ): Promise<IPaginationResult<any>> {
+    return await this.CourseRepo.getCourseUser(page, limit, sort, filter);
   }
   async getSelectedCourse(
     id: string,
@@ -24,6 +40,8 @@ export class CourseUsecase implements ICourseUseCase {
   ): Promise<any> {
     try {
       let progress = null;
+      console.log(id);
+
       const data = await this.CourseRepo.getSingleCourse(id, isValid);
 
       console.log(data, "in usecase");
@@ -48,24 +66,15 @@ export class CourseUsecase implements ICourseUseCase {
       await this.userRepo.addCourseInstudent(userId, courseId);
       const courses = await this.CourseRepo.FindSelectedCourse(courseId);
 
-      const lessons = courses?.lessons.map((data) => {
-        return { Lesson_id: String(data) };
-      });
-      console.log(lessons, "all lesojsss");
-      if (lessons) {
-        await this.CourseRepo.createProgress({
-          Course_id: courseId,
-          lesson_progress: lessons,
-          Student_id: userId,
-        });
-      }
+      await this.createProgress(courseId, userId);
+
       return;
     } catch (error: any) {
       throw new Error(error.message);
     }
   }
-  async getByCoursids(CourseId: string[]) {
-    return await this.CourseRepo.getCouseEachuser(CourseId);
+  async getByCoursids(CourseId: string[], userid: string) {
+    return await this.CourseRepo.getCouseEachuser(CourseId, userid);
   }
   async createCourse(datas: Omit<ICourses, "_id">) {
     console.log(datas, "lessson is");
@@ -126,7 +135,7 @@ export class CourseUsecase implements ICourseUseCase {
     const datas = await this.CourseRepo.updateLesson(lessonid, data);
     return datas;
   }
-  async updateTaskinRepo(data: ITask, taskId: string) {
+  async updateTaskinRepo(data: ITask, taskId: string): Promise<ITask | null> {
     return await this.CourseRepo.UpdateTask(taskId, data);
   }
   async getLesson(lessonid: string): Promise<ILesson | null> {
@@ -162,29 +171,254 @@ export class CourseUsecase implements ICourseUseCase {
   ): Promise<void> {
     this.CourseRepo.DeleteLessonFromCourse(courseId, lessonid);
   }
-  async getuserallCourseprogresdata(userid: string) {
-    console.log("in herer");
+  async getuserallCourseprogresdata(userid: string): Promise<{
+    progresPersentage: number;
+    coursesCount: number;
+    completedCourse: number;
+  }> {
+    console.log("Fetching user progress data for user:", userid);
 
-    const dat = await this.CourseRepo.getAllprogressByuserid(userid);
-    console.log(dat);
+    // Fetch all progress data for the user
+    const progressData = await this.CourseRepo.getAllprogressByuserid(userid);
+    console.log("Progress data:", progressData);
 
-    let progress = 0;
+    let totalProgress = 0;
     let coursesCount = 0;
     let completedCourse = 0;
-    dat?.forEach((data) => {
-      console.log(data.Score, "datasss");
 
-      progress += Number(data.Score);
-      coursesCount++;
-      if (data.Score == 100) {
-        completedCourse++;
+    // Iterate through each course progress
+    progressData?.forEach((data: any) => {
+      const score = Number(data.Score);
+
+      // Ensure the score is a valid number
+      if (!isNaN(score)) {
+        totalProgress += score;
+        coursesCount++;
+
+        // Check if the course is completed (score === 100)
+        if (score === 100) {
+          completedCourse++;
+        }
+      } else {
+        console.warn(`Invalid score found for user ${userid}:`, data.Score);
       }
     });
-    const pdata = progress / coursesCount;
-    return { progresPersentage: pdata, coursesCount, completedCourse };
+
+    // Calculate the average progress percentage
+    const averageProgress = coursesCount > 0 ? totalProgress / coursesCount : 0;
+
+    return {
+      progresPersentage: averageProgress,
+      coursesCount,
+      completedCourse,
+    };
   }
   async getTaskByid(taskid: string): Promise<ITask | IQuizTask | null> {
     return await this.CourseRepo.FindTask(taskid);
+  }
+  async createOrder(course: orderDto): Promise<orderDto> {
+    return await this.CourseRepo.createOrder(course);
+  }
+  async updateOrder(updateData: orderDto, orderid: string): Promise<orderDto> {
+    const data = await this.CourseRepo.updataOrder(orderid, updateData);
+    if (!data) {
+      throw new Error("Unable to update order");
+    }
+    return data;
+  }
+  async Conformpayment(
+    updateData: orderDto,
+    orderId: string
+  ): Promise<orderDto> {
+    const session = await mongoose.startSession(); // 1️⃣ Start session
+    session.startTransaction(); // 2️⃣ Start transaction
+
+    try {
+      const data = await this.CourseRepo.updataOrder(
+        orderId,
+        updateData,
+        session
+      );
+
+      if (!data) {
+        throw new Error("Unable to update order");
+      }
+
+      await session.commitTransaction(); // 3️⃣ Commit transaction
+      return data;
+    } catch (error) {
+      await session.abortTransaction(); // ❌ Rollback transaction on error
+      throw new Error(
+        `Payment confirmation failed: ${
+          error instanceof Error ? error.message : "an Error eccoured"
+        }`
+      );
+    } finally {
+      session.endSession(); // 🛑 End session
+    }
+  }
+
+
+  async createProgress(courseid: string, userid: string) {
+    // Fetch the course with populated lessons and tasks
+    try {
+      console.log(courseid, userid, "data is ");
+
+      const course = await this.CourseRepo.FindSelectedCourse(courseid);
+      console.log("courseis ", course);
+
+      if (!course) {
+        throw new Error("Course not found");
+      }
+
+      // Initialize an array to hold lesson progress
+      const lessonProgress: ILessonProgress[] = [];
+
+      // Iterate through each lesson in the course
+      course.lessons.forEach((lesson: any) => {
+        // Initialize an array to hold task progress for the current lesson
+        const taskProgress: ITaskProgress[] = [];
+
+        // Iterate through each task in the lesson
+        lesson.Task.forEach((task: any) => {
+          console.log(task, "task is ");
+
+          let taskProgressItem: ITaskProgress | any = {};
+          if (task.Type == "Video") {
+            taskProgressItem = {
+              Task_id: task._id.toString(), // Task ID
+              userid: userid,
+              Completed: false,
+              Score: 0,
+              WatchTime: 0,
+              Status: "Not Started",
+            };
+          }
+          if (task.Type == "Quiz") {
+            taskProgressItem = {
+              Task_id: task._id.toString(), // Task ID
+              userid: userid,
+              Completed: false,
+
+              Status: "Not Started",
+            };
+          }
+          if (task.Type == "Assignment") {
+            taskProgressItem = {
+              Task_id: task._id.toString(), // Task ID
+              userid: userid,
+              Completed: false,
+              responce: "",
+              Status: "Not Started",
+            };
+          }
+          console.log(taskProgressItem);
+
+          // Add the task progress to the array
+          // if (taskProgressItem && taskProgressItem.keys.length !== 0) {
+          taskProgress.push(taskProgressItem);
+          // }
+        });
+
+        // Create a lesson progress object for the current lesson
+        const lessonProgressItem: ILessonProgress = {
+          Lesson_id: lesson._id.toString(), // Lesson ID
+          Completed: false, // Default to not completed
+          WatchTime: 0, // Default watch time
+          Task_progress: taskProgress, // Array of task progress
+        };
+
+        // Add the lesson progress to the array
+        lessonProgress.push(lessonProgressItem);
+      });
+      console.log(lessonProgress, "data adn the uid is ", userid, courseid);
+
+      await this.CourseRepo.createProgress(userid, courseid, lessonProgress);
+
+      return;
+    } catch (error: any) {
+      throw new Error(error.message || "an Error occupied");
+    }
+  }
+  async updateTaskProgress(
+    studentId: string,
+    courseId: string,
+    lessonId: string,
+    taskId: string,
+    taskType: string,
+    updateData: {
+      watchTime?: number;
+      isCompleted?: boolean;
+      response?: string;
+      score?: number;
+    }
+  ): Promise<IProgressCollection> {
+    const result = await this.CourseRepo.updateTaskProgress(
+      studentId,
+      courseId,
+      lessonId,
+      taskId,
+      taskType,
+      // response,
+      updateData
+    );
+    return result;
+  }
+  async markLessonCompleteduseCase(
+    studentId: string,
+    courseId: string,
+    lessonId: string
+  ): Promise<IProgressCollection> {
+    return await this.CourseRepo.markLessonCompleted(
+      studentId,
+      courseId,
+      lessonId
+    );
+  }
+  async getSelectedProgress(
+    courseid: string,
+    userid: string
+  ): Promise<IProgressCollection | null> {
+    return await this.CourseRepo.getSelectedcourseprogress(userid, courseid);
+  }
+  async addRating(
+    userid: string,
+    courseid: string,
+    rating: number,
+    title: string,
+    comment: string
+  ): Promise<void> {
+    await this.ReviewRepo.CreateReview(
+      userid,
+      courseid,
+      rating,
+      title,
+      comment
+    );
+  }
+  async getallReviews(courseid: string): Promise<IReview[]> {
+    return await this.ReviewRepo.getReiview(courseid);
+  }
+  async checkOrderDupication(
+    userid: string,
+    courseid: string,
+    type: boolean
+  ): Promise<orderDto | null> {
+    const data = await this.CourseRepo.getorderByuidandCourse(
+      userid,
+      courseid,
+      type
+    );
+    if (data && type) {
+      throw new Error("Payment is already in progress");
+    }
+    return data;
+  }
+  async repayOrder(
+    userid: string,
+    orderid: string
+  ): Promise<Partial<orderDto>> {
+    return await this.CourseRepo.getOneorder(userid, orderid);
   }
 }
 // interface I

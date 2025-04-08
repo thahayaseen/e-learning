@@ -11,17 +11,19 @@ function UserBlockbtn({
   toggleBlock: (userId: string, type: boolean) => void;
   user: Adminshousers;
 }) {
+  console.log(user);
+  
   return (
     <Button
-      variant={user.blocked ? "outline" : "destructive"}
+      variant={user.isBlocked ? "outline" : "destructive"}
       size="sm"
-      onClick={() => toggleBlock(String(user.id), user.blocked)}
+      onClick={() => toggleBlock(String(user._id), user.isBlocked)}
       className={`flex items-center gap-2 ${
-        user.blocked
+        user.isBlocked
           ? "border-blue-400 text-blue-400 hover:bg-blue-800/50"
           : "bg-blue-600 hover:bg-blue-700 text-white"
       }`}>
-      {user.blocked ? (
+      {user.isBlocked ? (
         <>
           <UserCheck className="h-4 w-4" />
           Unblock

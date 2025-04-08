@@ -5,5 +5,6 @@ export interface IAdmin {
   Blockuser(id: string, type: boolean): Promise<void>;
   createCategory(name: string, description: string): Promise<ICategory | void>;
   changeCategory(id: string, data: ICategory): Promise<void>;
-  deleteCourse(id: string): Promise<void>;
+  actionCourse(id: string, type: boolean): Promise<void>;
+  getCategoryNameUsecase(name: string): Promise<ICategory | null>;
 }

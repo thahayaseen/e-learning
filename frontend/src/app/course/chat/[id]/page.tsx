@@ -28,17 +28,16 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { getallchat } from "@/services/fetchdata";
 
 // Import your enum
-export enum chatEnum{
-  error='error-message',
-  joinRoom='join-room',
-  disconnect='disconnect',
-  sendMessage='sendMessage',
-  receive="receive_message",
-  joinmeet='join-meet',
-  userConnected='userConnected',
-  signal='signal',
-  joined='joined-user',
-
+enum chatEnum {
+  error = "error-message",
+  joinRoom = "join-room",
+  disconnect = "disconnect",
+  sendMessage = "sendMessage",
+  receive = "receive_message",
+  joinmeet = "join-meet",
+  userConnected = "userConnected",
+  signal = "signal",
+  joined = "joined-user",
 }
 export interface IMessage {
   chatroomId: string;
@@ -61,26 +60,28 @@ function Chat() {
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState("");
 
-  const messagesEndRef = useRef(null);
-  const inputRef = useRef(null);
+  const messagesEndRef = useRef<any>(null);
+  const inputRef = useRef<any>(null);
 
   // Generate user avatar from username
-  const getUserInitials = (name) => {
+  const getUserInitials = (name: any) => {
     return name ? name.slice(0, 2).toUpperCase() : "U";
   };
 
   // Generate random color based on username
-  const getUserColor = (name) => {
+  const getUserColor = (name: any) => {
     if (!name) return "hsl(212, 100%, 50%)";
     const hash = name
       .split("")
-      .reduce((acc, char) => char.charCodeAt(0) + acc, 0);
+      .reduce((acc: any, char: any) => char.charCodeAt(0) + acc, 0);
     return `hsl(${hash % 360}, 70%, 45%)`;
   };
 
   // Auto-scroll to bottom when new messages arrive
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef && messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   useEffect(() => {
@@ -139,7 +140,7 @@ function Chat() {
     fn();
   }, [socket, roomId, username]);
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = (e: any) => {
     e.preventDefault();
     if (!newMessage.trim() || !socket) return;
 
@@ -150,7 +151,7 @@ function Chat() {
     inputRef.current?.focus();
   };
 
-  const formatMessageTime = (timestamp) => {
+  const formatMessageTime = (timestamp: string) => {
     console.log(timestamp);
 
     return new Date(timestamp).toLocaleTimeString([], {
@@ -189,7 +190,7 @@ function Chat() {
                 Logged in as {username}
               </p>
             </div>
-            <Badge variant={isConnected ? "success" : "destructive"}>
+            <Badge variant={isConnected ? "outline" : "destructive"}>
               {isConnected ? "Connected" : "Disconnected"}
             </Badge>
           </div>
@@ -213,7 +214,7 @@ function Chat() {
               </div>
             ) : (
               <div className="space-y-4">
-                {messages.map((message, index) => {
+                {messages.map((message: any, index) => {
                   const isOwnMessage = message.username == username;
                   return (
                     <div

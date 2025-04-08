@@ -8,15 +8,19 @@ export class RepositoryCategory implements IRcategory {
       Description: description,
     });
   }
+  async getCategorywithname(name: string): Promise<ICategory | null> {
+    return await Category.findOne({ Category: name });
+  }
   async getAllCategory(): Promise<ICategory[]> {
     return await Category.find();
   }
-  async deleteCategory(id: string): Promise<void> {
-    await Category.deleteOne({ _id: id });
+  async action(id: string, action: boolean): Promise<void> {
+    await Category.findByIdAndUpdate(id, { unlist: action });
+
     return;
   }
-  async editCategoy(id: string, data: ICategory):Promise<void> {
+  async editCategoy(id: string, data: ICategory): Promise<void> {
     await Category.findByIdAndUpdate(id, { $set: data });
-    return
+    return;
   }
 }

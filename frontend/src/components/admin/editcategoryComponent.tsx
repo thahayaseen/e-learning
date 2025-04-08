@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { editcourse } from "@/services/fetchdata";
+import { edtCategory } from "@/services/fetchdata";
 function EditcategoryComponent({
   open,
   setisopen,
@@ -46,7 +46,7 @@ function EditcategoryComponent({
     },
   });
 
-  const onSubmit = (data: Omit<ICategory,'createdAt'>) => {
+  const onSubmit = async(data: Omit<ICategory,'createdAt'>) => {
     const changedata:Partial<ICategory>={}
     for (const i in data) {
       const key = i as keyof  Omit<ICategory,'createdAt'>;
@@ -60,11 +60,13 @@ function EditcategoryComponent({
       }
     }
     console.log('changed is',changedata);
-    editcourse(String(selectedCategory._id),changedata)
-    console.log("Form Data:", data);
+   const datass=await edtCategory(String(selectedCategory._id),changedata)
+    if(datass){
+      console.log("Form Data:", data);
     data._id=selectedCategory._id
     handleEdit(data)
     setisopen();
+    }
   };
 
   return (
