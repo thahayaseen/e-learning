@@ -1,0 +1,50 @@
+import { useState } from "react";
+import { toast } from "sonner";
+
+function useUploadS3() {
+  const [uploading, setUploading] = useState(false);
+  const [uploadingVideo, setuploadVideo] = useState(false);
+  const uploadtos3 = async (file: File, fileType: "video" | "image") => {
+    try {
+      setUploading(fileType === "image");
+      setuploadVideo(fileType === "video");
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fileName: file.name,
+          fileType: file.type,
+          fileCategory: fileType, // Add category to differentiate between image and video
+        }),
+      });
+      if (!res.ok) {
+        throw new Error("Failed to get upload URL");
+      }
+      const { uploadUrl } = await res.json();
+      const uploadedUrl = await fetch(uploadUrl, {
+        method: "PUT",
+        body: file,
+        headers: { "Content-Type": file.type },
+      });
+      if (!uploadedUrl.ok) {
+        throw new Error("Failed to upload file");
+      }
+      const fileUrl = uploadUrl.split("?")[0];
+      console.log("image or video url is ", fileUrl);
+
+      return fileUrl;
+    } catch (error) {
+      console.error(`Error uploading ${fileType}:`, error);
+      toast.error("Upload Error", {
+        description: `Failed to upload ${fileType}. Please try again.`,
+      });
+      return null;
+    } finally {
+      setUploading(false);
+      setuploadVideo(false);
+    }
+  };
+  return { uploading, uploadingVideo, uploadtos3 };
+}
+
+export default useUploadS3;
