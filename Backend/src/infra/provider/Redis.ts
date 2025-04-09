@@ -12,7 +12,13 @@ export default class PrRedis implements IRedis {
       console.error("Redis Error:", err);
     });
 
-    this.redis.connect().catch(console.error);
+    this.redis.connect().then(()=>{
+      console.log('connected success');
+      
+    }).catch((err)=>{
+      console.log('error when connect redis',err);
+      
+    })
   }
   async storeOtp(
     userId: string,

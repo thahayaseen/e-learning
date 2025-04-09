@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Install Redis server and global npm packages
 RUN apt-get update && apt-get install -y redis-server \
-    && npm install -g typescript ts-node
+    && npm install -g typescript ts-node nodemon
 
 # Copy only package files first (for better Docker caching)
 COPY package*.json ./
