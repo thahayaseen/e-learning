@@ -1,0 +1,22 @@
+# Use Node.js official image
+FROM node:18
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Install Redis client dependencies and other necessary tools
+RUN apt-get update && apt-get install -y redis-server \
+    && npm install -g typescript ts-node nodemon
+
+# Copy package.json and package-lock.json and install dependencies
+COPY package.json package-lock.json ./
+RUN npm install
+
+# Copy the rest of the application code
+COPY . .
+
+# Expose backend port (make sure your backend listens on 4050)
+EXPOSE 4050
+
+# Start the server using npm run dev
+CMD ["npm", "run", "dev"]
