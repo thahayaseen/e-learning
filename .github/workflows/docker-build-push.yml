@@ -25,7 +25,7 @@ jobs:
 
       # -------- Backend Build & Push --------
       - name: Build Backend Image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/backend:latest ./backend
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/backend:latest ./Backend
 
       - name: Push Backend Image
         run: docker push ${{ secrets.DOCKER_USERNAME }}/backend:latest
