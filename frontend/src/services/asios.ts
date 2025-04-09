@@ -1,10 +1,10 @@
 import { get_cookie } from "@/lib/features/cookie";
 import axios, { AxiosInstance } from "axios";
 
-console.log(process.env.NEXT_PUBLIC_DOMAIN,'domain is ');
-
+const domain = process.env.NEXT_PUBLIC_DOMAIN || 'localhostfdsafs:4050';
+console.log(domain,'domain isff ',process.env.NEXT_PUBLIC_DOMAIN );
 const api: AxiosInstance = axios.create({
-  baseURL: "http://" + process.env.NEXT_PUBLIC_DOMAIN,
+  baseURL: "http://" +domain,
   timeout: 100000,
 });
 api.interceptors.request.use(
