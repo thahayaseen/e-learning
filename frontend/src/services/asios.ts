@@ -1,6 +1,7 @@
 import { get_cookie } from "@/lib/features/cookie";
 import axios, { AxiosInstance } from "axios";
-import toast from "react-hot-toast";
+
+console.log(process.env.NEXT_PUBLIC_DOMAIN,'domain is ');
 
 const api: AxiosInstance = axios.create({
   baseURL: "http://" + process.env.NEXT_PUBLIC_DOMAIN,
