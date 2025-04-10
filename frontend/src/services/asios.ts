@@ -4,7 +4,7 @@ import axios, { AxiosInstance } from "axios";
 const domain = process.env.NEXT_PUBLIC_DOMAIN || 'localhostfdsafs:4050';
 console.log(domain,'domain isff ',process.env.NEXT_PUBLIC_DOMAIN );
 const api: AxiosInstance = axios.create({
-  baseURL: "http://" +domain,
+  baseURL: "https://" +domain,
   timeout: 100000,
 });
 api.interceptors.request.use(
