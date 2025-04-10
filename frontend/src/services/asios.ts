@@ -2,7 +2,7 @@ import { get_cookie } from "@/lib/features/cookie";
 import axios, { AxiosInstance } from "axios";
 
 const domain = process.env.NEXT_PUBLIC_DOMAIN || 'localhostfdsafs:4050';
-console.log(domain,'domain isff ',process.env.NEXT_PUBLIC_DOMAIN );
+console.log(domain,'domain isff httpsssssd',process.env.NEXT_PUBLIC_DOMAIN );
 const api: AxiosInstance = axios.create({
   baseURL: "https://" +domain,
   timeout: 100000,
