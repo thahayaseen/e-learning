@@ -24,8 +24,8 @@ export async function POST(request: Request) {
         },
       ],
       mode: "payment",
-      success_url: `http://${process.env.NEXT_PUBLIC_SERVER}/paymentsuccess?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `http://${process.env.NEXT_PUBLIC_SERVER}/courses/${requestData.courseId}`,
+      success_url: `https://${process.env.NEXT_PUBLIC_SERVER}/paymentsuccess?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `https://${process.env.NEXT_PUBLIC_SERVER}/courses/${requestData.courseId}`,
       metadata: {
         courseId: requestData.courseId,
         planType: requestData.planType,

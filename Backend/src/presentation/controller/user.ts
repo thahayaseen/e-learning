@@ -51,7 +51,7 @@ export default class UserController {
       console.log("datais", data);
       res.cookie("varifyToken", data.token, {
         httpOnly: true,
-        secure:true,
+        secure: true,
         expires: new Date(Date.now() + 15 * 60 * 1000), // Expires in 15 minutes
         sameSite: "none",
       });
@@ -59,7 +59,7 @@ export default class UserController {
       res.status(HttpStatusCode.OK).json({
         success: true,
         token: data.token,
-        
+
         message: data.message,
         sameSite: "none",
       });
@@ -106,14 +106,14 @@ export default class UserController {
       const tokess = JSON.parse(data.datas);
       res.cookie("refresh", tokess.refresh, {
         httpOnly: true,
-        secure:true,
-        sameSite:'none',
+        secure: true,
+        sameSite: "none",
         expires: new Date(Date.now() + 7 * 60 * 60 * 1000), // Expires in 15 minutes
       });
       res.cookie("access", tokess.access, {
         httpOnly: true,
-        secure:true,
-        sameSite:'none',
+        secure: true,
+        sameSite: "none",
 
         expires: new Date(Date.now() + 7 * 60 * 60 * 1000), // Expires in 15 minutes
       });
@@ -201,8 +201,8 @@ export default class UserController {
 
       res.cookie("access", req.body.accessTocken, {
         httpOnly: true,
-        secure:true,
-        sameSite:'none',
+        secure: true,
+        sameSite: "none",
 
         expires: new Date(Date.now() + 15 * 60 * 1000), // Expires in 15 minutes
       });
@@ -241,15 +241,15 @@ export default class UserController {
 
       res.cookie("refresh", datas.token.refresh, {
         httpOnly: true,
-        secure:true,
-        sameSite:'none',
+        secure: true,
+        sameSite: "none",
 
         expires: new Date(Date.now() + 7 * 60 * 60 * 1000), // Expires in 7 day
       });
       res.cookie("access", datas.token?.access, {
         httpOnly: true,
-        secure:true,
-        sameSite:'none',
+        secure: true,
+        sameSite: "none",
 
         expires: new Date(Date.now() + 7 * 60 * 60 * 1000), // Expires in 15 minutes
       });
@@ -286,10 +286,12 @@ export default class UserController {
   logout(req: Request, res: Response, next: NextFunction) {
     console.log("logouting");
 
-    res.clearCookie("refresh", { path: "/" });
-    console.log(req.cookies);
-    // console.log("deleted", message);
     res.clearCookie("access", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
+    res.clearCookie("refresh", {
       path: "/",
       httpOnly: true,
       secure: true,
