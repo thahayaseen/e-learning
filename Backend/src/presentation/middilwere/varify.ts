@@ -51,6 +51,9 @@ export const jwtVerify = async (
       const newAccessToken = await LoginUsecase.generatToken(userData);
       res.cookie("access", newAccessToken, {
         httpOnly: true,
+        secure:true,
+        sameSite:'none',
+
         expires: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes expiry
       });
       req.body.accessTocken = newAccessToken;

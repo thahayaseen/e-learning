@@ -50,14 +50,18 @@ export default class UserController {
 
       console.log("datais", data);
       res.cookie("varifyToken", data.token, {
-        httpOnly: false,
+        httpOnly: true,
+        secure:true,
         expires: new Date(Date.now() + 15 * 60 * 1000), // Expires in 15 minutes
+        sameSite: "none",
       });
 
       res.status(HttpStatusCode.OK).json({
         success: true,
         token: data.token,
+        
         message: data.message,
+        sameSite: "none",
       });
       return;
     } catch (error: any) {
@@ -101,11 +105,16 @@ export default class UserController {
       );
       const tokess = JSON.parse(data.datas);
       res.cookie("refresh", tokess.refresh, {
-        httpOnly: false,
+        httpOnly: true,
+        secure:true,
+        sameSite:'none',
         expires: new Date(Date.now() + 7 * 60 * 60 * 1000), // Expires in 15 minutes
       });
       res.cookie("access", tokess.access, {
-        httpOnly: false,
+        httpOnly: true,
+        secure:true,
+        sameSite:'none',
+
         expires: new Date(Date.now() + 7 * 60 * 60 * 1000), // Expires in 15 minutes
       });
       res
@@ -191,7 +200,10 @@ export default class UserController {
       console.log("yse");
 
       res.cookie("access", req.body.accessTocken, {
-        httpOnly: false,
+        httpOnly: true,
+        secure:true,
+        sameSite:'none',
+
         expires: new Date(Date.now() + 15 * 60 * 1000), // Expires in 15 minutes
       });
     }
@@ -228,11 +240,17 @@ export default class UserController {
       console.log(datas, "is dasdgfsdfta");
 
       res.cookie("refresh", datas.token.refresh, {
-        httpOnly: false,
+        httpOnly: true,
+        secure:true,
+        sameSite:'none',
+
         expires: new Date(Date.now() + 7 * 60 * 60 * 1000), // Expires in 7 day
       });
       res.cookie("access", datas.token?.access, {
-        httpOnly: false,
+        httpOnly: true,
+        secure:true,
+        sameSite:'none',
+
         expires: new Date(Date.now() + 7 * 60 * 60 * 1000), // Expires in 15 minutes
       });
       res.status(HttpStatusCode.OK).json({
