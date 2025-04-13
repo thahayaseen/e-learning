@@ -10,4 +10,14 @@ export interface ICertificaterepository {
     completed_date: Date
   ): Promise<CertificateDTO>;
   getCertificate(certificateId: string): Promise<CertificateDTO>;
+  GetCertificateByCourseid(
+    studentid: string,
+    courseid: string
+  ): Promise<CertificateDTO | null>;
+  getAllcertificate(
+    studentid: string,
+    page: number,
+    limit: number,
+    search: any
+  ): Promise<{ data: CertificateDTO[]; total: number }>;
 }

@@ -50,7 +50,7 @@ export const jwtVerify = async (
 
       const newAccessToken = await LoginUsecase.generatToken(userData);
       res.cookie("access", newAccessToken, {
-        httpOnly: true,
+        httpOnly: process.env.https=="true"?true:false,
         secure:true,
         sameSite:'none',
 

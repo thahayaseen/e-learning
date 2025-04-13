@@ -50,7 +50,7 @@ export default class UserController {
 
       console.log("datais", data);
       res.cookie("varifyToken", data.token, {
-        httpOnly: true,
+        httpOnly: process.env.https == "true" ? true : false,
         secure: true,
         expires: new Date(Date.now() + 15 * 60 * 1000), // Expires in 15 minutes
         sameSite: "none",
@@ -105,13 +105,13 @@ export default class UserController {
       );
       const tokess = JSON.parse(data.datas);
       res.cookie("refresh", tokess.refresh, {
-        httpOnly: true,
+        httpOnly: process.env.https == "true" ? true : false,
         secure: true,
         sameSite: "none",
         expires: new Date(Date.now() + 7 * 60 * 60 * 1000), // Expires in 15 minutes
       });
       res.cookie("access", tokess.access, {
-        httpOnly: true,
+        httpOnly: process.env.https == "true" ? true : false,
         secure: true,
         sameSite: "none",
 
@@ -132,10 +132,14 @@ export default class UserController {
   }
   async otpverify(req: Request, res: Response, next: NextFunction) {
     try {
-     
-      const tocken=req.cookies.varifyToken
-      console.log(tocken,'token is ');
-      
+      let tocken;
+      if (req.body.token) {
+        tocken = req.body.token;
+      } else {
+        tocken = req.cookies.varifyToken;
+      }
+      console.log(tocken, "token is ");
+
       const isValid = await this.signUpUser.verifyOtp(req.body.otp, tocken);
       console.log("the untoken", isValid);
 
@@ -201,7 +205,7 @@ export default class UserController {
       console.log("yse");
 
       res.cookie("access", req.body.accessTocken, {
-        httpOnly: true,
+        httpOnly: process.env.https == "true" ? true : false,
         secure: true,
         sameSite: "none",
 
@@ -241,14 +245,14 @@ export default class UserController {
       console.log(datas, "is dasdgfsdfta");
 
       res.cookie("refresh", datas.token.refresh, {
-        httpOnly: true,
+        httpOnly: process.env.https == "true" ? true : false,
         secure: true,
         sameSite: "none",
 
         expires: new Date(Date.now() + 7 * 60 * 60 * 1000), // Expires in 7 day
       });
       res.cookie("access", datas.token?.access, {
-        httpOnly: true,
+        httpOnly: process.env.https == "true" ? true : false,
         secure: true,
         sameSite: "none",
 
@@ -265,13 +269,13 @@ export default class UserController {
       console.log(error.message, "message is ");
       res.clearCookie("refresh", {
         path: "/",
-        httpOnly: true, // Ensures security
+        httpOnly: process.env.https == "true" ? true : false, // Ensures security
         secure: true, // Required for HTTPS
         sameSite: "none", // Allows cross-site access
       });
       res.clearCookie("access", {
         path: "/",
-        httpOnly: true,
+        httpOnly: process.env.https == "true" ? true : false,
         secure: true,
         sameSite: "none",
       });
@@ -288,13 +292,13 @@ export default class UserController {
     console.log("logouting");
 
     res.clearCookie("access", {
-      httpOnly: true,
+      httpOnly: process.env.https == "true" ? true : false,
       secure: true,
       sameSite: "none",
     });
     res.clearCookie("refresh", {
       path: "/",
-      httpOnly: true,
+      httpOnly: process.env.https == "true" ? true : false,
       secure: true,
       sameSite: "none",
     });
@@ -1031,6 +1035,8 @@ export default class UserController {
   async changePassword(req: AuthServices, res: Response) {
     try {
       const { _id } = req.user;
+      console.log(req.user,'userissd');
+      
       const { oldPassoword, newPassword } = req.body;
       await this.userUseCase.changePawword(_id, oldPassoword, newPassword);
       res.status(HttpStatusCode.OK).json({
@@ -1084,17 +1090,17 @@ export default class UserController {
       if (!_id || !courseId) {
         throw new Error("Please shere valid information");
       }
-      const result = await this.userUseCase.certificate(_id, courseId);
-      if (!result.completed) {
+      const result = await this.CourseUseCase.certificate(_id, courseId);
+      if (!result) {
         throw new Error("please Compleate course");
       }
+      console.log(result, "sdafasfasdf");
+
       res.status(HttpStatusCode.OK).json({
         success: true,
         message: "Succesfuly varified",
-        data: {
-          ...result,
-          name,
-        },
+
+        result,
       });
     } catch (error) {
       if (error instanceof Error) {
@@ -1223,6 +1229,33 @@ export default class UserController {
       res.status(500).json({
         message: "Failed to fetch mentor time-based revenue",
         error: error instanceof Error ? error.message : "An Error ",
+      });
+    }
+  }
+  async getAllCertificate(req: AuthServices, res: Response) {
+    try {
+      const id = req.user._id;
+      const { page, limit, search } = req.query;
+      console.log(page, limit, "pageand limit");
+
+      const data = await this.CourseUseCase.getAllCertificate(
+        id,
+        Number(page),
+        Number(limit),
+        search
+      );
+      console.log(data, "ans is sss");
+
+      res.status(HttpStatusCode.OK).json({
+        success: false,
+        message: "successfully fetch",
+        data: data.data,
+        total: data.total,
+      });
+    } catch (error) {
+      res.status(HttpStatusCode.BAD_REQUEST).json({
+        success: false,
+        message: error instanceof Error ? error.message : "An error occured",
       });
     }
   }

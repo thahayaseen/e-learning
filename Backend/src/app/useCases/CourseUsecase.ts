@@ -16,6 +16,7 @@ import { IPaginationResult } from "../../infra/repositories/RepositoryCourses";
 import { CourseDTO } from "../dtos/coursesDto";
 import { orderDto } from "../dtos/orderDto";
 import { ICertificaterepository } from "../../domain/repository/Icertificate.repository";
+import { CertificateDTO } from "../dtos/Certificate";
 
 export class CourseUsecase implements ICourseUseCase {
   constructor(
@@ -364,10 +365,21 @@ export class CourseUsecase implements ICourseUseCase {
       // response,
       updateData
     );
-    console.log(result, "result is sissisisisi",result.OverallScore,result.OverallScore == 100);
+    console.log(
+      result,
+      "result is sissisisisi",
+      result.OverallScore,
+      result.OverallScore == 100
+    );
     if (result.OverallScore == 100) {
-      console.log('yessss entered');
+      console.log("yessss entered");
+     const sertificate= await this.CertificateRepo.GetCertificateByCourseid(
+        result.Student_id._id,
+        result.Course_id._id
+      );
+      console.log(sertificate,'certificateis');
       
+     if(!sertificate){
       await this.CertificateRepo.createCertificate(
         result.Student_id._id,
         result.Student_id.name,
@@ -376,6 +388,7 @@ export class CourseUsecase implements ICourseUseCase {
         result.Course_id.Category.Category,
         new Date()
       );
+     }
     }
     return result;
   }
@@ -434,6 +447,29 @@ export class CourseUsecase implements ICourseUseCase {
     orderid: string
   ): Promise<Partial<orderDto>> {
     return await this.CourseRepo.getOneorder(userid, orderid);
+  }
+  async certificate(userid: string, courseid: string): Promise<any> {
+    console.log(userid, courseid, "ididdiid");
+
+    const ddd = await this.CertificateRepo.GetCertificateByCourseid(
+      userid,
+      courseid
+    );
+    console.log(ddd, "datatat");
+    return ddd;
+  }
+  async getAllCertificate(
+    studentid: string,
+    page: number = 1,
+    limit: number = 10,
+    search: any
+  ): Promise<{ data: CertificateDTO[]; total: number }> {
+    return await this.CertificateRepo.getAllcertificate(
+      studentid,
+      page,
+      limit,
+      search
+    );
   }
 }
 // interface I

@@ -32,8 +32,8 @@ router.post(
   controller.otpverify.bind(controller),
   controller.verifyForgotpassword.bind(controller)
 ); //for varify otp of forgat pass
-router.post(
-  "/changepassword",
+router.put(
+  "/resetchangepassword",
   jwtVerify,
   controller.changepass.bind(controller)
 );
@@ -203,6 +203,11 @@ router.get(
   roleChecker(Roles.ADMIN),
 
   controller.getTimeRevenue.bind(controller)
+);
+router.get(
+  "/allcertificate",
+  jwtVerify,
+  controller.getAllCertificate.bind(controller)
 );
 
 export default router;

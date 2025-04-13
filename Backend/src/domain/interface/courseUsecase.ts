@@ -1,3 +1,4 @@
+import { CertificateDTO } from "../../app/dtos/Certificate";
 import { CourseDTO } from "../../app/dtos/coursesDto";
 import { orderDto } from "../../app/dtos/orderDto";
 import { ICourses } from "../../infra/database/models/course";
@@ -89,5 +90,12 @@ export interface ICourseUseCase {
     type: boolean
   ): Promise<orderDto | null>;
   repayOrder(userid: string, orderid: string): Promise<Partial<orderDto>>;
+  certificate(userid: string, courseid: string): Promise<any>;
+  getAllCertificate(
+    studentid: string,
+    page: number,
+    limit: number,
+    search: any
+  ):  Promise<{ data: CertificateDTO[]; total: number }>;
   // getActiveOrder(_id: string, courseId: string): Promise<any>;
 }

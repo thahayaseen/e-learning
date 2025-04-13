@@ -26,10 +26,10 @@ const ChangePasswordForm = () => {
     console.log("Password  submitted:", token);
 
     try {
-      await axios.post(
-        "/changepassword",
+      await axios.put(
+        "/resetchangepassword",
         {
-          // token:get_cookie('reset_Token2'),
+          token:get_cookie('reset_Token2'),
 
           password: formData.newPassword,
         },

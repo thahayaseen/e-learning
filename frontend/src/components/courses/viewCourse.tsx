@@ -49,6 +49,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
+  getcertificate,
   getProgress,
   getSelectedCourse,
   requestmeeting,
@@ -59,11 +60,13 @@ import {
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import CourseRatingComponent from "./review";
-import CertificateDownload from "../course/certificta";
+// import CertificateDownload from "../course/certificta";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // Add this import at the top of the file
 import { CourseResources } from "@/components/course-resources";
+import CertificateDisplay from "../course/certificta";
+import { setloading } from "@/lib/features/User";
 
 // Interfaces
 interface Course {
@@ -119,7 +122,13 @@ interface Meeting {
   meetingLink?: string;
   status: string;
 }
-
+const certificateData = {
+  studentName: "John Appleseed",
+  courseName: "Advanced Web Development",
+  category: "Computer Science",
+  completedDate: new Date("2023-12-15"),
+  certificateId: "CERT-2023-12345",
+};
 const CourseView = ({ id }: { id: string }) => {
   const [meet, setMeet] = useState<Meeting | null>(null);
   const [loading, setLoading] = useState(true);
@@ -134,6 +143,7 @@ const CourseView = ({ id }: { id: string }) => {
   const [assignmentSubmission, setAssignmentSubmission] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
+  // const [certificateData, SetcertificateData] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
   const [totalprogres, settotalprogress] = useState(null);
 
@@ -344,6 +354,28 @@ const CourseView = ({ id }: { id: string }) => {
       });
   };
 
+  const fetchCertificate = async () => {
+    setloading(true);
+    // (null);
+
+    try {
+      const response: any = await getcertificate(course._id);
+      console.log(response, "data");
+
+      if (!response.success) {
+        throw new Error("Failed to fetch certificate data");
+      }
+
+      const data = await response.result;
+      return { success: response.success, ...data };
+    } catch (err) {
+      // setError(err.message);
+      console.error("Certificate fetch error:", err);
+      toast.error(err instanceof Error?err.message:"Cannot get the certificate data")
+    } finally {
+      setloading(false);
+    }
+  };
   // Add this function to calculate completed items by type
   const calculateCompletedItemsByType = () => {
     if (!course) return { videos: 0, quizzes: 0, assignments: 0, lessons: 0 };
@@ -515,6 +547,7 @@ const CourseView = ({ id }: { id: string }) => {
   // Quiz answer handler
   const handleQuizAnswer = (answer: string) => {
     setQuizAnswers(answer);
+ 
   };
 
   const handleChatmentor = () => {
@@ -1301,7 +1334,11 @@ const CourseView = ({ id }: { id: string }) => {
                   </div>
 
                   {totalprogres == 100 && (
-                    <CertificateDownload courseId={course?._id} />
+                    <CertificateDisplay
+                      {...certificateData}
+                      fetchCertificate={fetchCertificate}
+                      courseId={course._id}
+                    />
                   )}
                 </div>
               </div>

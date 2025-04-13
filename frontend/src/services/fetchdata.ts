@@ -106,16 +106,18 @@ export const butCousePageData = async (id: string) => {
     return;
   } catch (error) {}
 };
-export const getAllcourseUser = async ({
-  page = 1,
-  limit = 10,
-  filter = {},
-  sort = {
-    field: "UpdatedAt",
-    order: "desc",
-  },
-  
-}: any = {},publicr=false) => {
+export const getAllcourseUser = async (
+  {
+    page = 1,
+    limit = 10,
+    filter = {},
+    sort = {
+      field: "UpdatedAt",
+      order: "desc",
+    },
+  }: any = {},
+  publicr = false
+) => {
   // Construct query parameters
   const queryParams = new URLSearchParams();
 
@@ -417,7 +419,7 @@ export const ordersRes = async (currentPage: number, limit: number = 5) => {
   return await axios.get(`/orders?page=${currentPage}&limit=` + limit);
 };
 export const getordersMentor = async (page: number = 1, limit: number = 3) => {
-  return await axios.get("/mentor/getorders?page=" + page + "&&limit=" + limit);
+  return await axios.get("/mentor/getorders?page=" + page + "&limit=" + limit);
 };
 export const statesMentor = async () => {
   return await axios.get("/mentor/getstate");
@@ -436,4 +438,20 @@ export const changeStatusMeet = async (status: string, meetid: string) => {
 export const updateMeetingTime = async (meetid: string, date: Date) => {
   console.log(date, "date is ");
   await axios.put("/updatetime/" + meetid, { UpdateTime: date });
+};
+export const getAllcertificate = async (
+  page: number,
+  limit: number,
+  search?: string
+) => {
+  console.log("inhererererer");
+  const url = new URLSearchParams();
+
+  url.append("page", String(page));
+  url.append("limit", String(limit));
+  if (search) {
+    url.append("search", String(search));
+  }
+  url.toString();
+  return await axios.get("/allcertificate?" + url.toString());
 };

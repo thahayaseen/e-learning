@@ -33,8 +33,11 @@ import {
   Clock8,
 } from "lucide-react";
 
-
-import { fetchorders, fetchUsers } from "@/services/fetchdata";
+import {
+  fetchorders,
+  fetchUsers,
+  getAllcertificate,
+} from "@/services/fetchdata";
 import { useDispatch, useSelector } from "react-redux";
 import { Orders } from "@/components/Profilecomponents/Orders";
 import { Overview } from "@/components/Profilecomponents/profile-overview";
@@ -47,6 +50,7 @@ import { UserDTO } from "@/services/interface/CourseDto";
 import { Imentorrequst } from "@/services/interface/mentorReqst";
 import { Account } from "@/components/Profilecomponents/profile-Account";
 import { Courses } from "@/components/Profilecomponents/profile-Courses";
+import { Certificates } from "@/components/Profilecomponents/certificate";
 
 export interface Iprogress {
   progresPersentage: number;
@@ -68,6 +72,7 @@ const UserProfilePage = () => {
     completedCourse: 0,
     coursesCount: 0,
   });
+
   useEffect(() => {
     const fetchdata = async () => {
       dispatch(setloading(true));
@@ -230,7 +235,7 @@ const UserProfilePage = () => {
               {/* User progress & courses section */}
               <div className="w-full lg:w-3/4">
                 <Tabs defaultValue="overview" className="w-full">
-                  <TabsList className="grid grid-cols-4 mb-6 bg-gray-800">
+                  <TabsList className="grid grid-cols-5 mb-6 bg-gray-800">
                     <TabsTrigger
                       value="overview"
                       className="data-[state=active]:bg-indigo-900 data-[state=active]:text-white">
@@ -251,6 +256,11 @@ const UserProfilePage = () => {
                       className="data-[state=active]:bg-indigo-900 data-[state=active]:text-white">
                       order
                     </TabsTrigger>
+                    <TabsTrigger
+                      value="certificate"
+                      className="data-[state=active]:bg-indigo-900 data-[state=active]:text-white">
+                      certificate
+                    </TabsTrigger>
                   </TabsList>
 
                   <Overview
@@ -266,6 +276,7 @@ const UserProfilePage = () => {
                   />
                   <Courses courses={courses} key={2} />
                   <Orders />
+                  <Certificates />
                 </Tabs>
               </div>
             </div>

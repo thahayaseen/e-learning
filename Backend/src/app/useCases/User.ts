@@ -144,23 +144,7 @@ export class UserUsecase implements IuserUseCase {
     await this.userReposetory.changeUserRole(userid, role);
     return;
   }
-  async certificate(userid: string, courseid: string): Promise<any> {
-    const progressdata = await this.CourseRepo.getSelectedcourseprogress(
-      userid,
-      courseid
-    );
-    if (progressdata?.OverallScore == 100) {
-      const course = await this.CourseRepo.getSingleCourse(courseid, false);
-      return {
-        completed: true,
-        course: course?.Title,
-        conpletedDate: progressdata.UpdatedAt,
-      };
-    }
-    return {
-      completed: false,
-    };
-  }
+
   async ChackuseraldredyBuyed(
     userid: string,
     courseid: string,

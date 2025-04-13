@@ -36,7 +36,6 @@ export interface IuserUseCase {
     userid: string,
     role: "mentor" | "admin" | "user"
   ): Promise<void>;
-  certificate(userid: string, courseid: string): Promise<any>;
   ChackuseraldredyBuyed(
     userid: string,
     courseid: string,
