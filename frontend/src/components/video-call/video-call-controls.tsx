@@ -45,14 +45,14 @@ const VideoCallControls = ({
       >
         {isVideoOn ? <Camera className="h-5 w-5" /> : <VideoOff className="h-5 w-5" />}
       </Button>
-      <Button
+      {/* <Button
         variant="outline"
         size="icon"
         className="rounded-full h-12 w-12 bg-blue-600 hover:bg-blue-700 border-none"
       >
         <ScreenShare className="h-5 w-5" />
-      </Button>
-      <Button
+      </Button> */}
+      {/* <Button
         variant="outline"
         size="icon"
         className={`rounded-full h-12 w-12 ${
@@ -61,12 +61,12 @@ const VideoCallControls = ({
         onClick={() => setIsChatOpen(!isChatOpen)}
       >
         <MessageSquare className="h-5 w-5" />
-      </Button>
+      </Button> */}
       <Button
         variant="outline"
         size="icon"
         className="rounded-full h-12 w-12 bg-red-600 hover:bg-red-700 border-none"
-        onClick={() => router.push("/course")}
+        onClick={() => router.back()}
       >
         <Phone className="h-5 w-5" />
       </Button>

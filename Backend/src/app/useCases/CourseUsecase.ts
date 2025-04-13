@@ -15,12 +15,14 @@ import { IQuizTask, ITask } from "../../infra/database/models/tasks";
 import { IPaginationResult } from "../../infra/repositories/RepositoryCourses";
 import { CourseDTO } from "../dtos/coursesDto";
 import { orderDto } from "../dtos/orderDto";
+import { ICertificaterepository } from "../../domain/repository/Icertificate.repository";
 
 export class CourseUsecase implements ICourseUseCase {
   constructor(
     private userRepo: IUserReposetory,
     private CourseRepo: ICoursesRepository,
-    private ReviewRepo: IReviewRepo
+    private ReviewRepo: IReviewRepo,
+    private CertificateRepo: ICertificaterepository
   ) {}
   async getCourseBymentor(id: string): Promise<ICourses | null> {
     return await this.CourseRepo.getCourseBymentor(id);
@@ -188,7 +190,7 @@ export class CourseUsecase implements ICourseUseCase {
 
     // Iterate through each course progress
     progressData?.forEach((data: any) => {
-      const score = Number(data.Score);
+      const score = Number(data.OverallScore);
 
       // Ensure the score is a valid number
       if (!isNaN(score)) {
@@ -205,7 +207,8 @@ export class CourseUsecase implements ICourseUseCase {
     });
 
     // Calculate the average progress percentage
-    const averageProgress = coursesCount > 0 ? totalProgress / coursesCount : 0;
+    const averageProgress =
+      coursesCount > 0 ? Math.ceil(totalProgress / coursesCount) : 0;
 
     return {
       progresPersentage: averageProgress,
@@ -257,7 +260,6 @@ export class CourseUsecase implements ICourseUseCase {
       session.endSession(); // 🛑 End session
     }
   }
-
 
   async createProgress(courseid: string, userid: string) {
     // Fetch the course with populated lessons and tasks
@@ -353,7 +355,7 @@ export class CourseUsecase implements ICourseUseCase {
       score?: number;
     }
   ): Promise<IProgressCollection> {
-    const result = await this.CourseRepo.updateTaskProgress(
+    const result: any = await this.CourseRepo.updateTaskProgress(
       studentId,
       courseId,
       lessonId,
@@ -362,6 +364,19 @@ export class CourseUsecase implements ICourseUseCase {
       // response,
       updateData
     );
+    console.log(result, "result is sissisisisi",result.OverallScore,result.OverallScore == 100);
+    if (result.OverallScore == 100) {
+      console.log('yessss entered');
+      
+      await this.CertificateRepo.createCertificate(
+        result.Student_id._id,
+        result.Student_id.name,
+        result.Course_id._id,
+        result.Course_id.Title,
+        result.Course_id.Category.Category,
+        new Date()
+      );
+    }
     return result;
   }
   async markLessonCompleteduseCase(

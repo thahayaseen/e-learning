@@ -70,7 +70,7 @@ export function Explore({ _id }: { _id: string }) {
   return (
     <Button
       variant="ghost"
-      className="hover:bg-indigo-800/50 hover:text-white"
+      className="hover:bg-indigo-800/50 text-white hover:text-white"
       onClick={() => router.push("/course/" + _id)}>
       Explore
     </Button>

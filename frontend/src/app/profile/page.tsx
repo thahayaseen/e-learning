@@ -32,56 +32,7 @@ import {
   Sparkles,
   Clock8,
 } from "lucide-react";
-const dummyOrders = [
-  {
-    _id: "660d1f9e4b3d2f0012345671",
-    userId: "650d1f9e4b3d2f0012345678",
-    courseId: "650d1fae4b3d2f0012345679",
-    paymentId: "pay_1234567890abcdef",
-    paymentStatus: "paid",
-    amount: 4999,
-    currency: "inr",
-    planType: "premium",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    _id: "660d1f9e4b3d2f0012345672",
-    userId: "650d1f9e4b3d2f0012345678",
-    courseId: "650d1fae4b3d2f0012345680",
-    paymentId: "pay_abcdef1234567890",
-    paymentStatus: "pending",
-    amount: 2999,
-    currency: "usd",
-    planType: "basic",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    _id: "660d1f9e4b3d2f0012345673",
-    userId: "650d1f9e4b3d2f0012345681",
-    courseId: "650d1fae4b3d2f0012345682",
-    paymentId: "pay_7890abcdef123456",
-    paymentStatus: "failed",
-    amount: 1999,
-    currency: "inr",
-    planType: "standard",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    _id: "660d1f9e4b3d2f0012345674",
-    userId: "650d1f9e4b3d2f0012345683",
-    courseId: "650d1fae4b3d2f0012345684",
-    paymentId: "pay_4567890abcdef123",
-    paymentStatus: "paid",
-    amount: 9999,
-    currency: "usd",
-    planType: "pro",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-];
+
 
 import { fetchorders, fetchUsers } from "@/services/fetchdata";
 import { useDispatch, useSelector } from "react-redux";
@@ -121,8 +72,8 @@ const UserProfilePage = () => {
     const fetchdata = async () => {
       dispatch(setloading(true));
       const dat = await fetchUsers("/profile");
-      const orders = await fetchorders();
-      console.log(orders, "odatais ");
+      // const orders = await fetchorders();
+      // console.log(orders, "odatais ");
 
       console.log(isloading.current, "ref is ");
       console.log("done");

@@ -40,11 +40,13 @@ const ReviewSchema = z.object({
     .max(5, "Rating must be between 1 and 5"),
   title: z
     .string()
+    .trim()
     .min(3, "Title must be at least 3 characters")
     .max(100, "Title must be less than 100 characters")
     .optional(),
   comment: z
     .string()
+    .trim()
     .min(10, "Comments must be at least 10 characters")
     .max(500, "Comments must be less than 500 characters"),
 });

@@ -100,7 +100,8 @@ const CourseList: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [totalCourses, setTotalCourses] = useState(0);
-  const ITEMS_PER_PAGE = 9;
+  const ITEMS_PER_PAGE = 2;
+  console.log(mentorFilter, "filter is ");
 
   // Fetch Initial Data
   useEffect(() => {
@@ -121,6 +122,8 @@ const CourseList: React.FC = () => {
 
         // Parse URL Parameters
         const params = new URLSearchParams(window.location.search);
+        console.log(params, "url is ");
+
         const urlParams = {
           search: params.get("search"),
           level: params.get("level"),
@@ -143,8 +146,7 @@ const CourseList: React.FC = () => {
         console.error("Error fetching initial data:", error);
       }
     };
-
-  
+    fetchInitialData();
   }, []);
 
   // Fetch Courses Effect

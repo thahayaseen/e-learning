@@ -13,6 +13,7 @@ export default class User {
     public purchasedCourses: string[],
     public subscription: string | null,
     public updatedAt?: Date,
-    public username?: string
+    public username?: string,
+    public createdAt?: Date
   ) {}
 }

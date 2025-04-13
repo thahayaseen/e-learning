@@ -114,7 +114,8 @@ export const getAllcourseUser = async ({
     field: "UpdatedAt",
     order: "desc",
   },
-}: any = {}) => {
+  
+}: any = {},publicr=false) => {
   // Construct query parameters
   const queryParams = new URLSearchParams();
 
@@ -123,6 +124,9 @@ export const getAllcourseUser = async ({
   queryParams.append("limit", limit.toString());
   console.log("searcyh is", filter);
 
+  // if(publicr){
+  //   queryParams.append('publicRoute','true')
+  // }
   // Add filter parameters
   if (filter) {
     if (filter.search) queryParams.append("search", filter.search);

@@ -36,10 +36,10 @@ export class MentorController {
     try {
       console.log("data from frond", req.body);
 
-      if (req.user.role !== Roles.MENTOR) {
-        console.log("no");
-        return;
-      }
+      // if (req.user.role !== Roles.MENTOR) {
+      //   console.log("no");
+      //   return;
+      // }
       const Coursdata = req.body.data;
       console.log("yses", Coursdata);
       console.log(req.user);
@@ -90,12 +90,12 @@ export class MentorController {
     }
   }
   async getCourses(req: AuthServices, res: Response) {
-    if (req.user.role !== Roles.MENTOR) {
-      res
-        .status(HttpStatusCode.UNAUTHORIZED)
-        .json({ success: false, message: userError.Unauthorised });
-      return;
-    }
+    // if (req.user.role !== Roles.MENTOR) {
+    //   res
+    //     .status(HttpStatusCode.UNAUTHORIZED)
+    //     .json({ success: false, message: userError.Unauthorised });
+    //   return;
+    // }
     const userid = await this.userUsecase.UseProfileByemail(req.user.email);
     console.log(userid);
 
@@ -117,13 +117,13 @@ export class MentorController {
     return;
   }
   async controlergetLesson(req: AuthServices, res: Response) {
-    if (req.user.role !== Roles.MENTOR && req.user.role !== Roles.ADMIN) {
-      res.status(HttpStatusCode.UNAUTHORIZED).json({
-        success: false,
-        message: userError.Unauthorised,
-      });
-      return;
-    }
+    // if (req.user.role !== Roles.MENTOR && req.user.role !== Roles.ADMIN) {
+    //   res.status(HttpStatusCode.UNAUTHORIZED).json({
+    //     success: false,
+    //     message: userError.Unauthorised,
+    //   });
+    //   return;
+    // }
     console.log(req.body, "dara from frn");
 
     const datas = await this.MentoruseCases.getLesson(req.body.lessonid);
@@ -263,13 +263,13 @@ export class MentorController {
   }
   async updateCoursecontroler(req: AuthServices, res: Response) {
     try {
-      if (req.user.role != Roles.MENTOR) {
-        res.status(HttpStatusCode.UNAUTHORIZED).json({
-          success: false,
-          message: userError.Unauthorised,
-        });
-        return;
-      }
+      // if (req.user.role != Roles.MENTOR) {
+      //   res.status(HttpStatusCode.UNAUTHORIZED).json({
+      //     success: false,
+      //     message: userError.Unauthorised,
+      //   });
+      //   return;
+      // }
       const { courseid } = req.params;
       const { data } = req.body;
       if (data.lessons) {
@@ -324,12 +324,12 @@ export class MentorController {
   async updataLesson(req: AuthServices, res: Response): Promise<void> {
     try {
       const { email, role } = req.user;
-      if (role !== Roles.MENTOR) {
-        res.status(HttpStatusCode.UNAUTHORIZED).json({
-          success: false,
-          message: userError.Unauthorised,
-        });
-      }
+      // if (role !== Roles.MENTOR) {
+      //   res.status(HttpStatusCode.UNAUTHORIZED).json({
+      //     success: false,
+      //     message: userError.Unauthorised,
+      //   });
+      // }
       const { lessonid } = req.params;
       const { data, courseId } = req.body;
       await this.VarifyUser(email, courseId, lessonid);
@@ -353,12 +353,12 @@ export class MentorController {
   async addlesson(req: AuthServices, res: Response) {
     try {
       const { email, role } = req.user;
-      if (role !== Roles.MENTOR) {
-        res.status(HttpStatusCode.UNAUTHORIZED).json({
-          success: false,
-          message: userError.Unauthorised,
-        });
-      }
+      // if (role !== Roles.MENTOR) {
+      //   res.status(HttpStatusCode.UNAUTHORIZED).json({
+      //     success: false,
+      //     message: userError.Unauthorised,
+      //   });
+      // }
       const { data, courseId } = req.body;
       await this.VarifyUser(email, courseId);
       console.log(data, courseId, "idis sdfas");
@@ -457,13 +457,13 @@ export class MentorController {
         userid: user._id,
         mentorid: course.Mentor_id._id,
       });
-      console.log(isaldredy);
+      console.log(course,'cours id ', course.Mentor_id._id,course.Mentor_id);
 
       if (isaldredy) {
         roomid = String(isaldredy._id);
       } else {
         roomid = await this.SocketuserCase.StartMessage(
-          course.Mentor_id._id,
+          course.Mentor_id.mentorId,
           user._id,
           courseid
         );
@@ -486,13 +486,7 @@ export class MentorController {
   async getRoomsByid(req: AuthServices, res: Response) {
     const { email, _id, role } = req.user;
     const page = Number(req.query.page) || 1;
-    if (role !== Roles.MENTOR) {
-      res.status(HttpStatusCode.FORBIDDEN).json({
-        success: false,
-        message: "you dont have access to do this",
-      });
-      return;
-    }
+
     const data = await this.SocketuserCase.getAllroomsByid(_id, page);
     console.log(data);
     res.status(HttpStatusCode.OK).json({
@@ -505,9 +499,9 @@ export class MentorController {
     try {
       const { page } = req.query;
       const users = req.user;
-      if (users.role !== Roles.MENTOR) {
-        throw new Error(userError.Unauthorised);
-      }
+      // if (users.role !== Roles.MENTOR) {
+      //   throw new Error(userError.Unauthorised);
+      // }
       if (!page) {
         throw new Error("no pages found");
       }
@@ -561,9 +555,7 @@ export class MentorController {
   async getState(req: AuthServices, res: Response) {
     try {
       const { _id, role } = req.user;
-      if (role !== Roles.MENTOR) {
-        throw new Error(userError.Unauthorised);
-      }
+    
       const data = await this.MentoruseCases.getState(_id);
       console.log(data, "stateis ");
 
@@ -582,9 +574,7 @@ export class MentorController {
   async getRevenue(req: AuthServices, res: Response) {
     try {
       const { _id, role } = req.user;
-      if (role !== Roles.MENTOR) {
-        throw new Error(userError.Unauthorised);
-      }
+    
       const data = await this.MentoruseCases.getRevenueData(_id);
       res.status(HttpStatusCode.OK).json({
         success: true,
@@ -601,9 +591,7 @@ export class MentorController {
   async updateMeetingStatus(req: AuthServices, res: Response) {
     try {
       const { _id, role } = req.user;
-      if (role !== Roles.MENTOR) {
-        throw new Error("You dont have access");
-      }
+
       const { status } = req.query;
       const { meetid } = req.params;
       const validStatuses = [
@@ -647,9 +635,7 @@ export class MentorController {
       const { _id, role } = req.user;
       console.log("entere fadfsd");
 
-      if (role !== Roles.MENTOR) {
-        throw new Error(userError.Unauthorised);
-      }
+   
       const { page, limit, search, status } = req.query;
       let filter = {
         search,

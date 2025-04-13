@@ -20,7 +20,7 @@ const ELearningPlatform = () => {
       if (!state.isAuthenticated) {
         await dispatch(Varify());
       }
-      const datas = await getAllcourseUser({page:1,limit:4});
+      const datas = await getAllcourseUser({ page: 1, limit: 4 }, true);
       console.log(datas);
 
       setCouse(datas.courses);
@@ -49,38 +49,17 @@ const ELearningPlatform = () => {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {courses.map((course,index) => (
+            {courses.map((course, index) => (
               <Products
-
                 category={course.Title}
                 orderCount={100}
                 id={course._id}
-                
                 price={course.Price}
                 smallDiscroption={course.Description}
                 url={course.image}
                 key={index}
               />
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Plans */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Flexible Pricing Plans
-            </h2>
-            <p className="text-gray-400 max-w-2xl mx-auto">
-              Choose the perfect plan for your learning goals and budget.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* plans lists */}
-            <Plans />
           </div>
         </div>
       </section>

@@ -18,9 +18,9 @@ export default class Admincontroler {
     try {
       console.log(req.user);
 
-      if (req.user.role !== Roles.ADMIN) {
-        throw new Error(userError.Unauthorised);
-      }
+      // if (req.user.role !== Roles.ADMIN) {
+      //   throw new Error(userError.Unauthorised);
+      // }
       console.log("yses", req.body);
       if (String(req.user._id) == String(req.body.userid)) {
         throw new Error("Cannot self Block");
@@ -42,12 +42,12 @@ export default class Admincontroler {
       const { role } = req.user;
       console.log(role, "in  usedatass");
 
-      if (!role || role !== Roles.ADMIN) {
-        res
-          .status(HttpStatusCode.UNAUTHORIZED)
-          .json({ success: true, message: "Unauthorized" });
-        return;
-      }
+      // if (!role || role !== Roles.ADMIN) {
+      //   res
+      //     .status(HttpStatusCode.UNAUTHORIZED)
+      //     .json({ success: true, message: "Unauthorized" });
+      //   return;
+      // }
       const { page, limit } = req.query;
       if (!page || !limit) {
         res
@@ -76,10 +76,10 @@ export default class Admincontroler {
   async createCategorys(req: AuthServices, res: Response) {
     try {
       console.log("adding");
-      if (req.user.role !== Roles.ADMIN) {
-        res.status(HttpStatusCode.BAD_REQUEST);
-        return;
-      }
+      // if (req.user.role !== Roles.ADMIN) {
+      //   res.status(HttpStatusCode.BAD_REQUEST);
+      //   return;
+      // }
 
       const { name, description } = req.body;
       const datass = await this.adminUsecase.getCategoryNameUsecase(name);
@@ -106,10 +106,10 @@ export default class Admincontroler {
   async editCategory(req: AuthServices, res: Response) {
     try {
       const { email, role } = req.user;
-      if (role !== Roles.ADMIN) {
-        res.status(HttpStatusCode.BAD_REQUEST);
-        return;
-      }
+      // if (role !== Roles.ADMIN) {
+      //   res.status(HttpStatusCode.BAD_REQUEST);
+      //   return;
+      // }
       const { categoryid } = req.params;
       const { data } = req.body;
       console.log(data, "editing");
@@ -143,13 +143,13 @@ export default class Admincontroler {
   async actionCategory(req: AuthServices, res: Response) {
     try {
       const { categoryid } = req.params;
-      if (req.user.role !== Roles.ADMIN) {
-        res.status(HttpStatusCode.UNAUTHORIZED).json({
-          success: false,
-          message: userError.Unauthorised,
-        });
-        return;
-      }
+      // if (req.user.role !== Roles.ADMIN) {
+      //   res.status(HttpStatusCode.UNAUTHORIZED).json({
+      //     success: false,
+      //     message: userError.Unauthorised,
+      //   });
+      //   return;
+      // }
       console.log("typessis", typeof req.body.type);
 
       await this.adminUsecase.actionCourse(categoryid, req.body.type);
@@ -166,13 +166,13 @@ export default class Admincontroler {
   }
   async getCourseunaproved(req: AuthServices, res: Response) {
     try {
-      if (req.user.role !== Roles.ADMIN) {
-        res.status(HttpStatusCode.UNAUTHORIZED).json({
-          success: false,
-          message: userError.Unauthorised,
-        });
-        return;
-      }
+      // if (req.user.role !== Roles.ADMIN) {
+      //   res.status(HttpStatusCode.UNAUTHORIZED).json({
+      //     success: false,
+      //     message: userError.Unauthorised,
+      //   });
+      //   return;
+      // }
       const { page, type } = req.params;
       console.log("page is ", page, type, req.params);
 
@@ -201,9 +201,9 @@ export default class Admincontroler {
       const { _id, role } = req.user;
       console.log(role, "roeis");
 
-      if (role !== Roles.ADMIN) {
-        throw new Error("Only admin have access to this api");
-      }
+      // if (role !== Roles.ADMIN) {
+      //   throw new Error("Only admin have access to this api");
+      // }
       const { page } = req.query || 1;
       const filter = req.query;
       console.log(filter);

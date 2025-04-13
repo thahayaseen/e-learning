@@ -50,7 +50,7 @@ const LessonProgressSchema: Schema = new Schema({
 });
 
 const ProgressCollectionSchema: Schema = new Schema({
-  Student_id: { type: Schema.Types.ObjectId, ref: "Student", required: true },
+  Student_id: { type: Schema.Types.ObjectId, ref: "User", required: true },
   Course_id: { type: Schema.Types.ObjectId, ref: "Courses", required: true },
   lesson_progress: [LessonProgressSchema],
   UpdatedAt: { type: Date, default: Date.now },

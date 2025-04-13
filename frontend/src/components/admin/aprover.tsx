@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { Check, X, Eye, Loader2 } from "lucide-react";
+import { Check, X, Eye, Loader2, FileX } from "lucide-react";
 
 import {
   Card,
@@ -151,10 +151,25 @@ const AdminCourseManagement: React.FC = () => {
 
             <TabsContent value={typeOfList}>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-                {filteredCourses.map((course) => (
-                  <Card
-                    key={course._id}
-                    className={`
+                {filteredCourses.length == 0 ? (
+                  <div className="col-span-full flex flex-col items-center justify-center py-16 text-center">
+                    <div className="bg-gray-100 rounded-full p-6 mb-4">
+                      <FileX className="h-12 w-12 text-gray-400" />
+                    </div>
+                    <h3 className="text-xl font-medium text-gray-900 mb-2">
+                      No Courses Found
+                    </h3>
+                    <p className="text-gray-500 max-w-md mx-auto mb-6">
+                      There are currently no courses matching your criteria.
+                 
+                    </p>
+                   
+                  </div>
+                ) : (
+                  filteredCourses.map((course) => (
+                    <Card
+                      key={course._id}
+                      className={`
                       hover:shadow-lg transition-shadow
                       ${
                         course.Approved_by_admin === "approved"
@@ -167,68 +182,68 @@ const AdminCourseManagement: React.FC = () => {
                           : ""
                       }
                     `}>
-                    <Image
-                      priority
-                      src={course.image || "/default.png"}
-                      alt={course.Title}
-                      width={400}
-                      height={200}
-                      className="w-full h-48 object-cover"
-                    />
-                    <CardHeader>
-                      <CardTitle>{course.Title}</CardTitle>
-                      <CardDescription>
-                       
-                        By {course.Mentor_id?.name||'Thaha'}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center justify-between">
-                        <Badge variant="outline">
-                          {course.Category.Category}
-                        </Badge>
-                        <span className="font-semibold">₹{course.Price}</span>
-                      </div>
-                    </CardContent>
-                    <CardFooter className="flex justify-between">
-                      <div
-                        className="border p-2 border-solid border-black rounded-sm cursor-pointer"
-                        onClick={() => handleCourseView(course)}>
-                        <Eye className="h-4 w-4" />
-                      </div>
-                      {course.Approved_by_admin === "approved" ||
-                      course.Approved_by_admin === "rejected" ? (
-                        <Badge
-                          variant={
-                            course.Approved_by_admin === "approved"
-                              ? "default"
-                              : "destructive"
-                          }>
-                          {course.Approved_by_admin}
-                        </Badge>
-                      ) : (
-                        <div className="space-x-2">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() =>
-                              handleCourseAction(course._id, false)
-                            }>
-                            <X className="h-4 w-4 text-destructive" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() =>
-                              handleCourseAction(course._id, true)
-                            }>
-                            <Check className="h-4 w-4 text-green-500" />
-                          </Button>
+                      <Image
+                        priority
+                        src={course.image || "/default.png"}
+                        alt={course.Title}
+                        width={400}
+                        height={200}
+                        className="w-full h-48 object-cover"
+                      />
+                      <CardHeader>
+                        <CardTitle>{course.Title}</CardTitle>
+                        <CardDescription>
+                          By {course.Mentor_id?.name || "Thaha"}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center justify-between">
+                          <Badge variant="outline">
+                            {course.Category.Category}
+                          </Badge>
+                          <span className="font-semibold">₹{course.Price}</span>
                         </div>
-                      )}
-                    </CardFooter>
-                  </Card>
-                ))}
+                      </CardContent>
+                      <CardFooter className="flex justify-between">
+                        <div
+                          className="border p-2 border-solid border-black rounded-sm cursor-pointer"
+                          onClick={() => handleCourseView(course)}>
+                          <Eye className="h-4 w-4" />
+                        </div>
+                        {course.Approved_by_admin === "approved" ||
+                        course.Approved_by_admin === "rejected" ? (
+                          <Badge
+                            variant={
+                              course.Approved_by_admin === "approved"
+                                ? "default"
+                                : "destructive"
+                            }>
+                            {course.Approved_by_admin}
+                          </Badge>
+                        ) : (
+                          <div className="space-x-2">
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              onClick={() =>
+                                handleCourseAction(course._id, false)
+                              }>
+                              <X className="h-4 w-4 text-destructive" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              onClick={() =>
+                                handleCourseAction(course._id, true)
+                              }>
+                              <Check className="h-4 w-4 text-green-500" />
+                            </Button>
+                          </div>
+                        )}
+                      </CardFooter>
+                    </Card>
+                  ))
+                )}
               </div>
             </TabsContent>
           </Tabs>

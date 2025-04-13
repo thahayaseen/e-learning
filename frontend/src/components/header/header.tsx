@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useEffect, useState, useCallback } from "react";
 import { Button } from "../ui/button";
 import { Menu, X, User, ChevronDown } from "lucide-react";
@@ -6,9 +6,16 @@ import { Profile, Sighnout } from "../mybtns/myBtns";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { storeType } from "@/lib/store";
+// import { useSelector } from "react-redux";
 
-function Header({ forceFixed = false }: { isLoggedIn?: boolean, forceFixed?: boolean }) {
-  const isLoggedIn = useSelector((state: storeType) => state.User.isAuthenticated);
+function Header({
+  forceFixed = false,
+}: {
+  isLoggedIn?: boolean;
+  forceFixed?: boolean;
+}) {
+  const state = useSelector((state: storeType) => state.User);
+  const isLoggedIn = state.isAuthenticated;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isFixed, setFixed] = useState(forceFixed);
@@ -27,27 +34,27 @@ function Header({ forceFixed = false }: { isLoggedIn?: boolean, forceFixed?: boo
   // }, [forceFixed]);
 
   // Toggle functions
-  const toggleMenu = () => setIsMenuOpen(prev => !prev);
-  const toggleProfileMenu = () => setIsProfileMenuOpen(prev => !prev);
+  const toggleMenu = () => setIsMenuOpen((prev) => !prev);
+  const toggleProfileMenu = () => setIsProfileMenuOpen((prev) => !prev);
   const closeProfileMenu = () => setIsProfileMenuOpen(false);
-  
+
   // Handle clicks outside the profile menu
   useEffect(() => {
     const handleClickOutside = (event) => {
       const target = event.target;
-      if (isProfileMenuOpen && !target.closest('[data-profile-menu]')) {
+      if (isProfileMenuOpen && !target.closest("[data-profile-menu]")) {
         closeProfileMenu();
       }
     };
-    
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isProfileMenuOpen]);
 
   // Handle scroll for fixed header - improved with throttling
   // useEffect(() => {
   //   let scrollTimeout;
-    
+
   //   const throttledScrollHandler = () => {
   //     if (!scrollTimeout) {
   //       scrollTimeout = setTimeout(() => {
@@ -74,24 +81,19 @@ function Header({ forceFixed = false }: { isLoggedIn?: boolean, forceFixed?: boo
   }, [isMenuOpen]);
 
   // Navigation links array for DRY code
-  const navLinks = [
-    { text: "Courses", href: "/course" },
-   
-  ];
+  const navLinks = [{ text: "Courses", href: "/course" }];
 
   return (
     <header
       className={`transition-all duration-300 ease-in-out ${
         isFixed ? "fixed top-0 left-0 opacity-95 shadow-md" : "relative"
       } w-full bg-gray-900/95 backdrop-blur-sm border-b border-gray-800 z-50`}
-      style={{ transform: isFixed ? "translateZ(0)" : "" }}
-    >
+      style={{ transform: isFixed ? "translateZ(0)" : "" }}>
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         {/* Logo Section */}
-        <div 
-          className="flex items-center gap-2 cursor-pointer" 
-          onClick={() => router.push('/')}
-        >
+        <div
+          className="flex items-center gap-2 cursor-pointer"
+          onClick={() => router.push("/")}>
           <div className="bg-gradient-to-r from-indigo-500 to-cyan-400 w-8 h-8 rounded-md flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform">
             <span className="font-bold text-white">E</span>
           </div>
@@ -106,8 +108,7 @@ function Header({ forceFixed = false }: { isLoggedIn?: boolean, forceFixed?: boo
             <a
               key={index}
               href={link.href}
-              className="text-gray-300 hover:text-white hover:scale-105 transition-all duration-200 font-medium relative group"
-            >
+              className="text-gray-300 hover:text-white hover:scale-105 transition-all duration-200 font-medium relative group">
               {link.text}
               <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-gradient-to-r from-indigo-500 to-cyan-400 group-hover:w-full transition-all duration-300"></span>
             </a>
@@ -123,15 +124,16 @@ function Header({ forceFixed = false }: { isLoggedIn?: boolean, forceFixed?: boo
                 <Button
                   variant="ghost"
                   className="flex items-center gap-2 text-gray-300 hover:text-white bg-gray-800 hover:bg-gray-700"
-                  onClick={toggleProfileMenu}
-                >
+                  onClick={toggleProfileMenu}>
                   <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center">
                     <User size={16} />
                   </div>
                   <span className="font-medium">Profile</span>
-                  <ChevronDown 
-                    size={16} 
-                    className={`transform transition-transform ${isProfileMenuOpen ? 'rotate-180' : ''}`} 
+                  <ChevronDown
+                    size={16}
+                    className={`transform transition-transform ${
+                      isProfileMenuOpen ? "rotate-180" : ""
+                    }`}
                   />
                 </Button>
 
@@ -140,7 +142,17 @@ function Header({ forceFixed = false }: { isLoggedIn?: boolean, forceFixed?: boo
                   <div className="absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-md shadow-lg z-10 animate-fadeIn">
                     <div className="py-1">
                       <Profile />
-                      <div className="border-t border-gray-700 my-1"></div>
+                      <div className="border-t border-gray-700 my-1">
+                        {" "}
+                        {state.user.role !== "student" && (
+                          <Button
+                            onClick={() => {
+                              router.push("/" + state.user.role);
+                            }}>
+                            Got to {state.user.role} Panel
+                          </Button>
+                        )}
+                      </div>
                       <div className="px-4 py-2">
                         <Sighnout isLoggedIn={isLoggedIn} />
                       </div>
@@ -166,8 +178,7 @@ function Header({ forceFixed = false }: { isLoggedIn?: boolean, forceFixed?: boo
             size="icon"
             className="md:hidden text-gray-300 hover:text-white"
             onClick={toggleMenu}
-            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-          >
+            aria-label={isMenuOpen ? "Close menu" : "Open menu"}>
             {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </Button>
         </div>
@@ -197,8 +208,7 @@ function Header({ forceFixed = false }: { isLoggedIn?: boolean, forceFixed?: boo
                 <a
                   key={index}
                   href={link.href}
-                  className="text-gray-300 hover:text-white transition-colors font-medium py-2"
-                >
+                  className="text-gray-300 hover:text-white transition-colors font-medium py-2">
                   {link.text}
                 </a>
               ))}
@@ -208,14 +218,12 @@ function Header({ forceFixed = false }: { isLoggedIn?: boolean, forceFixed?: boo
                 <>
                   <a
                     href="/dashboard"
-                    className="text-gray-300 hover:text-white transition-colors font-medium py-2"
-                  >
+                    className="text-gray-300 hover:text-white transition-colors font-medium py-2">
                     Dashboard
                   </a>
                   <a
                     href="/settings"
-                    className="text-gray-300 hover:text-white transition-colors font-medium py-2"
-                  >
+                    className="text-gray-300 hover:text-white transition-colors font-medium py-2">
                     Settings
                   </a>
                 </>
@@ -227,14 +235,12 @@ function Header({ forceFixed = false }: { isLoggedIn?: boolean, forceFixed?: boo
                   <Button
                     variant="ghost"
                     className="text-gray-300 justify-start px-0 hover:text-white"
-                    onClick={() => router.push('/login')}
-                  >
+                    onClick={() => router.push("/login")}>
                     Log in
                   </Button>
-                  <Button 
+                  <Button
                     className="bg-gradient-to-r from-indigo-500 to-cyan-400 hover:from-indigo-600 hover:to-cyan-500 text-white"
-                    onClick={() => router.push('/signup')}
-                  >
+                    onClick={() => router.push("/signup")}>
                     Sign up
                   </Button>
                 </div>
@@ -253,19 +259,31 @@ function Header({ forceFixed = false }: { isLoggedIn?: boolean, forceFixed?: boo
 
       <style jsx>{`
         @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(-10px); }
-          to { opacity: 1; transform: translateY(0); }
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
-        
+
         @keyframes slideDown {
-          from { max-height: 0; opacity: 0; }
-          to { max-height: 500px; opacity: 1; }
+          from {
+            max-height: 0;
+            opacity: 0;
+          }
+          to {
+            max-height: 500px;
+            opacity: 1;
+          }
         }
-        
+
         .animate-fadeIn {
           animation: fadeIn 0.2s ease-out forwards;
         }
-        
+
         .animate-slideDown {
           animation: slideDown 0.3s ease-out forwards;
           overflow: hidden;

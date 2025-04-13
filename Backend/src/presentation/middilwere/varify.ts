@@ -13,10 +13,10 @@ export const jwtVerify = async (
   next: NextFunction
 ) => {
   try {
-    const { publicRoute } = req.query;
-    if (publicRoute == "true") {
-      next();
-    }
+    // const { publicRoute } = req.query;
+    // if (publicRoute == "true") {
+    //   next();
+    // }
     console.log("Authorization Header:", req.headers.authorization);
     let token = req.headers.authorization?.split(" ")[1];
     let userData = null;

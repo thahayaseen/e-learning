@@ -5,7 +5,6 @@ import {
   PaginationPrevious,
   PaginationNext,
   PaginationLink,
-  PaginationEllipsis,
 } from "@/components/ui/pagination";
 import { SetStateAction, useCallback } from "react";
 
@@ -22,11 +21,9 @@ const PaginationComponent: React.FC<PaginationComponentProps> = ({
   itemsPerPage,
   setPage,
 }) => {
-  console.log(total);
-
-  const totalPages = Math.ceil(total / itemsPerPage);
-  console.log("total pages", totalPages);
-
+  // Calculate total pages, ensuring minimum of 1 page even when total is 0
+  const totalPages = Math.max(1, Math.ceil(total / itemsPerPage));
+  
   const nextPage = useCallback(() => {
     if (page < totalPages) {
       setPage((prev) => prev + 1);
@@ -40,90 +37,48 @@ const PaginationComponent: React.FC<PaginationComponentProps> = ({
   }, [page, setPage]);
 
   return (
-    <Pagination>
-      <PaginationContent>
+    <Pagination className="my-4">
+      <PaginationContent className="flex items-center gap-1 bg-gray-800 p-2 rounded-lg shadow-md">
         {/* Previous Button */}
         <PaginationItem>
           <PaginationPrevious
             onClick={previousPage}
             aria-label="Go to previous page"
-            className={
-              page === 1 ? "pointer-events-none opacity-50 text-white" : ""
-            }
+            className={`transition-all duration-200 hover:bg-gray-700 ${
+              page === 1 ? "pointer-events-none opacity-50 text-gray-400" : "text-white hover:scale-105"
+            }`}
           />
         </PaginationItem>
 
-        {/* Page Numbers */}
-        {totalPages <= 5 ? (
-          // Show all pages if total pages are 5 or less
-          Array.from({ length: totalPages }, (_, i) => (
-            <PaginationItem key={i + 1}>
-              <PaginationLink
-                isActive={page === i + 1}
-                onClick={() => setPage(i + 1)}
-                className="text-white">
-                {i + 1}
-              </PaginationLink>
-            </PaginationItem>
-          ))
-        ) : (
-          // Show pagination with ellipsis for more than 5 pages
-          <>
-            <PaginationItem>
-              <PaginationLink isActive={page === 1} onClick={() => setPage(1)}>
-                1
-              </PaginationLink>
-            </PaginationItem>
+    
 
-            {/* First ellipsis */}
-            {page > 3 && (
-              <PaginationItem>
-                <PaginationEllipsis />
-              </PaginationItem>
-            )}
+        {/* Current page */}
+        <PaginationItem>
+          <PaginationLink
+            isActive
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium transition-all duration-200"
+          >
+            {page}
+          </PaginationLink>
+        </PaginationItem>
 
-            {/* Pages around current page */}
-            {page > 2 && page < totalPages && (
-              <PaginationItem>
-                <PaginationLink
-                  onClick={() => setPage(page)}
-                  isActive
-                  className="text-white">
-                  {page}
-                </PaginationLink>
-              </PaginationItem>
-            )}
-
-            {/* Second ellipsis */}
-            {page < totalPages - 2 && (
-              <PaginationItem>
-                <PaginationEllipsis />
-              </PaginationItem>
-            )}
-
-            {/* Last page */}
-            <PaginationItem>
-              <PaginationLink
-                isActive={page === totalPages}
-                onClick={() => setPage(totalPages)}>
-                {totalPages}
-              </PaginationLink>
-            </PaginationItem>
-          </>
-        )}
+    
 
         {/* Next Button */}
         <PaginationItem>
           <PaginationNext
             onClick={nextPage}
             aria-label="Go to next page"
-            className={
-              page === totalPages
-                ? "pointer-events-none opacity-50 text-white"
-                : ""
-            }
+            className={`transition-all duration-200 hover:bg-gray-700 ${
+              page === totalPages ? "pointer-events-none opacity-50 text-gray-400" : "text-white hover:scale-105"
+            }`}
           />
         </PaginationItem>
+        <br/>
+   
+        {/* <div className="text-xs text-gray-400 ml-2 px-3">
+          Page {page} of {totalPages}
+        </div> */}
       </PaginationContent>
     </Pagination>
   );

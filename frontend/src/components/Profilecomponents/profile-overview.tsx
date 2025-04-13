@@ -1,7 +1,7 @@
 import { TabsContent } from "@/components/ui/tabs";
 import { IProgressCollection, UserDTO } from "@/services/interface/CourseDto";
 import {
-  Badge,
+
   BarChart3,
   Calendar,
   CheckCircle,
@@ -21,6 +21,7 @@ import {
 import { Progress } from "@radix-ui/react-progress";
 
 import { Iprogress } from "@/app/profile/page";
+import { Badge } from "../ui/badge";
 
 // Enhanced StatCard with improved design
 const StatCard = ({
@@ -113,13 +114,13 @@ export function Overview({
                   <Badge
                     className={`
                       ${
-                        course.Score === 100
+                        course.progress.OverallScore === 100
                           ? "bg-emerald-800"
                           : course.Score > 5
                           ? "bg-indigo-800"
                           : "bg-gray-700"
                       }`}>
-                    {course.Score === 100
+                    {course.progress.OverallScore === 100
                       ? "Completed"
                       : course.Score > 5
                       ? "In Progress"
@@ -145,7 +146,7 @@ export function Overview({
                     />
                   </Progress>
                   <span className="text-sm font-medium text-white">
-                    {course.Score}%
+                    {course.progress.OverallScore}%
                   </span>
                 </div>
                 <div className="flex justify-between text-xs text-gray-400 mt-2">

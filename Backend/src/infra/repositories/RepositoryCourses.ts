@@ -18,6 +18,7 @@ import {
   VideoTask,
 } from "../database/models/tasks";
 import User from "../database/models/User";
+import { pipeline } from "nodemailer/lib/xoauth2";
 export interface IPaginationResult<T> {
   courses: T[];
   total: number;
@@ -149,6 +150,7 @@ export class RepositoryCourses implements ICoursesRepository {
     if (filter.category) {
       matchFilter.Category = new Types.ObjectId(filter.category);
     }
+    console.log(filter.mentor, "id isds ds");
 
     // Add mentor filter
     if (filter.mentor) {
@@ -255,28 +257,117 @@ export class RepositoryCourses implements ICoursesRepository {
     return await Courses.find({ Category: categoryid });
   }
 
-  async getSingleCourse(
-    id: string,
-    isValid: boolean
-  ): Promise<ICourses | null> {
+  async getSingleCourse(id: string, isValid: boolean): Promise<any | null> {
     try {
       console.log(isValid);
-
-      const query = Courses.findOne({ _id: id })
-        .populate("Mentor_id", "name _id")
-        .populate("Category", "Category -_id");
-
+      console.log(id, "id is ");
+      let lessonPopulate: any = {};
       if (isValid) {
-        query.populate({
-          path: "lessons",
-
-          populate: {
-            path: "Task",
+        lessonPopulate = {
+          $lookup: {
+            from: "lessons",
+            localField: "lessons",
+            foreignField: "_id",
+            as: "lessons",
+            pipeline: [
+              {
+                $lookup: {
+                  from: "tasks",
+                  localField: "Task",
+                  foreignField: "_id",
+                  as: "Task",
+                },
+              },
+            ],
           },
-        });
+        };
+      } else if (!isValid) {
+        lessonPopulate = {
+          $lookup: {
+            from: "lessons",
+            localField: "lessons",
+            foreignField: "_id",
+            as: "lessons",
+            pipeline: [
+              {
+                $project: {
+                  Lessone_name: 1,
+                  Task: 1,
+                },
+              },
+              {
+                $lookup: {
+                  from: "tasks",
+                  localField: "Task",
+                  foreignField: "_id",
+                  as: "Task",
+                },
+              },
+              {
+                $project: {
+                  Lessone_name: 1,
+                  "Task._id": 1,
+                  "Task.Type": 1,
+                },
+              },
+            ],
+          },
+        };
       }
+      const pipline = [
+        {
+          $match: {
+            _id: new Types.ObjectId(id),
+          },
+        },
+        {
+          $lookup: {
+            from: "beamentors",
+            localField: "Mentor_id",
+            foreignField: "userid",
+            as: "Mentor_id",
+            pipeline: [
+              {
+                $project: {
+                  name: "$fullname",
+                  phone: "$mobile",
+                  mentorId: "$userid",
+                  qualification: "$qualification",
+                  experience: "$experience",
+                  profileLink: "$profileLink",
+                  profileImage: 1,
+                },
+              },
+            ],
+          },
+        },
+        {
+          $unwind: "$Mentor_id",
+        },
+        {
+          $lookup: {
+            from: "categories",
+            localField: "Category",
+            foreignField: "_id",
+            as: "Category",
+            pipeline: [
+              {
+                $project: {
+                  Category: 1,
+                },
+              },
+            ],
+          },
+        },
+        { $unwind: "$Category" },
+        lessonPopulate,
+      ];
+      console.log(pipline, "pipline is ");
 
-      return await query;
+      const query = await Courses.aggregate(pipline);
+      console.log(query, "quryis");
+
+      return query[0];
     } catch (error) {
       throw new Error("Course Not found");
     }
@@ -452,7 +543,7 @@ export class RepositoryCourses implements ICoursesRepository {
       {
         $unwind: {
           path: "$progress",
-          preserveNullAndEmptyArrays: true, // Ensures courses without progress data are kept
+          preserveNullAndEmptyArrays: true,
         },
       },
 
@@ -697,14 +788,12 @@ export class RepositoryCourses implements ICoursesRepository {
       // Calculate task completion percentage
       const taskCompletionPercentage = (completedTasks / totalTasks) * 100;
 
-      // Calculate weighted overall score
-      // Adjust weights as needed: 40% quiz, 40% assignments, 20% completion
-      const quizWeight = 0.4;
-      const assignmentWeight = 0.4;
-      const completionWeight = 0.2;
       console.log(taskCompletionPercentage);
 
-      progress.OverallScore = Math.round(taskCompletionPercentage);
+      progress.OverallScore =
+        progress.OverallScore == 100
+          ? progress.OverallScore
+          : Math.round(taskCompletionPercentage);
     };
 
     // Calculate and update overall progress
@@ -714,9 +803,22 @@ export class RepositoryCourses implements ICoursesRepository {
     progress.UpdatedAt = new Date();
 
     // Save the updated progress
+    const res: any = await ProgressCollection.findOne({
+      Student_id: studentId,
+      Course_id: courseId,
+    })
+    .populate("Student_id", "name")
+    .populate({
+      path: "Course_id",
+      select: "Title Category",
+      populate: {
+        path: "Category",
+        select: "Category",
+      },
+    });
     await progress.save();
-
-    return progress;
+    
+    return res;
   }
   async createProgressForuser(progressData: IProgressCollection) {
     await ProgressCollection.create(progressData);

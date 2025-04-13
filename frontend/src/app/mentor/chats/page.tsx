@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,16 +11,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, Send, X, ArrowLeft } from "lucide-react";
-import { Avatar } from "@/components/ui/avatar";
+import { MessageSquare, Send, X, ArrowLeft, Search } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { getallchat, getChatrooms } from "@/services/fetchdata";
 import { useSocket } from "@/hooks/socketio";
 import { useSelector } from "react-redux";
 import { chatEnum } from "@/lib/chat-enums";
-import { IMessage } from "@/app/course/chat/[id]/page";
+import type { IMessage } from "@/app/course/chat/[id]/page";
 import PaginationComponent from "@/components/default/pagination";
-import { useSearchParams } from "next/navigation";
-import Image from "next/image";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const MessageAdminDashboard = () => {
   const [chatrooms, setChatrooms] = useState([]);
@@ -33,6 +33,11 @@ const MessageAdminDashboard = () => {
   const socket = useSocket();
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Fix: Use a ref to track socket room joining to prevent duplicate joins
+  const joinedRooms = useRef(new Set());
+
   useEffect(() => {
     fetchChatrooms();
 
@@ -41,10 +46,14 @@ const MessageAdminDashboard = () => {
 
       return () => {
         socket.off(chatEnum.receive);
-        // socket.off('chatroom_updated');
+        
+        joinedRooms.current.forEach((roomId) => {
+          socket.emit("leave_room", roomId);
+        });
+        joinedRooms.current.clear();
       };
     }
-  }, [socket]);
+  }, [socket, page]);
 
   useEffect(() => {
     // Scroll to bottom when messages change
@@ -53,19 +62,18 @@ const MessageAdminDashboard = () => {
 
   useEffect(() => {
     if (selectedChat) {
-      console.log(selectedChat._id);
-
       fetchMessages(selectedChat._id);
 
-      // Join the chatroom socket room
-      if (socket) {
-        console.log("emited", selectedChat._id);
-
+      // Fix: Only join the room if we haven't joined it already
+      if (socket && !joinedRooms.current.has(selectedChat._id)) {
         socket.emit(chatEnum.joinRoom, {
           roomId: String(selectedChat._id),
           username: state.name,
           email: state.email,
         });
+
+        // Add to our tracking set
+        joinedRooms.current.add(selectedChat._id);
       }
     }
   }, [selectedChat, socket]);
@@ -73,7 +81,7 @@ const MessageAdminDashboard = () => {
   const fetchChatrooms = async () => {
     try {
       setIsLoading(true);
-      const data = await getChatrooms();
+      const data = await getChatrooms(page);
       setTotal(data.data.total);
       setChatrooms(data.data.data);
       setIsLoading(false);
@@ -85,19 +93,17 @@ const MessageAdminDashboard = () => {
 
   const fetchMessages = async (chatroomId: any) => {
     try {
-      console.log(chatroomId);
-
       const data = await getallchat(chatroomId);
-      console.log(data);
-
       setMessages(data.data);
     } catch (error) {
       console.error("Error fetching messages:", error);
     }
   };
+  console.log(selectedChat,);
+
 
   const handleNewMessage = (message: Partial<IMessage>) => {
-    console.log("yes here ");
+    console.log("yes here ",selectedChat);
 
     console.log([message, messages]);
 
@@ -111,21 +117,14 @@ const MessageAdminDashboard = () => {
     console.log(messages);
   };
 
-  const handleChatroomUpdated = (updatedChatroom: any) => {
-    console.log(updatedChatroom);
-  };
-
   const handleSendMessage = () => {
     if (newMessage.trim() && selectedChat && socket) {
-      console.log(selectedChat._id);
-
       const messageData: any = {
         message: newMessage,
         chatroomId: String(selectedChat._id),
         userEmail: state.email,
-        username: state.name, // Replace with actual mentor ID
+        username: state.name,
       };
-      console.log(messageData);
 
       // Emit the message through socket
       socket.emit(
@@ -135,8 +134,19 @@ const MessageAdminDashboard = () => {
         state.email,
         state.name
       );
-      messageData.createdAt = new Date();
-      //   handleNewMessage(messageData);
+
+      // Add message to UI immediately for better UX
+      const localMessage = {
+        _id: Date.now().toString(),
+        message: newMessage,
+        username: state.name,
+        userEmail: state.email,
+        chatroomId: selectedChat._id,
+        createdAt: new Date().toISOString(),
+      };
+
+      // setMessages((prev) => [...prev, localMessage]);
+
       // Clear input
       setNewMessage("");
     }
@@ -166,59 +176,115 @@ const MessageAdminDashboard = () => {
   };
 
   const closeChat = () => {
+    // Fix: Don't leave the room when closing the chat, just hide the UI
     setSelectedChat(null);
-    setMessages([]);
   };
 
+  const filteredChatrooms = chatrooms.filter(
+    (chatroom: any) =>
+      chatroom.userId.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (chatroom.courseName &&
+        chatroom.courseName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (chatroom.lastMessage?.message &&
+        chatroom.lastMessage.message
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()))
+  );
+
   return (
-    <div className="min-h-full w-full bg-slate-900 p-6">
-      <div className="grid grid-cols-3 lg:grid-cols-3 gap-6">
+    <div className="min-h-full w-full bg-gradient-to-b from-slate-900 to-slate-800 p-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Messages table section */}
         <div
-          className={`${selectedChat && "hidden lg:block"} h-[70vh] ${
-            !selectedChat ? "col-span-3" : "col-span-2"
-          }
-          }`}>
-          <Card className="bg-slate-800 border-slate-700 shadow-lg w-full h-full">
-            <CardHeader className="border-b border-slate-700 bg-slate-800">
-              <CardTitle className="text-white flex items-center">
-                <MessageSquare className="mr-2" size={24} />
-                Message Administration Dashboard
-              </CardTitle>
+          className={`${
+            selectedChat
+              ? "hidden lg:block lg:col-span-2"
+              : "col-span-1 lg:col-span-3"
+          } h-[75vh] overflow-hidden`}>
+          <Card className="bg-slate-800 border-slate-700 shadow-lg w-full h-full flex flex-col">
+            <CardHeader className="border-b border-slate-700 bg-slate-800/80 backdrop-blur-sm">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <CardTitle className="text-white flex items-center">
+                  <MessageSquare className="mr-2 text-blue-400" size={24} />
+                  Message Administration
+                </CardTitle>
+                <div className="relative w-full md:w-64">
+                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-400" />
+                  <Input
+                    placeholder="Search messages..."
+                    className="pl-8 bg-slate-700 border-slate-600 text-slate-200 placeholder:text-slate-400 focus-visible:ring-blue-500"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+              </div>
             </CardHeader>
-            <CardContent className="p-6">
+            <CardContent className="p-0 flex-grow overflow-auto">
               {isLoading ? (
-                <div className="flex justify-center py-10">
-                  <div className="h-8 w-8 border-4 border-t-blue-500 border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
+                <div className="p-6 space-y-4">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="flex items-center space-x-4">
+                      <Skeleton className="h-12 w-12 rounded-full" />
+                      <div className="space-y-2">
+                        <Skeleton className="h-4 w-[250px]" />
+                        <Skeleton className="h-4 w-[200px]" />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : (
                 <div className="rounded-md overflow-hidden">
                   <Table>
-                    <TableHeader className="bg-slate-700">
+                    <TableHeader className="bg-slate-700/70 sticky top-0">
                       <TableRow>
-                        <TableHead className="text-slate-200">
+                        <TableHead className="text-slate-200 font-medium">
                           Participants
                         </TableHead>
-                        <TableHead className="text-slate-200">Course</TableHead>
-                        <TableHead className="text-slate-200">
+                        <TableHead className="text-slate-200 font-medium">
+                          Course
+                        </TableHead>
+                        <TableHead className="text-slate-200 font-medium">
                           Last Message
                         </TableHead>
-                        <TableHead className="text-slate-200">Date</TableHead>
-                        <TableHead className="text-slate-200">Status</TableHead>
-                        <TableHead className="text-slate-200">Action</TableHead>
+                        <TableHead className="text-slate-200 font-medium">
+                          Date
+                        </TableHead>
+                        <TableHead className="text-slate-200 font-medium">
+                          Status
+                        </TableHead>
+                        <TableHead className="text-slate-200 font-medium">
+                          Action
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {chatrooms.map((chatroom: any) => (
+                      {filteredChatrooms.map((chatroom: any) => (
                         <TableRow
                           key={chatroom._id}
-                          className="border-b border-slate-700 hover:bg-slate-700/50">
+                          className="border-b border-slate-700 hover:bg-slate-700/50 cursor-pointer"
+                          onClick={() => selectChat(chatroom)}>
                           <TableCell className="text-slate-300">
-                            <div className="flex flex-col">
-                              <span className="font-medium">
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-10 w-10 bg-slate-600 border border-slate-500">
+                                {chatroom.userId.profile?.avatar ? (
+                                  <AvatarImage
+                                    src={
+                                      chatroom.userId.profile.avatar ||
+                                      "/placeholder.svg"
+                                    }
+                                    alt={chatroom.userId.name}
+                                  />
+                                ) : (
+                                  <AvatarFallback className="bg-blue-600 text-white">
+                                    {chatroom.userId.name
+                                      .charAt(0)
+                                      .toUpperCase()}
+                                  </AvatarFallback>
+                                )}
+                              </Avatar>
+                              <div className="font-medium">
                                 {chatroom.userId.name}
-                              </span>
-                              {/* <span className="text-xs text-slate-400">with {chatroom.participants.length} participants</span> */}
+                              </div>
                             </div>
                           </TableCell>
                           <TableCell className="text-slate-300">
@@ -234,18 +300,21 @@ const MessageAdminDashboard = () => {
                           </TableCell>
                           <TableCell>
                             {chatroom.lastMessage?.senderId === "mentor-id" ? (
-                              <Badge className="bg-green-600 text-white hover:bg-green-700">
+                              <Badge className="bg-green-600/80 text-white hover:bg-green-700">
                                 Replied
                               </Badge>
                             ) : (
-                              <Badge className="bg-amber-500 text-white hover:bg-amber-600">
+                              <Badge className="bg-amber-500/80 text-white hover:bg-amber-600">
                                 Awaiting Reply
                               </Badge>
                             )}
                           </TableCell>
                           <TableCell>
                             <Button
-                              onClick={() => selectChat(chatroom)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                selectChat(chatroom);
+                              }}
                               className="bg-blue-600 hover:bg-blue-700 text-white"
                               size="sm">
                               View Chat
@@ -253,12 +322,14 @@ const MessageAdminDashboard = () => {
                           </TableCell>
                         </TableRow>
                       ))}
-                      {chatrooms.length === 0 && (
+                      {filteredChatrooms.length === 0 && (
                         <TableRow>
                           <TableCell
                             colSpan={6}
                             className="text-center py-8 text-slate-400">
-                            No chatrooms found
+                            {searchTerm
+                              ? "No matching chatrooms found"
+                              : "No chatrooms found"}
                           </TableCell>
                         </TableRow>
                       )}
@@ -267,15 +338,26 @@ const MessageAdminDashboard = () => {
                 </div>
               )}
             </CardContent>
+            <div className="p-4 border-t border-slate-700">
+              <PaginationComponent
+                page={page}
+                setPage={setPage}
+                total={total}
+                itemsPerPage={10}
+              />
+            </div>
           </Card>
         </div>
 
         {/* Chat section */}
         {selectedChat && (
-          <div className="col-span-1 max-h-[70vh]">
+          <div
+            className={`${
+              selectedChat ? "col-span-1 lg:col-span-1" : "hidden"
+            } h-[75vh]`}>
             <Card className="bg-slate-800 border-slate-700 shadow-lg h-full flex flex-col">
               {/* Chat header */}
-              <CardHeader className="border-b border-slate-700 bg-slate-700 p-4">
+              <CardHeader className="border-b border-slate-700 bg-slate-700/90 backdrop-blur-sm p-4">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center">
                     <Button
@@ -285,16 +367,20 @@ const MessageAdminDashboard = () => {
                       className="mr-2 lg:hidden text-slate-200 hover:text-white hover:bg-slate-600">
                       <ArrowLeft size={20} />
                     </Button>
-                    <Avatar className="h-10 w-10 mr-3 bg-slate-600">
-                      <Image
-                        width={100}
-                        height={100}
-                        src={
-                          selectedChat.userId.name?.avatar ||
-                          "/api/placeholder/30/30"
-                        }
-                        alt="User"
-                      />
+                    <Avatar className="h-10 w-10 mr-3 bg-slate-600 border border-slate-500">
+                      {selectedChat.userId.profile?.avatar ? (
+                        <AvatarImage
+                          src={
+                            selectedChat.userId.profile.avatar ||
+                            "/placeholder.svg"
+                          }
+                          alt={selectedChat.userId.name}
+                        />
+                      ) : (
+                        <AvatarFallback className="bg-blue-600 text-white">
+                          {selectedChat.userId.name.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      )}
                     </Avatar>
                     <div>
                       <h3 className="font-medium text-white">
@@ -316,24 +402,24 @@ const MessageAdminDashboard = () => {
               </CardHeader>
 
               {/* Messages area */}
-              <div className="flex-grow p-4 overflow-y-auto bg-slate-800">
-                <div className="space-y-4">
-                  {messages.length > 0 ? (
-                    messages.map((message) => (
+              <div className="flex-grow p-4 overflow-y-auto bg-slate-800/70 backdrop-blur-sm">
+                {messages.length > 0 ? (
+                  <div className="space-y-4">
+                    {messages.map((message, index) => (
                       <div
-                        key={message._id}
+                        key={message._id || index}
                         className={`flex ${
                           message.username === state.name
                             ? "justify-end"
                             : "justify-start"
                         }`}>
                         <div
-                          className={`max-w-3/4 p-3 rounded-lg ${
+                          className={`max-w-[80%] p-3 rounded-lg ${
                             message.username === state.name
-                              ? "bg-blue-600 text-white"
-                              : "bg-slate-700 text-slate-200"
+                              ? "bg-blue-600 text-white rounded-tr-none"
+                              : "bg-slate-700 text-slate-200 rounded-tl-none"
                           }`}>
-                          <p>{message.message}</p>
+                          <p className="break-words">{message.message}</p>
                           <p
                             className={`text-xs mt-1 ${
                               message.username === state.name
@@ -344,32 +430,37 @@ const MessageAdminDashboard = () => {
                           </p>
                         </div>
                       </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-10 text-slate-400">
-                      No messages in this conversation yet
-                    </div>
-                  )}
-                  <div ref={messagesEndRef} />
-                </div>
+                    ))}
+                    <div ref={messagesEndRef} />
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                    <MessageSquare className="h-12 w-12 mb-2 opacity-30" />
+                    <p>No messages in this conversation yet</p>
+                    <p className="text-sm">
+                      Start the conversation by sending a message
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Message input */}
-              <div className="p-4 border-t border-slate-700 bg-slate-800">
+              <div className="p-4 border-t border-slate-700 bg-slate-800/90 backdrop-blur-sm">
                 <div className="flex items-center">
-                  <input
+                  <Input
                     type="text"
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder="Type your message..."
-                    className="flex-grow p-2 bg-slate-700 border-slate-600 border rounded-lg mr-2 text-slate-200 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-grow bg-slate-700 border-slate-600 text-slate-200 placeholder:text-slate-400 focus-visible:ring-blue-500"
                     onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
                   />
                   <Button
                     onClick={handleSendMessage}
                     disabled={!newMessage.trim()}
-                    className="bg-blue-600 hover:bg-blue-700 text-white">
-                    <Send size={18} />
+                    className="ml-2 bg-blue-600 hover:bg-blue-700 text-white">
+                    <Send size={18} className="mr-2" />
+                    Send
                   </Button>
                 </div>
               </div>
@@ -377,12 +468,6 @@ const MessageAdminDashboard = () => {
           </div>
         )}
       </div>
-      <PaginationComponent
-        page={page}
-        setPage={setPage}
-        total={total}
-        itemsPerPage={10}
-      />
     </div>
   );
 };

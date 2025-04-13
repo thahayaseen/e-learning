@@ -28,9 +28,13 @@ export const Varify = createAsyncThunk(
       console.log(error, "from axios");
 
       axios.post("/logout");
-      console.log(error,'error in affter logit');
-      
-      throw new Error(error instanceof Error ?error.message:error?.response?.data?.message||'Unexpexted Error');
+      console.log(error, "error in affter logit");
+      return rejectWithValue(
+        error instanceof Error
+          ? error.message
+          : error?.response?.data?.message || "Unexpexted Error"
+      );
+      // throw new Error(error instanceof Error ?error.message:error?.response?.data?.message||'Unexpexted Error');
     }
   }
 );

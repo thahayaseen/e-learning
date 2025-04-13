@@ -33,6 +33,7 @@ export interface UserDTO {
   purchasedCourses?: string[];
   subscription?: string | null;
   updatedAt?: string;
+  CreatedAt?:Date
 }
 
 export interface ProfileDTO {

@@ -65,6 +65,7 @@ export default class UserRepository implements IUser {
       verified: userdata.verified,
       password: userdata.password,
       username: userdata.username,
+      CreatedAt:userdata.createdAt
     };
     return obj;
   });

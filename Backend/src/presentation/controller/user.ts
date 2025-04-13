@@ -132,10 +132,11 @@ export default class UserController {
   }
   async otpverify(req: Request, res: Response, next: NextFunction) {
     try {
-      const token = req.body.token;
-      console.log(token, "in token");
-
-      const isValid = await this.signUpUser.verifyOtp(req.body.otp, token);
+     
+      const tocken=req.cookies.varifyToken
+      console.log(tocken,'token is ');
+      
+      const isValid = await this.signUpUser.verifyOtp(req.body.otp, tocken);
       console.log("the untoken", isValid);
 
       if (isValid) {
@@ -374,21 +375,7 @@ export default class UserController {
       return;
     }
   }
-  async Beamentor(req: AuthServices, res: Response) {
-    const {
-      fullName,
-      email,
-      phoneNumber,
-      profession,
-      experience,
-      areasOfExpertise,
-      availability,
-      motivation,
-      resume,
-      profileImage,
-    } = req.body;
-    const userid = req.user.userid;
-  }
+
   async GetCourse(req: AuthServices, res: Response) {
     try {
       const { courseid } = req.params;
@@ -449,8 +436,16 @@ export default class UserController {
         mentor,
         sort,
         order,
+        publicRoute,
       } = req.query;
-      const { _id, role } = req.user;
+      let token = req.headers.authorization?.split(" ")[1];
+      let userData: any = null;
+
+      if (token) {
+        userData = await this.LoginUsecase.protectByjwt(token);
+        console.log("Access token verified:", userData);
+      }
+
       // Build filter object
       const filter: any = {};
 
@@ -490,10 +485,17 @@ export default class UserController {
         field: (sort as string) || "UpdatedAt",
         order: (order as "asc" | "desc") || "desc",
       };
-      if ([Roles.STUDENT].includes(role) || !_id || !role) {
+      if (
+        !userData ||
+        !userData.role ||
+        [Roles.STUDENT].includes(userData?.role)
+      ) {
         filter.fromUser = true;
       }
-      // Get courses with pagination, filtering and sorting
+      console.log(filter, "filter is ");
+
+      // Get
+      //  courses with pagination, filtering and sorting
       const data = await this.CourseUseCase.getAllCourse(
         Number(page || 1),
         Number(limit || 10),
@@ -627,12 +629,13 @@ export default class UserController {
       if (!ans) {
         throw new Error("Room not fount");
       }
-      const data = await this.Socketusecase.getAllmessageByroom(roomid);
+      const data: any = await this.Socketusecase.getAllmessageByroom(roomid);
       console.log(data, "chats");
       res.status(HttpStatusCode.OK).json({
         success: true,
         message: "succesfully fetch data",
         data,
+        remortUser: resp?.mentorId?.name,
       });
       return;
     } catch (error) {
@@ -673,10 +676,10 @@ export default class UserController {
       const { UpdateTime } = req.body;
       const { meetid } = req.params;
       const { _id, role } = req.user;
-      console.log(req.user);
-      if (role !== Roles.MENTOR) {
-        throw new Error("Mentor have only access");
-      }
+      // console.log(req.user);
+      // if (role !== Roles.MENTOR) {
+      //   throw new Error("Mentor have only access");
+      // }
       const scheduledTime = new Date(UpdateTime);
 
       const meet = await this.MeetingUsecase.fetchMeetmyId(meetid);
@@ -1120,6 +1123,8 @@ export default class UserController {
     const session = await this.stripe.checkout.sessions.retrieve(
       data.sessionId
     );
+    console.log(session);
+
     res.status(200).json({
       success: true,
       message: "created",
@@ -1129,9 +1134,9 @@ export default class UserController {
   }
   async getTotalRevenue(req: AuthServices, res: Response) {
     try {
-      if (req.user.role !== Roles.ADMIN) {
-        throw new Error(userError.Unauthorised);
-      }
+      // if (req.user.role !== Roles.ADMIN) {
+      //   throw new Error(userError.Unauthorised);
+      // }
       const totalRevenue = await this.revenueUseCase.getTotalRevenue();
       res.status(200).json({ totalRevenue });
     } catch (error) {
@@ -1144,9 +1149,9 @@ export default class UserController {
 
   async getMentorRevenue(req: AuthServices, res: Response) {
     try {
-      if (req.user.role !== Roles.ADMIN) {
-        throw new Error(userError.Unauthorised);
-      }
+      // if (req.user.role !== Roles.ADMIN) {
+      //   throw new Error(userError.Unauthorised);
+      // }
       const mentorRevenue = await this.revenueUseCase.getMentorRevenue();
       res.status(200).json({ mentorRevenue });
     } catch (error) {
@@ -1159,9 +1164,9 @@ export default class UserController {
 
   async getTimeRevenue(req: AuthServices, res: Response) {
     try {
-      if (req.user.role !== Roles.ADMIN) {
-        throw new Error(userError.Unauthorised);
-      }
+      // if (req.user.role !== Roles.ADMIN) {
+      //   throw new Error(userError.Unauthorised);
+      // }
       const { period } = req.query;
       const timeRevenue = await this.revenueUseCase.getTimeRevenue(
         typeof period == "string"

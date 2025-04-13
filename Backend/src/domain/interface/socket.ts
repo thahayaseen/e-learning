@@ -8,7 +8,7 @@ export default interface IsocketUsecase {
     userId: string,
     courseid: string
   ): Promise<string>;
-  getAllroomsByid(Roomid: string,page:number): Promise<getChatroom>;
+  getAllroomsByid(Roomid: string, page: number): Promise<getChatroom>;
   sendMessage(
     Roomid: string,
     userId: string,
@@ -17,7 +17,7 @@ export default interface IsocketUsecase {
   ): Promise<IMessage>;
   findByusers(data: { userid: string; mentorid: string }): Promise<any | null>;
   validatoinUser(roomid: string, email: string): Promise<boolean>;
-  findChatwithroom(roomid: string): Promise<IChatroom | null>;
+  findChatwithroom(roomid: string): Promise<IChatroom | null | any>;
   getAllmessageByroom(roomid: string): Promise<IMessage[]>;
-  valiateMeeting(room:string,userId:string):Promise<boolean>
+  valiateMeeting(room: string, userId: string): Promise<boolean>;
 }

@@ -90,15 +90,16 @@ export function Courses({ courses }: { courses: IProgressCollection[] }) {
                 <CardContent className="p-5">
                   <div className="flex items-center gap-3 mb-4">
                     <Progress
-                      value={course.Score}
+                      value={course.progress.OverallScore
+                      }
                       className="h-2 flex-1 bg-gray-700 rounded-full">
                       <div
                         className={`h-full rounded-full ${progressColor}`}
-                        style={{ width: `${course.progress.OverallScore}%` }}
+                        style={{ width: `${100}%` }}
                       />
                     </Progress>
                     <span className="text-sm font-medium text-white">
-                      {course.Score}%
+                      {course.progress.OverallScore}%
                     </span>
                   </div>
   

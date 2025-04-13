@@ -115,7 +115,7 @@ const AdminDashboard = () => {
     };
 
     fetchTimeRevenue();
-  }, [timePeriod, dashboardData.timeRevenue]);
+  }, [timePeriod]);
 
   // Fetch orders when page changes
   const fetchOrders = async (page) => {
@@ -286,7 +286,7 @@ const AdminDashboard = () => {
       ) : (
         <div className="container mx-auto px-4 py-6">
           {/* Summary Stats with improved visuals */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-6">
             <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg shadow-lg p-6 border border-gray-700 transition-transform hover:scale-102 hover:shadow-xl">
               <div className="flex items-center">
                 <div className="bg-indigo-900 p-3 rounded-full">
@@ -298,6 +298,21 @@ const AdminDashboard = () => {
                   </h2>
                   <p className="text-2xl font-bold text-white">
                     {formatCurrency(dashboardData.totalRevenue)}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg shadow-lg p-6 border border-gray-700 transition-transform hover:scale-102 hover:shadow-xl">
+              <div className="flex items-center">
+                <div className="bg-indigo-900 p-3 rounded-full">
+                  <DollarSign className="text-indigo-400" size={24} />
+                </div>
+                <div className="ml-4">
+                  <h2 className="text-sm font-medium text-gray-400">
+                    Total Gained
+                  </h2>
+                  <p className="text-2xl font-bold text-white">
+                    {formatCurrency((dashboardData.totalRevenue*.1))}
                   </p>
                 </div>
               </div>

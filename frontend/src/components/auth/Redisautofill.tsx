@@ -29,7 +29,7 @@ function Protection({ children }: { children: React.ReactNode }) {
   });
 
   const authRoutes = ["/auth"];
-  const unrestrictedRoutes = [];
+  const unrestrictedRoutes = ["/","/course"];
   // Add /payment to common paths so all authenticated users can access it
   const commonPaths = [
     "/settings",
@@ -211,7 +211,7 @@ function Protection({ children }: { children: React.ReactNode }) {
           }
         }
       } catch (error) {
-        console.error("Auth error:", error);
+        console.log("Auth error:", error);
 
         // Even on error, show unrestricted routes
         if (isAuthRoute || isUnrestrictedRoute(path)) {

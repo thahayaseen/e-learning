@@ -7,6 +7,8 @@ import {
   signUpUser,
   userUseCase,
 } from "../../config/dependencies";
+import { roleChecker } from "../middilwere/roleChecking";
+import { Roles } from "../../app/useCases/enum/User";
 
 const adminControler = new Admincontroler(adminUsecase, userUseCase);
 const router = Router();
@@ -39,21 +41,27 @@ router.post("/logout", controller.logout.bind(controller));
 router.get(
   "/allusers",
   jwtVerify,
+  roleChecker(Roles.ADMIN),
   adminControler.userData.bind(adminControler)
 );
 router.put(
   "/blockuser",
   jwtVerify,
+  roleChecker(Roles.ADMIN),
+
   adminControler.blockUser.bind(adminControler)
 );
 router.get(
   "/getcourse/:page/:type",
   jwtVerify,
+  roleChecker(Roles.ADMIN),
+
   adminControler.getCourseunaproved.bind(adminControler)
 );
 router.get(
   "/allcourses",
-  jwtVerify,
+  // jwtVerify,
+
   controller.getAllcourseUser.bind(controller)
 );
 router.get("/profile", jwtVerify, controller.uProfile.bind(controller));
@@ -61,16 +69,20 @@ router.get("/profile", jwtVerify, controller.uProfile.bind(controller));
 router.post(
   "/addcategory",
   jwtVerify,
+  roleChecker(Roles.ADMIN),
+
   adminControler.createCategorys.bind(adminControler)
 );
 router.put(
   "/actionCategory/:categoryid",
   jwtVerify,
+  roleChecker(Roles.ADMIN),
   adminControler.actionCategory.bind(adminControler)
 );
 router.put(
   "/editcategory/:categoryid",
   jwtVerify,
+  roleChecker(Roles.ADMIN),
   adminControler.editCategory.bind(adminControler)
 );
 router.get(
@@ -109,6 +121,7 @@ router.post(
 router.put(
   "/updatetime/:meetid",
   jwtVerify,
+  roleChecker(Roles.MENTOR),
   controller.UpdateTime.bind(controller)
 );
 router.get("/meeting/:id", jwtVerify, controller.addUsermeet.bind(controller));
@@ -143,11 +156,14 @@ router.post(
 router.get(
   "/getall-mentor-requst",
   jwtVerify,
+  roleChecker(Roles.ADMIN),
   adminControler.getAllmentorrequst.bind(adminControler)
 );
 router.put(
   "/action-be-mentor/:dataid",
   jwtVerify,
+  roleChecker(Roles.ADMIN),
+
   adminControler.actionToRequst.bind(adminControler)
 );
 router.put(
@@ -170,16 +186,22 @@ router.get("/reorder/:orderid", jwtVerify, controller.reOrder.bind(controller));
 router.get(
   "/revenue/total",
   jwtVerify,
+  roleChecker(Roles.ADMIN),
+
   controller.getTotalRevenue.bind(controller)
 );
 router.get(
   "/revenue/mentors",
   jwtVerify,
+  roleChecker(Roles.ADMIN),
+
   controller.getMentorRevenue.bind(controller)
 );
 router.get(
   "/revenue/time",
   jwtVerify,
+  roleChecker(Roles.ADMIN),
+
   controller.getTimeRevenue.bind(controller)
 );
 

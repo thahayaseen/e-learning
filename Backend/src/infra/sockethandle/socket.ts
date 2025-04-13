@@ -27,7 +27,11 @@ export default class HandleSocket {
             room.email
           );
           console.log(res);
+          console.log('thisisisis',res);
+          
           if (res) {
+            console.log('thisissi');
+            
             this.handleJoinRoom(socket, room);
           } else {
             socket.emit(chatEnum.error, "unknown user");
@@ -89,6 +93,8 @@ export default class HandleSocket {
           userEmail: string,
           username: string
         ) => {
+          console.log(message,'mesis');
+          
           this.handleSendMessage(socket, {
             roomId,
             message,

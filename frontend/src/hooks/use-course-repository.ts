@@ -32,14 +32,14 @@ export function useCourseRepository() {
     }) => {
       setIsLoading(true);
       try {
-        console.log(params,'param is fas');
-        
+        console.log(params, "param is fas");
+
         const response = await getcourse(params);
-console.log(response,'cours ius ');
+        console.log(response, "cours ius ");
 
         setCourses(response.data);
         setLatestCourses(response.data.slice(0, 6));
-        console.log(response,'response is ');
+        console.log(response, "response is ");
 
         setTotalCourses(response.total);
 
@@ -58,12 +58,10 @@ console.log(response,'cours ius ');
         setTotalRevenue(revenue);
 
         setApprovedCourses(
-          response.data.filter((c) => c.Approved_by_admin === "approved")
-            .length
+          response.data.filter((c) => c.Approved_by_admin === "approved").length
         );
         setPendingCourses(
-          response.data.filter((c) => c.Approved_by_admin === "pending")
-            .length
+          response.data.filter((c) => c.Approved_by_admin === "pending").length
         );
       } catch (error) {
         console.error("Error fetching courses:", error);

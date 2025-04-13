@@ -68,14 +68,14 @@ export class SocketuseCase implements IsocketUsecase {
     const user = await this.userUsecase.UseProfileByemail(email);
     console.log(user);
 
-    const room = await this.ChatroomUsecase.findByRoomid(roomid);
+    const room: any = await this.ChatroomUsecase.findByRoomid(roomid);
     console.log(room, "roomsis");
     if (!room || !room.userId || !user || !user._id) {
       return false;
     }
     const validatiuon =
       String(room.userId) == String(user._id) ||
-      String(room.mentorId) == String(user._id);
+      String(room.mentorId._id) == String(user._id);
 
     console.log(validatiuon, "validation result is ");
 
@@ -91,25 +91,26 @@ export class SocketuseCase implements IsocketUsecase {
     return await this.MessageRepo.getallmessages(roomid);
   }
   async valiateMeeting(room: string, email: string): Promise<boolean> {
-    console.log('in herefindihg room,',room,email);
-    
+    console.log("in herefindihg room,", room, email);
+
     const result = await this.MeetinguseCase.fetchMeetmyId(room);
     console.log(result);
-    
-    if(!result){
-      console.log('no result found',result);
-      
-      return false
+
+    if (!result) {
+      console.log("no result found", result);
+
+      return false;
     }
     const user = await this.userUsecase.UseProfileByemail(email);
-    console.log(result,'result',user,'useris');
-    
+    console.log(result, "result", user, "useris");
+
     if (!user || !user._id) {
       return false;
     }
-    console.log(result.participants,user._id);
-    
-    const res = String(result.mentorId)==user._id||String(result.userId)==user._id
+    console.log(result.participants, user._id);
+
+    const res =
+      String(result.mentorId) == user._id || String(result.userId) == user._id;
     return res;
   }
 }

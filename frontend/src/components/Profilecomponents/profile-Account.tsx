@@ -37,6 +37,7 @@ export function Account({
 }) {
   const [open, setOpen] = useState(false);
   const [changePassopen, setChangePassopen] = useState(false);
+console.log(userData,'datatattae');
 
   return (
     <TabsContent
@@ -180,8 +181,9 @@ export function Account({
               </h3>
               <p className="text-white flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-[#5CDB95]" />
-                {userData.createdAt
-                  ? new Date(userData.createdAt).toLocaleDateString()
+                {/* {JSON.stringify(userData)} */}
+                {userData.CreatedAt
+                  ? new Date(userData.CreatedAt).toLocaleDateString()
                   : "N/A"}
               </p>
             </div>
