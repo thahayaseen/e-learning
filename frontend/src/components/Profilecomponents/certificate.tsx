@@ -187,7 +187,7 @@ export function Certificates({ userData }: CertificateProps) {
               </h3>
               <p className="text-white flex items-center gap-2 text-2xl font-bold">
                 <Award className="h-6 w-6 text-[#5CDB95]" />
-                {certificates ? certificates.length : 0}
+                {certificates ? total : 0}
               </p>
             </div>
             <div className="bg-[#0a192f] p-5 rounded-xl border border-[#1a2b4a]">
