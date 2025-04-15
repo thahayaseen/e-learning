@@ -80,6 +80,7 @@ interface Course {
   Category?: { Category: string };
   CreatedAt?: string;
   lessons_progress?: any;
+  mentorId?: string;
 }
 
 interface Lesson {
@@ -371,7 +372,9 @@ const CourseView = ({ id }: { id: string }) => {
     } catch (err) {
       // setError(err.message);
       console.error("Certificate fetch error:", err);
-      toast.error(err instanceof Error?err.message:"Cannot get the certificate data")
+      toast.error(
+        err instanceof Error ? err.message : "Cannot get the certificate data"
+      );
     } finally {
       setloading(false);
     }
@@ -520,8 +523,8 @@ const CourseView = ({ id }: { id: string }) => {
         toast.success("Video lesson completed!");
       }
     }
-    console.log(updatedProgress.isCompleted,'lastis');
-    
+    console.log(updatedProgress.isCompleted, "lastis");
+
     console.log("sdfsafsadf");
 
     // Call the updated function with the correct parameters for video type
@@ -549,7 +552,6 @@ const CourseView = ({ id }: { id: string }) => {
   // Quiz answer handler
   const handleQuizAnswer = (answer: string) => {
     setQuizAnswers(answer);
- 
   };
 
   const handleChatmentor = () => {
@@ -573,9 +575,13 @@ const CourseView = ({ id }: { id: string }) => {
 
     // Create a datetime string from the selected date and time
     const meetingDateTime = new Date(`${selectedDate}T${selectedTime}:00`);
-
+    console.log(course.Mentor_id);
     // Call API to request meeting
-    requestmeeting(course.Mentor_id._id, meetingDateTime.toString(), course._id)
+    requestmeeting(
+      course.Mentor_id.mentorId,
+      meetingDateTime.toString(),
+      course._id
+    )
       .then((result) => {
         // Update meeting state with the new meeting
         console.log(result, "resulst is ");
@@ -728,7 +734,7 @@ const CourseView = ({ id }: { id: string }) => {
   const shuffledOptions = useMemo(() => {
     return selectedTask?.Options ? shuffleArray(selectedTask.Options) : [];
   }, [selectedTask?.Options]);
-  
+
   // Navigate to next task
   const navigateToNextTask = () => {
     if (!course || !selectedTask) return;
@@ -791,7 +797,7 @@ const CourseView = ({ id }: { id: string }) => {
                 Video Lesson
               </CardTitle>
               <CardDescription className="text-gray-600">
-                Watch and learn at your own pace  
+                Watch and learn at your own pace
               </CardDescription>
             </CardHeader>
             <CardContent className="p-6">
@@ -902,24 +908,22 @@ const CourseView = ({ id }: { id: string }) => {
                     onValueChange={(value) => handleQuizAnswer(value)}
                     className="space-y-3">
                     {shuffledOptions &&
-                      shuffledOptions.map(
-                        (option: string, index: number) => (
-                          <div
-                            key={index}
-                            className="flex items-center space-x-2 border p-4 rounded-md hover:bg-blue-50/50 transition-colors">
-                            <RadioGroupItem
-                              value={option}
-                              id={`option-${index}`}
-                              className="h-5 w-5 text-blue-600"
-                            />
-                            <Label
-                              htmlFor={`option-${index}`}
-                              className="flex-1 cursor-pointer text-gray-700">
-                              {option}
-                            </Label>
-                          </div>
-                        )
-                      )}
+                      shuffledOptions.map((option: string, index: number) => (
+                        <div
+                          key={index}
+                          className="flex items-center space-x-2 border p-4 rounded-md hover:bg-blue-50/50 transition-colors">
+                          <RadioGroupItem
+                            value={option}
+                            id={`option-${index}`}
+                            className="h-5 w-5 text-blue-600"
+                          />
+                          <Label
+                            htmlFor={`option-${index}`}
+                            className="flex-1 cursor-pointer text-gray-700">
+                            {option}
+                          </Label>
+                        </div>
+                      ))}
                   </RadioGroup>
                 )}
               </div>

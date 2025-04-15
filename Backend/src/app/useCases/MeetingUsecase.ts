@@ -57,6 +57,8 @@ class MeetingUsecase implements ImessageUsecase {
     mentorid: string
   ): Promise<void> {
     const meet = await this.MeetingRepo.getMeetingByid(Meetid);
+    console.log('fasdafsdafsd');
+    
     if (!meet) {
       throw new Error("Meet Not find");
     }
