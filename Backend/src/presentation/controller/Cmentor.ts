@@ -492,9 +492,14 @@ export class MentorController {
       let roomid;
       const isaldredy = await this.SocketuserCase.findByusers({
         userid: user._id,
-        mentorid: course.Mentor_id._id,
+        mentorid: course.Mentor_id.mentorId,
       });
-      console.log(course, "cours id ", course.Mentor_id._id, course.Mentor_id);
+      console.log(
+        course,
+        "cours id ",
+        course.Mentor_id.mentorId,
+        course.Mentor_id
+      );
 
       if (isaldredy) {
         roomid = String(isaldredy._id);

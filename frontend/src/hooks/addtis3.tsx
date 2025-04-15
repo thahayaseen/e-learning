@@ -8,6 +8,10 @@ function useUploadS3() {
     try {
       setUploading(fileType === "image");
       setuploadVideo(fileType === "video");
+      if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) {
+        throw new Error("Cannot upload other than video or image");
+      }
+
       const res = await fetch("/api/upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
