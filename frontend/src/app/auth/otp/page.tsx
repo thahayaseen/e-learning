@@ -87,14 +87,14 @@ function Page() {
       const response: any = await axios.post(
         "/verify",
         {
-          token: "varifyToken",
+          token: get_cookie("varifyToken"),
           otp: value,
         },
         {
           withCredentials: true,
         }
       );
-      
+
       console.log(response);
       delete_cookie("varifyToken");
       if (response.success) {
