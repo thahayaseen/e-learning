@@ -18,6 +18,7 @@ app.use(
     origin: [
       "https://e-learning-git-main-thahayaseens-projects.vercel.app",
       "http://localhost:3000",
+      "https://e-learning-phi-five.vercel.app",
     ],
     methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
     credentials: true,
