@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import { CertificateDTO } from "../../app/dtos/Certificate";
 import { ICertificaterepository } from "../../domain/repository/Icertificate.repository";
 import Certificate from "../database/models/certificate";
@@ -84,12 +85,11 @@ console.log(data,'anss is ');
     studentid: string,
     courseid: string
   ): Promise<CertificateDTO|null> {
-    const res: CertificateDTO | null = await Certificate.findOne({
+  return  await Certificate.findOne({
       student_id: studentid,
-      course_id: courseid,
+      course_id: new Types.ObjectId(courseid),
     });
  
-    return res;
   }
 }
 export default new CertificateRepo();

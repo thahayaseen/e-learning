@@ -791,7 +791,7 @@ const CourseView = ({ id }: { id: string }) => {
                 Video Lesson
               </CardTitle>
               <CardDescription className="text-gray-600">
-                Watch and learn at your own pace
+                Watch and learn at your own pace  
               </CardDescription>
             </CardHeader>
             <CardContent className="p-6">
@@ -1226,17 +1226,17 @@ const CourseView = ({ id }: { id: string }) => {
               <div className="space-y-5">
                 <div>
                   <div className="flex justify-between text-sm mb-1.5">
-                    <span className="font-medium text-gray-700">
+                    {/* <span className="font-medium text-gray-700">
                       Course Progress
                     </span>
                     <span className="font-semibold text-primary">
                       {totalprogres}%
-                    </span>
+                    </span> */}
                   </div>
-                  <Progress
+                  {/* <Progress
                     value={totalprogres}
                     className="h-2.5 bg-gray-100"
-                  />
+                  /> */}
                 </div>
 
                 {/* Enhanced Learning Progress Dashboard */}
@@ -1331,7 +1331,7 @@ const CourseView = ({ id }: { id: string }) => {
                       <Button
                         size="sm"
                         onClick={() => setMeetingDialogOpen(true)}
-                        className="flex-1"
+                        className="flex-1 text-white"
                         variant="outline">
                         <Calendar className="h-4 w-4 mr-2" /> Request Meeting
                       </Button>

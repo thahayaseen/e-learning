@@ -131,7 +131,11 @@ export function useCourseRepository() {
 
       // Remove the course from the list
       setCourses((prevCourses) =>
-        prevCourses.filter((course) => course._id !== courseId)
+        prevCourses.map((course) =>
+          course._id === courseId
+            ? { ...course, unlist: !course.unlist }
+            : course
+        )
       );
     } catch (error) {
       console.error("Error deleting course:", error);
