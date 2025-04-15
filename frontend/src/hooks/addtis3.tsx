@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "react-hot-toast";
 
 function useUploadS3() {
   const [uploading, setUploading] = useState(false);
@@ -38,10 +38,12 @@ function useUploadS3() {
 
       return fileUrl;
     } catch (error) {
-      console.error(`Error uploading ${fileType}:`, error);
-      toast.error("Upload Error", {
-        description: `Failed to upload ${fileType}. Please try again.`,
-      });
+      console.log(`Error uploading ${fileType}:`, error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : `Failed to upload ${fileType}. Please try again.`
+      );
       return null;
     } finally {
       setUploading(false);

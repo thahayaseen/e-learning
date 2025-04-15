@@ -643,15 +643,18 @@ const CourseView = ({ id }: { id: string }) => {
           }));
 
           // Update progress on the server for Quiz type
-          return updateVideoProgress(
+          updateVideoProgress(
             course?._id, // Course ID
             taskId, // Task ID
             undefined, // No watch time for quiz
             true, // Completed
             undefined, // No response for quiz
-            result.score || 100, // Score from validation or default to 100
+            100, // Score from validation or default to 100
             selectedlessonid
-          );
+          ).then((data:any) => {
+            console.log(data, "data adter update",data.data.OverallScore);
+            settotalprogress(data.data.OverallScore)
+          });
         } else {
           toast.error("Incorrect answer. Please try again.");
         }

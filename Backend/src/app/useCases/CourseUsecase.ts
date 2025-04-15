@@ -372,7 +372,7 @@ export class CourseUsecase implements ICourseUseCase {
       lessonId,
       taskId,
       taskType,
-      // response,
+
       updateData
     );
     console.log(
@@ -383,14 +383,14 @@ export class CourseUsecase implements ICourseUseCase {
     );
     if (result.OverallScore == 100) {
       console.log("yessss entered");
-      const sertificate = await this.CertificateRepo.GetCertificateByCourseid(
+      let sertificate = await this.CertificateRepo.GetCertificateByCourseid(
         result.Student_id._id,
         result.Course_id._id
       );
       console.log(sertificate, "certificateis");
 
       if (!sertificate) {
-        await this.CertificateRepo.createCertificate(
+        sertificate = await this.CertificateRepo.createCertificate(
           result.Student_id._id,
           result.Student_id.name,
           result.Course_id._id,
@@ -399,7 +399,10 @@ export class CourseUsecase implements ICourseUseCase {
           new Date()
         );
       }
+      console.log(sertificate, "data isissisisisi");
+      result.certificateId = sertificate?._id;
     }
+
     return result;
   }
   async markLessonCompleteduseCase(
@@ -481,7 +484,7 @@ export class CourseUsecase implements ICourseUseCase {
       search
     );
   }
-  async actionCourse(coureseId: string, action: boolean):Promise<void> {
+  async actionCourse(coureseId: string, action: boolean): Promise<void> {
     await this.CourseRepo.UpdataCourse(String(coureseId), { unlist: action });
   }
 }

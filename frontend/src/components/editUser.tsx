@@ -125,8 +125,10 @@ const EditProfileDialog: React.FC<EditProfileProps> = ({
       // Upload image if a new file is selected
       if (imageFile) {
         avatarUrl = await uploadtos3(imageFile, "image");
-        newUpdatedData = { ...newUpdatedData, ...{ avathar: avatarUrl } };
-        datas = { ...datas, profile: { ...data.profile, avatar: avatarUrl } };
+        if (avatarUrl) {
+          newUpdatedData = { ...newUpdatedData, ...{ avathar: avatarUrl } };
+          datas = { ...datas, profile: { ...data.profile, avatar: avatarUrl } };
+        }
       }
 
       console.log("databefore", newUpdatedData);
@@ -135,8 +137,8 @@ const EditProfileDialog: React.FC<EditProfileProps> = ({
       setNewimage(null);
       setNewimage(null);
       setUpdatedData({});
-      console.log(datas,'add data after update');
-      
+      console.log(datas, "add data after update");
+
       onSave(datas);
       onOpenChange(false);
     } catch (error) {
@@ -237,7 +239,8 @@ const EditProfileDialog: React.FC<EditProfileProps> = ({
                 <FormItem>
                   <FormLabel className="text-blue-200">Username</FormLabel>
                   <FormControl>
-                    <Input disabled
+                    <Input
+                      disabled
                       {...field}
                       className="bg-blue-900 text-white border-blue-800 focus:ring-blue-600"
                     />
@@ -255,7 +258,7 @@ const EditProfileDialog: React.FC<EditProfileProps> = ({
                   <FormLabel className="text-blue-200">Email</FormLabel>
                   <FormControl>
                     <Input
-                    disabled
+                      disabled
                       {...field}
                       type="email"
                       className="bg-blue-900 text-white border-blue-800 focus:ring-blue-600"

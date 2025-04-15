@@ -807,6 +807,7 @@ export class RepositoryCourses implements ICoursesRepository {
     // Update timestamp
     progress.UpdatedAt = new Date();
 
+    await progress.save();
     // Save the updated progress
     const res: any = await ProgressCollection.findOne({
       Student_id: studentId,
@@ -821,7 +822,6 @@ export class RepositoryCourses implements ICoursesRepository {
           select: "Category",
         },
       });
-    await progress.save();
 
     return res;
   }

@@ -1102,6 +1102,8 @@ export default class UserController {
       if (!_id || !courseId) {
         throw new Error("Please shere valid information");
       }
+      console.log(_id,'id issss');
+      
       const result = await this.CourseUseCase.certificate(_id, courseId);
       if (!result) {
         throw new Error("please Compleate course");

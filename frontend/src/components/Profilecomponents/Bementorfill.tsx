@@ -109,11 +109,11 @@ function BeMentorFill() {
       if (values.idProof) {
         const idprofurl = await uploadtos3(values.idProof, "image");
         console.log(idprofurl);
-        values.idProof = idprofurl;
+        values.idProof = idprofurl ? idprofurl : null;
       }
       if (values.profileImage) {
         const profileimage = await uploadtos3(values.profileImage, "image");
-        values.profileImage = profileimage;
+        values.profileImage = profileimage ? profileimage : null;
       }
       console.log(values, "all datais ");
       await beaMentor(values);

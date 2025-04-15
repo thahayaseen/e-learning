@@ -198,7 +198,7 @@ const TaskForm = ({
 
       if (videoFile && !videoUrl) {
         finalVideoUrl = await uploadtos3(videoFile, "video");
-        setVideoUrl(finalVideoUrl);
+        setVideoUrl((prev) => (finalVideoUrl ? finalVideoUrl : prev));
       }
 
       onSave({
@@ -285,11 +285,14 @@ const TaskForm = ({
                           <SelectValue placeholder="Select correct answer" />
                         </SelectTrigger>
                         <SelectContent>
-                          {quizForm.watch("Options").filter(option => option.trim() !== "").map((option, index) => (
-                            <SelectItem key={index} value={option}>
-                              {option}
-                            </SelectItem>
-                          ))}
+                          {quizForm
+                            .watch("Options")
+                            .filter((option) => option.trim() !== "")
+                            .map((option, index) => (
+                              <SelectItem key={index} value={option}>
+                                {option}
+                              </SelectItem>
+                            ))}
                         </SelectContent>
                       </Select>
                     </FormControl>
