@@ -568,8 +568,8 @@ export default class UserController {
           },
         ],
         mode: "payment",
-        success_url: `http://${process.env.NEXT_PUBLIC_SERVER}/paymentstatus?status=true&session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `http://${process.env.NEXT_PUBLIC_SERVER}/paymentstatus?status=false&session_id={CHECKOUT_SESSION_ID}`,
+        success_url: `${process.env.NEXT_PUBLIC_SERVER}/paymentstatus?status=true&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${process.env.NEXT_PUBLIC_SERVER}/paymentstatus?status=false&session_id={CHECKOUT_SESSION_ID}`,
         metadata: {
           courseId: requestData.courseId,
           planType: requestData.planType,
