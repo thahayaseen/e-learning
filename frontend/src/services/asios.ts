@@ -1,41 +1,45 @@
 import { get_cookie } from "@/lib/features/cookie";
 import axios, { AxiosInstance } from "axios";
 
-const domain =process.env.NEXT_PUBLIC_DOMAIN || "http://"+'localhost:4050'
-console.log(domain,'domain isff httpsssssd',process.env.NEXT_PUBLIC_DOMAIN );
+// Fallback to localhost if env var is not set
+const domain = process.env.NEXT_PUBLIC_DOMAIN || "http://localhost:4050";
+console.log(domain, '← API base URL');
+
 const api: AxiosInstance = axios.create({
   baseURL: domain,
   timeout: 100000,
+  withCredentials: true, // Recommended to be here globally
 });
+
+// Request interceptor
 api.interceptors.request.use(
   (config) => {
-    console.log("Requset Intercepto", config);
-    const tocken = get_cookie("access");
-    config.withCredentials = true;
-
-    if (tocken) {
-      console.log("tojen in access", tocken);
-
-      config.headers["Authorization"] = `Bearer ${tocken}`;
-      return config;
+    const token = get_cookie("access");
+    if (token) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+      console.log("→ Request with token", token);
+    } else {
+      console.log("→ Request without token");
     }
     return config;
   },
   (error) => {
-    console.log("error in request" + error);
+    console.error("Request error:", error);
     return Promise.reject(error);
   }
 );
+
+// Response interceptor
 api.interceptors.response.use(
   (response) => {
-    console.log("responcse is " + response.data);
-    return response.data;
+    console.log("→ Response received", response.data);
+    return response.data; // Simplify response usage
   },
   (error) => {
-    console.log("error is", error);
-    // toast.error( error.response.data.message)
-    // return Promise.reject(error);
-    throw new Error(error?.response?.data.message || error.message);
+    const errorMsg = error?.response?.data?.message || error.message;
+    console.error("→ Response error:", errorMsg);
+    // You can show toast here if you're using a UI lib
+    throw new Error(errorMsg); // Keeps it consistent with async/await usage
   }
 );
 
