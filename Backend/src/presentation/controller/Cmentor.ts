@@ -158,12 +158,14 @@ export class MentorController {
     courseId: string,
     lessonid?: string,
     islesson: boolean = true,
-    taskId?: string
+    taskId?: string,
+    isCourseDelete: boolean = true
   ) {
     const user = await this.userUsecase.UseProfileByemail(email);
     if (!user) {
       throw new Error("User not found");
     }
+    console.log(email, courseId, lessonid, "datais");
 
     // Fetch course
     const course = await this.CourseUsecase.getSelectedCourse(courseId, false);
@@ -171,12 +173,30 @@ export class MentorController {
     if (!course) {
       throw new Error("Course not found");
     }
-    if (String(course.Mentor_id._id) !== String(user._id)) {
+    console.log(
+      course.Mentor_id._id,
+      "memtorid s",
+      course.Mentor_id,
+      course.Mentor_id.mentorId
+    );
+    if (String(course.Mentor_id.mentorId) !== String(user._id)) {
       throw new Error("You don't have permission");
     }
-    // console.log(course.lessons, lessonid);
+    if (course.Approved_by_admin == "approved" && isCourseDelete) {
+      throw new Error("Cannot update approved Course");
+    }
+    console.log(course.lessons, "lessonid isissisi");
+    console.log(
+      lessonid,
+      islesson,
+      course.lessons.findIndex((data: any) => String(data._id) == lessonid),
+      "lesson idatas"
+    );
+    const ans = course.lessons.findIndex(
+      (data: any) => String(data._id) == lessonid
+    );
 
-    if (lessonid && islesson && !course.lessons.includes(lessonid)) {
+    if (lessonid && islesson && ans == -1) {
       throw new Error("You don't have permission");
     }
 
@@ -272,10 +292,15 @@ export class MentorController {
       // }
       const { courseid } = req.params;
       const { data } = req.body;
+      const { _id, email } = req.user;
       if (data.lessons) {
         delete data.lessons;
       }
       console.log(data, courseid);
+      const { course } = await this.VarifyUser(email, courseid);
+      const different =
+        new Date().getDate() - new Date(course.CreatedAt).getDate();
+      console.log(different, "diffrent is ");
 
       await this.MentoruseCases.updataCourse(courseid, data);
       res.status(HttpStatusCode.OK).json({
@@ -284,30 +309,40 @@ export class MentorController {
       });
       return;
     } catch (error) {
+      console.log(error instanceof Error ? error.message : "loooo", "eror is");
+
       res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: "Unable to update",
+        message: error instanceof Error ? error.message : "Unable to update",
       });
     }
   }
   async deleteLesson(req: AuthServices, res: Response) {
-    if (req.user.role != Roles.MENTOR) {
-      res.status(HttpStatusCode.UNAUTHORIZED).json({
-        success: false,
-        message: userError.Unauthorised,
-      });
-      return;
-    }
-    const { email } = req.user;
-    const { id } = req.params;
-    const lessonid = req.body.lessonId;
-    console.log(lessonid, id, "the id is htis ");
+    try {
+      if (req.user.role != Roles.MENTOR) {
+        res.status(HttpStatusCode.UNAUTHORIZED).json({
+          success: false,
+          message: userError.Unauthorised,
+        });
+        return;
+      }
+      const { email } = req.user;
+      const { id } = req.params;
+      const lessonid = req.body.lessonId;
+      console.log(lessonid, id, "the id is htis ");
 
-    await this.VarifyUser(email, id, lessonid);
-    // const data = await this.MentoruseCases.FindCourse(id);
-    // const removedArray = data?.lessons.filter((data) => data !== lessonid);
-    await this.MentoruseCases.DeleteLesson(lessonid);
-    this.CourseUsecase.deleteLessonfromcourse(id, lessonid);
+      await this.VarifyUser(email, id, lessonid);
+      // const data = await this.MentoruseCases.FindCourse(id);
+      // const removedArray = data?.lessons.filter((data) => data !== lessonid);
+      await this.MentoruseCases.DeleteLesson(lessonid);
+      await this.CourseUsecase.deleteLessonfromcourse(id, lessonid);
+    } catch (error) {
+      console.log(
+        error instanceof Error
+          ? error.message + "cannot seeeeeee"
+          : "an error occured"
+      );
+    }
   }
   async UpdateAndAddNewlesson(req: AuthServices, res: Response) {
     const { email, role } = req.user;
@@ -367,7 +402,9 @@ export class MentorController {
       console.log(lessonId, courseId);
 
       await this.CourseUsecase.addLessoninCourse(courseId, String(lessonId));
-
+      res.status(HttpStatusCode.OK).json({
+        success: true,
+      });
       return;
     } catch (error: any) {
       console.error("Error adding Lesson:", error.message);
@@ -457,7 +494,7 @@ export class MentorController {
         userid: user._id,
         mentorid: course.Mentor_id._id,
       });
-      console.log(course,'cours id ', course.Mentor_id._id,course.Mentor_id);
+      console.log(course, "cours id ", course.Mentor_id._id, course.Mentor_id);
 
       if (isaldredy) {
         roomid = String(isaldredy._id);
@@ -555,7 +592,7 @@ export class MentorController {
   async getState(req: AuthServices, res: Response) {
     try {
       const { _id, role } = req.user;
-    
+
       const data = await this.MentoruseCases.getState(_id);
       console.log(data, "stateis ");
 
@@ -574,7 +611,7 @@ export class MentorController {
   async getRevenue(req: AuthServices, res: Response) {
     try {
       const { _id, role } = req.user;
-    
+
       const data = await this.MentoruseCases.getRevenueData(_id);
       res.status(HttpStatusCode.OK).json({
         success: true,
@@ -635,7 +672,6 @@ export class MentorController {
       const { _id, role } = req.user;
       console.log("entere fadfsd");
 
-   
       const { page, limit, search, status } = req.query;
       let filter = {
         search,
@@ -659,6 +695,37 @@ export class MentorController {
         message:
           error instanceof Error ? error.message : "Cannot find the Data",
       });
+    }
+  }
+  async ListactionCourse(req: AuthServices, res: Response) {
+    try {
+      const { courseid } = req.query;
+      const { email } = req.user;
+      if (!courseid) {
+        throw new Error("cannot get all data");
+      }
+      const { course } = await this.VarifyUser(
+        email,
+        String(courseid),
+        undefined,
+        undefined,
+        undefined,
+        false
+      );
+
+      await this.CourseUsecase.actionCourse(String(courseid), !course.unlist);
+      res.status(HttpStatusCode.OK).json({
+        success: true,
+        message: "updated",
+      });
+      return;
+    } catch (error) {
+      console.log(error, "error is ");
+      res.status(HttpStatusCode.BAD_REQUEST).json({
+        success: false,
+        message: error instanceof Error ? error.message : "Unable to update",
+      });
+      return;
     }
   }
 }

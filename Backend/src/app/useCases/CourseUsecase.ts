@@ -26,7 +26,7 @@ export class CourseUsecase implements ICourseUseCase {
     private CertificateRepo: ICertificaterepository
   ) {}
   async getCourseBymentor(id: string): Promise<ICourses | null> {
-    return await this.CourseRepo.getCourseBymentor(id);
+    return (await this.CourseRepo.getCourseBymentor(id))[0];
   }
   async getAllCourse(
     page: number,
@@ -76,8 +76,18 @@ export class CourseUsecase implements ICourseUseCase {
       throw new Error(error.message);
     }
   }
-  async getByCoursids(CourseId: string[], userid: string) {
-    return await this.CourseRepo.getCouseEachuser(CourseId, userid);
+  async getByCoursids(
+    CourseId: string[],
+    userid: string,
+    page?: number,
+    limit?: number
+  ) {
+    return await this.CourseRepo.getCouseEachuser(
+      CourseId,
+      userid,
+      page,
+      limit
+    );
   }
   async createCourse(datas: Omit<ICourses, "_id">) {
     console.log(datas, "lessson is");
@@ -172,7 +182,7 @@ export class CourseUsecase implements ICourseUseCase {
     courseId: string,
     lessonid: string
   ): Promise<void> {
-    this.CourseRepo.DeleteLessonFromCourse(courseId, lessonid);
+    await this.CourseRepo.DeleteLessonFromCourse(courseId, lessonid);
   }
   async getuserallCourseprogresdata(userid: string): Promise<{
     progresPersentage: number;
@@ -373,22 +383,22 @@ export class CourseUsecase implements ICourseUseCase {
     );
     if (result.OverallScore == 100) {
       console.log("yessss entered");
-     const sertificate= await this.CertificateRepo.GetCertificateByCourseid(
+      const sertificate = await this.CertificateRepo.GetCertificateByCourseid(
         result.Student_id._id,
         result.Course_id._id
       );
-      console.log(sertificate,'certificateis');
-      
-     if(!sertificate){
-      await this.CertificateRepo.createCertificate(
-        result.Student_id._id,
-        result.Student_id.name,
-        result.Course_id._id,
-        result.Course_id.Title,
-        result.Course_id.Category.Category,
-        new Date()
-      );
-     }
+      console.log(sertificate, "certificateis");
+
+      if (!sertificate) {
+        await this.CertificateRepo.createCertificate(
+          result.Student_id._id,
+          result.Student_id.name,
+          result.Course_id._id,
+          result.Course_id.Title,
+          result.Course_id.Category.Category,
+          new Date()
+        );
+      }
     }
     return result;
   }
@@ -470,6 +480,9 @@ export class CourseUsecase implements ICourseUseCase {
       limit,
       search
     );
+  }
+  async actionCourse(coureseId: string, action: boolean):Promise<void> {
+    await this.CourseRepo.UpdataCourse(String(coureseId), { unlist: action });
   }
 }
 // interface I

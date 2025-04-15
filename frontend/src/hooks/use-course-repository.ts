@@ -8,6 +8,7 @@ import {
   updateCourseApi,
   deleteCourseApi,
   getcourse,
+  unlistCourse,
 } from "@/services/fetchdata";
 
 export function useCourseRepository() {
@@ -126,7 +127,7 @@ export function useCourseRepository() {
   const deleteCourse = useCallback(async (courseId: string) => {
     setIsLoading(true);
     try {
-      await deleteCourseApi(courseId);
+      await unlistCourse(courseId);
 
       // Remove the course from the list
       setCourses((prevCourses) =>

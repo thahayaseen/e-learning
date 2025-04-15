@@ -27,7 +27,12 @@ export interface ICourseUseCase {
   ): Promise<orderDto>;
   purchaseCourse(userId: string, courseId: string): Promise<void>;
   createOrder(course: orderDto): Promise<orderDto>;
-  getByCoursids(CourseIds: string[], userid: string): Promise<ICourses[]>;
+  getByCoursids(
+    CourseIds: string[],
+    userid: string,
+    page?: number,
+    limit?: number
+  ): Promise<ICourses[]>;
   addlessons(data: ILesson[]): Promise<any>;
   createCourse(datas: Omit<ICourses, "_id">): Promise<any>;
   createTaskandaddtoLesson(
@@ -96,6 +101,7 @@ export interface ICourseUseCase {
     page: number,
     limit: number,
     search: any
-  ):  Promise<{ data: CertificateDTO[]; total: number }>;
+  ): Promise<{ data: CertificateDTO[]; total: number }>;
+  actionCourse(coureseId: string, action: boolean):Promise<void> 
   // getActiveOrder(_id: string, courseId: string): Promise<any>;
 }

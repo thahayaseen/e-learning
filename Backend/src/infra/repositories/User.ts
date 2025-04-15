@@ -91,7 +91,7 @@ export default class UserRepository implements IUser {
       filter: any = {},
       sort: any
     ): Promise<Alluserinterface> => {
-      console.log(limit, skip, filter, sort);
+      console.log(limit, skip, JSON.stringify(filter), sort);
 
       const data = await UserModel.find(filter)
         .populate("purchasedCourses")

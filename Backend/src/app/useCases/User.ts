@@ -12,6 +12,7 @@ import {
   Imentorrequst,
 } from "../../infra/repositories/beaMentorRepositroy";
 import { Roles } from "./enum/User";
+import { Types } from "mongoose";
 
 export class UserUsecase implements IuserUseCase {
   constructor(
@@ -50,10 +51,20 @@ export class UserUsecase implements IuserUseCase {
     }
     if (mentorid) {
       filter.purchasedCourses = {
-        $in: await this.CourseRepo.getCourseBymentor(mentorid),
+        $in: (await this.CourseRepo.getCourseBymentor(mentorid)).map(
+          (data: any) => new Types.ObjectId(data?._id as string)
+        ),
       };
     }
-    console.log();
+    // if (mentorid) {
+    //   const courseData = await this.CourseRepo.getCourseBymentor(mentorid);
+    //   if (courseData) {
+    //     filter.purchasedCourses = {
+    //       $in: courseData.Mentor_id,
+    //     };
+    //   }
+    // }
+    console.log(mentorid, "mentoridis",filter);
 
     const sortOptions = { [sort]: order === "asc" ? 1 : -1 };
     const users = await this.userReposetory.findAlluser(

@@ -28,7 +28,7 @@ import type {
 } from "@/services/interface/CourseDto";
 import {
   addNewTaskDb,
-
+  deleteLessonApi,
   deleteTask,
   savelessonchanges,
 } from "@/services/fetchdata";
@@ -219,14 +219,14 @@ const EditLessonDialog = ({
     setIsLoading(true);
     try {
       if (updateLesson) {
-        await savelessonchanges(lesson?._id, updateLesson,course?._id);
+        await savelessonchanges(lesson?._id, updateLesson, course?._id);
         setUpdatLessons(null);
       }
       await onSave(updatedLesson);
       onClose();
-    } catch (error:any) {
+    } catch (error: any) {
       console.error("Error saving lesson:", error);
-      toast.error(error.message)
+      toast.error(error.message);
     } finally {
       setIsLoading(false);
     }
@@ -239,11 +239,16 @@ const EditLessonDialog = ({
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-blue-900 text-white border-blue-700">
         <DialogHeader>
           <DialogTitle className="text-2xl text-white flex items-center gap-2">
-            Edit Lesson
+            {course.Approved_by_admin == "approved"
+              ? "View All Lesson"
+              : "Edit Lesson "}
+
             <Badge className="ml-2 bg-blue-700">{course.Title}</Badge>
           </DialogTitle>
           <DialogDescription className="text-blue-300">
-            Make changes to lesson content and tasks
+            {course.Approved_by_admin == "approved"
+              ? "view all lessons"
+              : "Make changes to lesson content and tasks"}
           </DialogDescription>
         </DialogHeader>
 
@@ -329,6 +334,7 @@ const EditLessonDialog = ({
                   <Input
                     id="Lessone_name"
                     name="Lessone_name"
+                    disabled={course.Approved_by_admin == "approved"}
                     value={updatedLesson.Lessone_name || ""}
                     onChange={handleInputChange}
                     className="bg-blue-800 border-blue-700 text-white focus:border-blue-500"
@@ -342,6 +348,7 @@ const EditLessonDialog = ({
                   <Textarea
                     id="Content"
                     name="Content"
+                    disabled={course.Approved_by_admin == "approved"}
                     value={updatedLesson.Content || ""}
                     onChange={handleInputChange}
                     rows={12}
@@ -374,7 +381,11 @@ const EditLessonDialog = ({
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-blue-300 hover:text-red-300 hover:bg-blue-600"
+                              className={`text-blue-300 hover:text-red-300 hover:bg-blue-600 ${
+                                course.Approved_by_admin == "approved"
+                                  ? "hidden"
+                                  : ""
+                              }`}
                               onClick={() =>
                                 removeTask(
                                   index,
@@ -395,6 +406,9 @@ const EditLessonDialog = ({
                                   </Label>
                                   <Input
                                     value={(task as IQuizTask).Question}
+                                    disabled={
+                                      course.Approved_by_admin == "approved"
+                                    }
                                     onChange={(e) =>
                                       handleTaskInputChange(
                                         e,
@@ -422,6 +436,10 @@ const EditLessonDialog = ({
                                           </div>
                                           <Input
                                             value={option}
+                                            disabled={
+                                              course.Approved_by_admin ==
+                                              "approved"
+                                            }
                                             onChange={(e) =>
                                               handleTaskInputChange(
                                                 e,
@@ -442,6 +460,9 @@ const EditLessonDialog = ({
                                     Correct Answer
                                   </Label>
                                   <Input
+                                    disabled={
+                                      course.Approved_by_admin == "approved"
+                                    }
                                     value={(task as IQuizTask).Answer}
                                     onChange={(e) =>
                                       handleTaskInputChange(e, index, "Answer")
@@ -459,6 +480,9 @@ const EditLessonDialog = ({
                                 </Label>
                                 <Textarea
                                   value={(task as IAssignmentTask).Description}
+                                  disabled={
+                                    course.Approved_by_admin == "approved"
+                                  }
                                   onChange={(e) =>
                                     handleTaskInputChange(
                                       e,
@@ -478,6 +502,9 @@ const EditLessonDialog = ({
                                   Video URL
                                 </Label>
                                 <Input
+                                  disabled={
+                                    course.Approved_by_admin == "approved"
+                                  }
                                   value={(task as IVideoTask).VideoURL}
                                   onChange={(e) =>
                                     handleTaskInputChange(e, index, "VideoURL")
@@ -497,7 +524,10 @@ const EditLessonDialog = ({
                   )}
                 </div>
 
-                <div className="bg-blue-800 border border-blue-700 rounded-md p-4">
+                <div
+                  className={`bg-blue-800 border border-blue-700 rounded-md p-4 ${
+                    course.Approved_by_admin == "approved" ? "hidden" : ""
+                  }`}>
                   <h3 className="text-lg font-medium text-white mb-4">
                     Add New Task
                   </h3>
@@ -561,6 +591,7 @@ const EditLessonDialog = ({
                         <div className="space-y-2">
                           <Label className="text-white">Question</Label>
                           <Input
+                            disabled={course.Approved_by_admin == "approved"}
                             value={newTask.content}
                             onChange={(e) => handleNewTaskChange(e, "content")}
                             placeholder="Enter quiz question"
@@ -579,6 +610,9 @@ const EditLessonDialog = ({
                                     {String.fromCharCode(65 + optionIndex)}
                                   </div>
                                   <Input
+                                    disabled={
+                                      course.Approved_by_admin == "approved"
+                                    }
                                     value={option}
                                     onChange={(e) =>
                                       handleNewTaskChange(
@@ -600,6 +634,7 @@ const EditLessonDialog = ({
                         <div className="space-y-2">
                           <Label className="text-white">Correct Answer</Label>
                           <Input
+                            disabled={course.Approved_by_admin == "approved"}
                             value={newTask.answer || ""}
                             onChange={(e) => handleNewTaskChange(e, "answer")}
                             placeholder="Enter the correct answer"
@@ -615,6 +650,7 @@ const EditLessonDialog = ({
                           Assignment Description
                         </Label>
                         <Textarea
+                          disabled={course.Approved_by_admin == "approved"}
                           value={newTask.content}
                           onChange={(e) => handleNewTaskChange(e, "content")}
                           placeholder="Enter assignment instructions"
@@ -628,6 +664,7 @@ const EditLessonDialog = ({
                       <div className="space-y-2">
                         <Label className="text-white">Video URL</Label>
                         <Input
+                          disabled={course.Approved_by_admin == "approved"}
                           value={newTask.videoURL || ""}
                           onChange={(e) => handleNewTaskChange(e, "videoURL")}
                           placeholder="Enter video URL"
@@ -657,12 +694,14 @@ const EditLessonDialog = ({
               <Button
                 type="button"
                 variant="outline"
-                className="text-red-400 border-red-800 hover:bg-red-900 hover:text-red-200 flex items-center gap-1"
+                className={`text-red-400 border-red-800 hover:bg-red-900 hover:text-red-200 flex items-center gap-1 ${
+                  course.Approved_by_admin == "approved" ? "hidden" : ""
+                }`}
                 onClick={async () => {
                   // This would typically show a confirmation dialog
                   try {
                     setIsLoading(true);
-                    await deleteLesson(course._id, lesson?._id);
+                    await deleteLessonApi(course._id, lesson?._id);
                     console.log("Delete course clicked");
                     toast.success("deleted success", {
                       description: "success",
@@ -673,6 +712,8 @@ const EditLessonDialog = ({
                     setCourses((prev) => prev.filter((_, i) => i !== idex));
                     onClose();
                   } catch (error) {
+                    console.log("errored");
+
                     toast.error(error, {
                       description: "unExpeted Error",
                     });
@@ -680,20 +721,22 @@ const EditLessonDialog = ({
                 }}>
                 <Trash2 size={16} />
 
-                <span>Delete Task</span>
+                <span>Delete Lesson</span>
               </Button>
               <Button
                 variant="outline"
                 className="bg-blue-800 border-blue-700 text-blue-200 hover:bg-blue-700"
                 onClick={onClose}>
-                Cancel
+                {course.Approved_by_admin == "approved" ? "Close" : "Cancel"}
               </Button>
-              <Button
-                className="bg-blue-600 hover:bg-blue-500 text-white"
-                onClick={handleSave}
-                disabled={isLoading}>
-                {isLoading ? "Saving..." : "Save Changes"}
-              </Button>
+              {course.Approved_by_admin !== "approved" && (
+                <Button
+                  className="bg-blue-600 hover:bg-blue-500 text-white"
+                  onClick={handleSave}
+                  disabled={isLoading}>
+                  {isLoading ? "Saving..." : "Save Changes"}
+                </Button>
+              )}
             </div>
           </div>
         </div>

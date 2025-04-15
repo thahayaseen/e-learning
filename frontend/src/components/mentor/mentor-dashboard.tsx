@@ -110,6 +110,8 @@ const MentorDashboard = () => {
 
   const handleUpdateCourse = async (courseId: string, courseData: any) => {
     try {
+      console.log();
+      
       // Validate with Zod
       courseSchema.parse(courseData);
 
@@ -144,9 +146,12 @@ const MentorDashboard = () => {
           description: `Please check the ${firstError.path[0]} field`,
         });
       } else {
-        toast.error("Failed to update course", {
-          description: "Please try again later",
-        });
+        toast.error(
+          error instanceof Error ? error.message : "Failed to update course",
+          {
+            description: "Please try again later",
+          }
+        );
       }
     }
   };

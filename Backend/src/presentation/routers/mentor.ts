@@ -120,5 +120,9 @@ router.put(
   roleChecker(Roles.MENTOR),
   mentorController.updateMeetingStatus.bind(mentorController)
 );
-
+router.put(
+  "/action-action-course-list",
+  jwtVerify,
+  mentorController.ListactionCourse.bind(mentorController)
+);
 export default router;

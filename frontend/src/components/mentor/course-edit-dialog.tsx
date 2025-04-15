@@ -75,7 +75,7 @@ export default function CourseEditDialog({
       Category: course.Category._id,
       Content: course.Content,
     });
-  }, [course]);
+  }, []);
 
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -128,6 +128,7 @@ export default function CourseEditDialog({
 
   const handleSaveChanges = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("enteredddddd");
 
     try {
       // Validate with Zod
@@ -138,7 +139,9 @@ export default function CourseEditDialog({
 
       // Call API to update course
       setIsLoading(true);
-      await onUpdate(course._id, courseData);
+      if (course.Approved_by_admin !== "approved") {
+        await onUpdate(course._id, courseData);
+      }
     } catch (error) {
       if (error instanceof z.ZodError) {
         // Convert Zod errors to a more usable format
@@ -346,29 +349,40 @@ export default function CourseEditDialog({
                       </div>
                     )}
                   </div>
-                  <div className="border-t border-blue-700 p-3 bg-blue-800 flex items-center justify-between">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="text-blue-200 border-blue-600 hover:bg-blue-700 hover:text-white flex items-center gap-1"
-                      onClick={() => setIsAddLessonOpen(true)}>
-                      <Plus size={16} />
-                      <span>Add Lesson</span>
-                    </Button>
+                  <div
+                    className={`border-t border-blue-700 p-3 bg-blue-800 flex items-center ${
+                      course.Approved_by_admin !== "approved"
+                        ? "justify-between"
+                        : "justify-end"
+                    }`}>
+                    {course.Approved_by_admin !== "approved" && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="text-blue-200 border-blue-600 hover:bg-blue-700 hover:text-white flex items-center gap-1"
+                        onClick={() => setIsAddLessonOpen(true)}>
+                        <Plus size={16} />
+                        <span>Add Lesson</span>
+                      </Button>
+                    )}
                     <div className="flex items-center gap-2">
                       <Button
                         type="button"
                         variant="ghost"
-                        className="text-blue-300 hover:bg-blue-700"
+                        className="text-white bg-blue-950 hover:bg-blue-500"
                         onClick={onClose}>
-                        Cancel
+                        {course.Approved_by_admin == "approved"
+                          ? "Close"
+                          : "Cancel"}
                       </Button>
-                      <Button
-                        type="submit"
-                        className="bg-blue-600 hover:bg-blue-500 text-white"
-                        disabled={isLoading}>
-                        {isLoading ? "Saving..." : "Save Changes"}
-                      </Button>
+                      {course.Approved_by_admin !== "approved" && (
+                        <Button
+                          type="submit"
+                          className="bg-blue-600 hover:bg-blue-500 text-white"
+                          disabled={isLoading}>
+                          {isLoading ? "Saving..." : "Save Changes"}
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -406,14 +420,16 @@ export default function CourseEditDialog({
                   </div>
                 </div>
                 <div className="mt-4 flex justify-between items-center">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="text-red-400 border-red-800 hover:bg-red-900 hover:text-red-200 flex items-center gap-1"
-                    onClick={handleDeleteCourse}>
-                    <Trash2 size={16} />
-                    <span>Delete Course</span>
-                  </Button>
+                  {(
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="text-red-400 border-red-800 hover:bg-red-900 hover:text-red-200 flex items-center gap-1"
+                      onClick={handleDeleteCourse}>
+                      <Trash2 size={16} />
+                      <span>{course.unlist?'List':'Unlist'} Course</span>
+                    </Button>
+                  )}
 
                   <div className="flex items-center gap-2">
                     <span className="text-blue-300 text-sm">

@@ -319,6 +319,7 @@ export const updateVideoProgress = async (
   if (watchTime !== undefined) {
     payload.watchTime = watchTime;
     payload.taskType = "Video";
+    payload.isCompleted = isCompleted;
   } else if (score !== undefined) {
     payload.score = score;
     payload.isCompleted = isCompleted;
@@ -454,4 +455,7 @@ export const getAllcertificate = async (
   }
   url.toString();
   return await axios.get("/allcertificate?" + url.toString());
+};
+export const unlistCourse = async(courseid: string) => {
+  await axios.put("/mentor/action-action-course-list?courseid="+ courseid );
 };

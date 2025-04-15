@@ -428,11 +428,12 @@ export class RepositoryCourses implements ICoursesRepository {
     courseId: string,
     lessonId: string
   ): Promise<void> {
-    Courses.findByIdAndUpdate(
+    const dat = await Courses.findByIdAndUpdate(
       courseId,
       { $pull: { lessons: lessonId } },
       { new: true }
     );
+
     return;
   }
   async DeleteTaskFromLesson(lessonid: string, taskid: string): Promise<void> {
@@ -491,7 +492,7 @@ export class RepositoryCourses implements ICoursesRepository {
     userId: string,
     page: number = 1,
     limit: number = 10
-  ): Promise<ICourses[]> {
+  ): Promise<any> {
     const skip = (page - 1) * limit;
     console.log("courseidis", CourseIds, userId);
 
@@ -548,18 +549,22 @@ export class RepositoryCourses implements ICoursesRepository {
       },
 
       {
-        $skip: skip,
-      },
-      {
-        $limit: limit,
+        $facet: {
+          totalCount: [{ $count: "count" }],
+          data: [
+            { $sort: { CreatedAt: -1 } },
+            { $skip: skip },
+            { $limit: limit },
+          ],
+        },
       },
     ]);
     console.log(anss, "ansesr is ");
 
-    return anss;
+    return anss[0];
   }
-  async getCourseBymentor(mentorid: string): Promise<ICourses | null> {
-    return await Courses.findOne({ Mentor_id: mentorid });
+  async getCourseBymentor(mentorid: string): Promise<ICourses[]> {
+    return await Courses.find({ Mentor_id: mentorid });
   }
   async deleteCourse(courseId: string): Promise<void> {
     await Courses.findByIdAndDelete(courseId);
@@ -807,17 +812,17 @@ export class RepositoryCourses implements ICoursesRepository {
       Student_id: studentId,
       Course_id: courseId,
     })
-    .populate("Student_id", "name")
-    .populate({
-      path: "Course_id",
-      select: "Title Category",
-      populate: {
-        path: "Category",
-        select: "Category",
-      },
-    });
+      .populate("Student_id", "name")
+      .populate({
+        path: "Course_id",
+        select: "Title Category",
+        populate: {
+          path: "Category",
+          select: "Category",
+        },
+      });
     await progress.save();
-    
+
     return res;
   }
   async createProgressForuser(progressData: IProgressCollection) {
@@ -1099,5 +1104,6 @@ export class RepositoryCourses implements ICoursesRepository {
       return months[monthIndex];
     }
   }
+
 }
 // Helper function to get month name

@@ -348,11 +348,13 @@ export default class UserController {
     try {
       const email = req.user.email;
       console.log(email);
-
+      const { page, limit } = req.query;
       const data = await this.userUseCase.UseProfileByemail(email);
       const courseData = await this.getpurchasedCourses(
-        data?.purchasedCourses as string[],
-        String(data?._id)
+        data?.purchasedCourses?.reverse() as string[],
+        String(data?._id),
+        Number(page),
+        Number(limit)
       );
       const progresdata = await this.CourseUseCase.getuserallCourseprogresdata(
         String(data?._id)
@@ -360,7 +362,7 @@ export default class UserController {
       const mentorRequst = await this.userUseCase.getuserMentorRequst(
         String(data?._id)
       );
-      console.log(mentorRequst, "fdafsdasfsdfa");
+      console.log(courseData, "fdafsdasfsdfa");
 
       res.status(HttpStatusCode.OK).json({
         success: true,
@@ -607,11 +609,21 @@ export default class UserController {
       );
     }
   }
-  async getpurchasedCourses(data: string[], userid: string) {
+  async getpurchasedCourses(
+    data: string[],
+    userid: string,
+    page: number=1,
+    limit: number=10
+  ) {
     try {
       console.log("course id is", userid);
 
-      const datas = await this.CourseUseCase.getByCoursids(data, userid);
+      const datas = await this.CourseUseCase.getByCoursids(
+        data,
+        userid,
+        page,
+        limit
+      );
       return datas;
     } catch (error) {
       throw new Error("An error occupied");
@@ -1035,8 +1047,8 @@ export default class UserController {
   async changePassword(req: AuthServices, res: Response) {
     try {
       const { _id } = req.user;
-      console.log(req.user,'userissd');
-      
+      console.log(req.user, "userissd");
+
       const { oldPassoword, newPassword } = req.body;
       await this.userUseCase.changePawword(_id, oldPassoword, newPassword);
       res.status(HttpStatusCode.OK).json({

@@ -1,6 +1,6 @@
 "use client";
 import type React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 // Add these imports at the top of the file
 import { TipCard } from "@/components/ui/tip-card";
@@ -520,6 +520,8 @@ const CourseView = ({ id }: { id: string }) => {
         toast.success("Video lesson completed!");
       }
     }
+    console.log(updatedProgress.isCompleted,'lastis');
+    
     console.log("sdfsafsadf");
 
     // Call the updated function with the correct parameters for video type
@@ -715,7 +717,18 @@ const CourseView = ({ id }: { id: string }) => {
         setSubmitting(false);
       });
   };
-
+  const shuffleArray = (array: string[]) => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+  const shuffledOptions = useMemo(() => {
+    return selectedTask?.Options ? shuffleArray(selectedTask.Options) : [];
+  }, [selectedTask?.Options]);
+  
   // Navigate to next task
   const navigateToNextTask = () => {
     if (!course || !selectedTask) return;
@@ -888,8 +901,8 @@ const CourseView = ({ id }: { id: string }) => {
                   <RadioGroup
                     onValueChange={(value) => handleQuizAnswer(value)}
                     className="space-y-3">
-                    {selectedTask.Options &&
-                      selectedTask.Options.map(
+                    {shuffledOptions &&
+                      shuffledOptions.map(
                         (option: string, index: number) => (
                           <div
                             key={index}

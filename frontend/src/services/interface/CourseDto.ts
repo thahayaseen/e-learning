@@ -12,13 +12,13 @@ export interface IProgressCollection {
   Score: number;
 }
 export interface ICategory {
-  _id?: string|number;
-  Category: string ;
+  _id?: string | number;
+  Category: string;
   CourseId?: string[] | null;
-  Description: string ;
-  unlist:boolean;
+  Description: string;
+  unlist: boolean;
   UpdatedAt?: string | null;
-  createdAt?: string | null|Date;
+  createdAt?: string | null | Date;
 }
 export interface ILesson {
   Lessone_name: string | null;
@@ -53,13 +53,14 @@ export interface ICourses {
   CreatedAt: string | null;
   Category: ICategory | null;
   Price: number | null;
-  Approved_by_admin: 'pending'|'rejected'|'approved' ;
+  Approved_by_admin: "pending" | "rejected" | "approved";
   Students_enrolled: string[] | null;
   UpdatedAt: string | null;
-  image:string
+  image: string;
   lessons: string[];
   Content: string | null;
   Offer_id: string | null;
+  unlist: boolean;
 }
 export interface UserDTO {
   _id?: string;
@@ -70,11 +71,10 @@ export interface UserDTO {
   gid?: string | null; // Google ID for OAuth users
   verified?: boolean;
   isBlocked?: boolean;
-  role: string
+  role: string;
   purchasedCourses?: string[];
   subscription?: string | null;
   UpdatedAt?: string;
-
 }
 export interface ProfileDTO {
   avatar?: string;

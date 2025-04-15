@@ -18,6 +18,7 @@ export interface ICoursesRepository {
   createCourse(data: Omit<ICourses, "_id">): Promise<ICourses>;
   createTask(tasks: any): Promise<any>;
   createLesson(lessondata: any): Promise<any>;
+  
   addTaskinsidelessone(lessonId: string, taskId: string): Promise<any>;
   getCourse(id: string, pipline: object[]): Promise<any>;
   getCourseByid(courseid: string): Promise<ICourses | null>;
@@ -52,7 +53,7 @@ export interface ICoursesRepository {
     page?: number,
     limit?: number
   ): Promise<ICourses[]>;
-  getCourseBymentor(user: string): Promise<ICourses | null>;
+  getCourseBymentor(user: string): Promise<ICourses[]>;
   deleteCourse(courseId: string): Promise<void>;
   DeleteTaskFromLesson(lessonid: string, taskid: string): Promise<void>;
   deleteTask(id: string): Promise<void>;

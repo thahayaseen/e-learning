@@ -106,6 +106,7 @@ export class MentorUsecase {
     return;
   }
   async updataCourse(courseId: string, data: CourseDTO) {
+    
     await this.CoursRepositry.UpdataCourse(courseId, data);
   }
   async FindCourse(id: string): Promise<CourseDTO | null> {
@@ -123,7 +124,8 @@ export class MentorUsecase {
       await this.CoursRepositry.deleteTask(data);
     });
 
-    return this.CoursRepositry.DeleteLessonByid(lesosnid);
+    await this.CoursRepositry.DeleteLessonByid(lesosnid);
+    
   }
   async getOrderBymentor(
     mentorid: string,
