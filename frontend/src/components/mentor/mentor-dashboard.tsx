@@ -128,9 +128,6 @@ const MentorDashboard = () => {
         sortBy: filters.sortBy,
       });
 
-      toast.success("Course updated successfully", {
-        description: "Your changes have been saved",
-      });
     } catch (error) {
       if (error instanceof z.ZodError) {
         // Convert Zod errors to a more usable format

@@ -54,7 +54,7 @@ function Chat() {
   const socket = useSocket();
 
   const [messages, setMessages] = useState<IMessage[] | []>([]);
-  const [remortUser,setRemortUser]=useState("Unknown User")
+  const [remortUser, setRemortUser] = useState("Unknown User");
   const [newMessage, setNewMessage] = useState("");
 
   const [username, setUsername] = useState(state?.name);
@@ -96,17 +96,17 @@ function Chat() {
       if (!socket) return;
 
       setIsLoading(true);
-      
+
       // Set a default username if not already set
       if (!username) {
         const defaultUsername = `User_${Math.floor(Math.random() * 1000)}`;
         setUsername(defaultUsername);
       }
-      
+
       try {
         const data = await getallchat(String(roomId));
         setMessages(data.data);
-        setRemortUser(data.remortUser)
+        setRemortUser(data.remortUser);
         // Join the room when socket is ready
         socket.emit(chatEnum.joinRoom, { roomId, username, email });
         setIsConnected(true);
@@ -151,10 +151,17 @@ function Chat() {
   const handleSendMessage = (e: any) => {
     e.preventDefault();
     if (!newMessage.trim() || !socket) return;
+    const localMessage = {
+      _id: Date.now().toString(),
+      message: newMessage,
+      username: state.name,
+      userEmail: state.email,
 
+      createdAt: new Date().toISOString(),
+    };
     socket.emit(chatEnum.sendMessage, newMessage, roomId, email, username);
     setNewMessage("");
-
+    setMessages((prev) => (prev ? [...prev, localMessage] : []));
     // Focus back on input after sending
     inputRef.current?.focus();
   };
@@ -193,36 +200,38 @@ function Chat() {
     <div className="flex justify-center h-screen p-4 bg-gradient-to-b from-background to-background/90">
       <Card className="w-full max-w-3xl flex flex-col h-full shadow-lg border-primary/10">
         <CardHeader className="px-6 py-4 bg-primary/5 border-b flex flex-row items-center gap-4">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={handleBack} 
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleBack}
             className="rounded-full hover:bg-primary/10"
-            aria-label="Go back"
-          >
+            aria-label="Go back">
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          
+
           <div className="flex-1">
             <CardTitle className="text-xl flex items-center gap-2">
-              <span className="font-semibold">To:</span> 
+              <span className="font-semibold">To:</span>
               <span className="text-primary">{remortUser}</span>
             </CardTitle>
             <p className="text-sm text-muted-foreground mt-1">
               Logged in as <span className="font-medium">{username}</span>
             </p>
           </div>
-          
-          <Badge 
+
+          <Badge
             variant={isConnected ? "outline" : "destructive"}
-            className={isConnected ? "bg-green-50 text-green-700 border-green-200" : ""}
-          >
+            className={
+              isConnected ? "bg-green-50 text-green-700 border-green-200" : ""
+            }>
             {isConnected ? "Connected" : "Disconnected"}
           </Badge>
         </CardHeader>
 
         {error && (
-          <Alert variant="destructive" className="mx-4 mt-4 animate-in fade-in-50 slide-in-from-top-5">
+          <Alert
+            variant="destructive"
+            className="mx-4 mt-4 animate-in fade-in-50 slide-in-from-top-5">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>{error}</AlertDescription>
           </Alert>
@@ -232,7 +241,9 @@ function Chat() {
           <ScrollArea className="h-full p-6">
             {messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-32 text-center">
-                <p className="text-muted-foreground mb-2 font-medium">No messages yet</p>
+                <p className="text-muted-foreground mb-2 font-medium">
+                  No messages yet
+                </p>
                 <p className="text-sm text-muted-foreground">
                   Be the first to send a message!
                 </p>
@@ -271,7 +282,10 @@ function Chat() {
                           </Tooltip>
                         </TooltipProvider>
 
-                        <div className={`max-w-full ${isOwnMessage ? "items-end" : "items-start"}`}>
+                        <div
+                          className={`max-w-full ${
+                            isOwnMessage ? "items-end" : "items-start"
+                          }`}>
                           <div
                             className={`rounded-2xl px-4 py-3 shadow-sm ${
                               isOwnMessage
@@ -280,7 +294,10 @@ function Chat() {
                             }`}>
                             <p className="break-words">{message.message}</p>
                           </div>
-                          <div className={`text-xs text-muted-foreground mt-2 px-2 ${isOwnMessage ? "text-right" : "text-left"}`}>
+                          <div
+                            className={`text-xs text-muted-foreground mt-2 px-2 ${
+                              isOwnMessage ? "text-right" : "text-left"
+                            }`}>
                             {formatMessageTime(message.createdAt)}
                           </div>
                         </div>
@@ -306,11 +323,10 @@ function Chat() {
               className="flex-1 text-white rounded-full bg-background focus-visible:ring-primary"
               autoComplete="off"
             />
-            <Button 
-              type="submit" 
-              disabled={!newMessage.trim()} 
-              className="rounded-full px-5"
-            >
+            <Button
+              type="submit"
+              disabled={!newMessage.trim()}
+              className="rounded-full px-5">
               <Send className="h-4 w-4 mr-2" />
               Send
             </Button>

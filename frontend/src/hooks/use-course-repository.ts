@@ -117,7 +117,10 @@ export function useCourseRepository() {
       return updatedCourse;
     } catch (error) {
       console.error("Error updating course:", error);
-      throw error;
+      toast.error(error instanceof Error?error.message:'cannot update Course', {
+        description: "Failed to save course data. Please try again.",
+      });
+      // throw new Error(error);
     } finally {
       setIsLoading(false);
     }

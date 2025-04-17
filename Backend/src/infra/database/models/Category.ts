@@ -15,7 +15,7 @@ const CategorySchema: Schema = new Schema(
     Category: { type: String },
     CoursesId: { type: Schema.Types.ObjectId, ref: "Courses" },
     Description: { type: String },
-    unlist: { type: Boolean, default: true },
+    unlist: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

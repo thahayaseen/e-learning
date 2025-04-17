@@ -36,8 +36,10 @@ api.interceptors.response.use(
     return response.data; // Simplify response usage
   },
   (error) => {
+    console.log(error,'error is ');
+    
     const errorMsg = error?.response?.data?.message || error.message;
-    console.error("→ Response error:", errorMsg);
+    console.log("→ Response error:", errorMsg);
     // You can show toast here if you're using a UI lib
     throw new Error(errorMsg); // Keeps it consistent with async/await usage
   }

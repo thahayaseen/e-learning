@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,100 +37,119 @@ const MessageAdminDashboard = () => {
 
   // Fix: Use a ref to track socket room joining to prevent duplicate joins
   const joinedRooms = useRef(new Set());
+  // Fix: Use a ref to track if the component is mounted
+  const isMounted = useRef(true);
 
+  // Fix: Remove the console.log that was causing unnecessary renders
   useEffect(() => {
-    fetchChatrooms();
-
+    // Set up socket event listeners only once
     if (socket) {
-      socket.on(chatEnum.receive, handleNewMessage);
+      // socket.on(chatEnum.receive, handleNewMessage)
 
+      // Clean up function
       return () => {
+        isMounted.current = false;
         socket.off(chatEnum.receive);
-        
+        // Leave all rooms when component unmounts
         joinedRooms.current.forEach((roomId) => {
-          socket.emit("leave_room", roomId);
+          socket.emit("leave-room", { roomId })
         });
         joinedRooms.current.clear();
       };
     }
-  }, [socket, page]);
+  }, [socket]); // Only depend on socket, not page
+
+  // Separate effect for fetching chatrooms
+  useEffect(() => {
+    fetchChatrooms();
+  }, [page]);
+
+  useEffect(() => {
+    if (selectedChat) {
+      fetchMessages(selectedChat._id);
+  
+      if (socket && !joinedRooms.current.has(selectedChat._id)) {
+        // Leave previous rooms first
+        joinedRooms.current.forEach((roomId) => {
+          if (roomId !== selectedChat._id) {
+            socket.emit("leave-room", { roomId });
+            joinedRooms.current.delete(roomId);
+          }
+        });
+  
+        // Join the new room
+        socket.emit(chatEnum.joinRoom, {
+          roomId: selectedChat._id,
+          username: state.name,
+          email: state.email,
+        });
+  
+        joinedRooms.current.add(selectedChat._id);
+      }
+    }
+  
+    return () => {
+      // Clean up when chat changes
+      if (socket && selectedChat) {
+        socket.emit("leave-room", { roomId: selectedChat._id });
+      }
+    };
+  }, [selectedChat, socket, state.email, state.name]);
 
   useEffect(() => {
     // Scroll to bottom when messages change
     scrollToBottom();
   }, [messages]);
 
-  useEffect(() => {
-    if (selectedChat) {
-      fetchMessages(selectedChat._id);
-
-      // Fix: Only join the room if we haven't joined it already
-      if (socket && !joinedRooms.current.has(selectedChat._id)) {
-        socket.emit(chatEnum.joinRoom, {
-          roomId: String(selectedChat._id),
-          username: state.name,
-          email: state.email,
-        });
-
-        // Add to our tracking set
-        joinedRooms.current.add(selectedChat._id);
-      }
-    }
-  }, [selectedChat, socket]);
-
   const fetchChatrooms = async () => {
     try {
       setIsLoading(true);
       const data = await getChatrooms(page);
-      setTotal(data.data.total);
-      setChatrooms(data.data.data);
-      setIsLoading(false);
+      if (isMounted.current) {
+        setTotal(data.data.total);
+        setChatrooms(data.data.data);
+        console.log(data.data.data[0], "data usssssss");
+
+        setSelectedChat(data.data.data[0]);
+        setIsLoading(false);
+      }
     } catch (error) {
       console.error("Error fetching chatrooms:", error);
-      setIsLoading(false);
+      if (isMounted.current) {
+        setIsLoading(false);
+      }
     }
   };
 
   const fetchMessages = async (chatroomId: any) => {
     try {
       const data = await getallchat(chatroomId);
-      setMessages(data.data);
+      if (isMounted.current) {
+        setMessages(data.data);
+      }
     } catch (error) {
       console.error("Error fetching messages:", error);
     }
   };
-  console.log(selectedChat,);
 
+  // Fix: Use useCallback to prevent recreation of this function on every render
+  const handleNewMessage = useCallback(
+    (message: Partial<IMessage>) => {
+      if (!isMounted.current) return;
 
-  const handleNewMessage = (message: Partial<IMessage>) => {
-    console.log("yes here ",selectedChat);
+      if (selectedChat && message.chatroomId === selectedChat._id) {
+        setMessages((prev) => [...prev, message]);
+      }
+    },
+    [selectedChat]
+  );
 
-    console.log([message, messages]);
-
-    if (selectedChat && message.chatroomId === selectedChat._id) {
-      setMessages((prev) => [...prev, message]);
-      return;
-    } else {
-      setMessages((prev) => [...prev, message]);
-    }
-
-    console.log(messages);
-  };
-
-  const handleSendMessage = () => {
+  const handleSendMessage = useCallback(() => {
     if (newMessage.trim() && selectedChat && socket) {
-      const messageData: any = {
-        message: newMessage,
-        chatroomId: String(selectedChat._id),
-        userEmail: state.email,
-        username: state.name,
-      };
-
-      // Emit the message through socket
       socket.emit(
         chatEnum.sendMessage,
         newMessage,
-        String(selectedChat._id),
+        selectedChat._id,
         state.email,
         state.name
       );
@@ -145,12 +164,12 @@ const MessageAdminDashboard = () => {
         createdAt: new Date().toISOString(),
       };
 
-      // setMessages((prev) => [...prev, localMessage]);
+      setMessages((prev) => [...prev, localMessage]);
 
       // Clear input
       setNewMessage("");
     }
-  };
+  }, [newMessage, selectedChat, socket, state]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -171,14 +190,28 @@ const MessageAdminDashboard = () => {
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
-  const selectChat = (chatroom: any) => {
-    setSelectedChat(chatroom);
-  };
+  // Fix: Improved chat selection logic
+  const selectChat = useCallback(
+    (chatroom: any) => {
+      if (socket && selectedChat && selectedChat._id !== chatroom._id) {
+        // Leave the previous room
+        socket.emit("leave-room", { roomId: selectedChat._id });
+        joinedRooms.current.delete(selectedChat._id);
+      }
 
-  const closeChat = () => {
-    // Fix: Don't leave the room when closing the chat, just hide the UI
+      setSelectedChat(chatroom);
+    },
+    [socket, selectedChat]
+  );
+
+  const closeChat = useCallback(() => {
+    // When closing chat, we should leave the room
+    if (socket && selectedChat) {
+      socket.emit("leave-room", { roomId: selectedChat._id })
+      joinedRooms.current.delete(selectedChat._id);
+    }
     setSelectedChat(null);
-  };
+  }, [socket, selectedChat]);
 
   const filteredChatrooms = chatrooms.filter(
     (chatroom: any) =>
@@ -270,6 +303,7 @@ const MessageAdminDashboard = () => {
                                   <AvatarImage
                                     src={
                                       chatroom.userId.profile.avatar ||
+                                      "/placeholder.svg" ||
                                       "/placeholder.svg"
                                     }
                                     alt={chatroom.userId.name}
@@ -372,6 +406,7 @@ const MessageAdminDashboard = () => {
                         <AvatarImage
                           src={
                             selectedChat.userId.profile.avatar ||
+                            "/placeholder.svg" ||
                             "/placeholder.svg"
                           }
                           alt={selectedChat.userId.name}

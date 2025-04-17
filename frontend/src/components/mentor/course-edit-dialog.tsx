@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -22,8 +22,10 @@ import {
   CheckCircle,
   Clock,
   Edit,
+  Eye,
+  EyeOff,
   Plus,
-  Trash2,
+  Upload,
   Users,
 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
@@ -32,6 +34,9 @@ import { useCategoryRepository } from "@/hooks/use-category-repository";
 import AddLessonModal from "@/components/courses/addlesson";
 import EditLessonDialog from "@/components/courses/editCourse";
 import type { ICourses, ILesson } from "@/services/interface/CourseDto";
+import Image from "next/image";
+
+import useUploadS3 from "@/hooks/addtis3";
 
 // Course validation schema
 const courseSchema = z.object({
@@ -57,16 +62,17 @@ export default function CourseEditDialog({
   onUpdate,
   onDelete,
 }: CourseEditDialogProps) {
-  console.log(JSON.stringify(course), "cours id ");
-
+  const courseImageRef = useRef<HTMLInputElement | null>(null);
   const [courseData, setCourseData] = useState<any>({
     Title: course.Title,
     Description: course.Description,
     Price: course.Price,
     Category: course.Category._id,
     Content: course.Content,
+    image: course.image,
+    unlist: course.unlist || false,
   });
-  console.log(courseData);
+
   useEffect(() => {
     setCourseData({
       Title: course.Title,
@@ -74,17 +80,20 @@ export default function CourseEditDialog({
       Price: course.Price,
       Category: course.Category._id,
       Content: course.Content,
+      image: course.image,
+      unlist: course.unlist || false,
     });
-  }, []);
+  }, [course]);
 
+  const { uploading, uploadtos3 } = useUploadS3();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [isImageUploading, setIsImageUploading] = useState(false);
   const [isAddLessonOpen, setIsAddLessonOpen] = useState(false);
   const [isEditLessonOpen, setIsEditLessonOpen] = useState(false);
   const [selectedLesson, setSelectedLesson] = useState<ILesson | null>(null);
 
-  const { lessons, fetchLessons, addLesson, updateLesson, deleteLesson } =
-    useLessonRepository(course._id);
+  const { lessons, fetchLessons, addLesson, updateLesson } = useLessonRepository(course._id);
   const { categories, fetchCategories } = useCategoryRepository();
 
   // Fetch lessons and categories when dialog opens
@@ -100,7 +109,7 @@ export default function CourseEditDialog({
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => {
-    const { name, value, type } = e.target;
+    const { name, value } = e.target;
 
     // Clear the error for this field when the user makes changes
     if (formErrors[name]) {
@@ -126,9 +135,28 @@ export default function CourseEditDialog({
     }
   };
 
+  const handleChangeCourseImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    try {
+      setIsImageUploading(true);
+      const url = await uploadtos3(file, "image");
+      setCourseData({
+        ...courseData,
+        image: url,
+      });
+      toast.success("Image uploaded successfully");
+    } catch (error) {
+      toast.error("Failed to upload image");
+      console.error("Image upload error:", error);
+    } finally {
+      setIsImageUploading(false);
+    }
+  };
+
   const handleSaveChanges = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("enteredddddd");
 
     try {
       // Validate with Zod
@@ -140,9 +168,12 @@ export default function CourseEditDialog({
       // Call API to update course
       setIsLoading(true);
       if (course.Approved_by_admin !== "approved") {
-        await onUpdate(course._id, courseData);
+         onUpdate(course._id, courseData)
+       
       }
     } catch (error) {
+      console.log(error,'the error is');
+      
       if (error instanceof z.ZodError) {
         // Convert Zod errors to a more usable format
         const errors: Record<string, string> = {};
@@ -158,6 +189,7 @@ export default function CourseEditDialog({
           description: `Please check the ${firstError.path[0]} field`,
         });
       } else {
+        
         console.error("Unexpected error:", error);
         toast.error("An unexpected error occurred");
       }
@@ -166,20 +198,25 @@ export default function CourseEditDialog({
     }
   };
 
-  const handleEditLesson = (lesson: ILesson) => {
+  const handleViewOrEditLesson = (lesson: ILesson) => {
     setSelectedLesson(lesson);
     setIsEditLessonOpen(true);
   };
 
-  const handleDeleteCourse = async () => {
+  const handleToggleCourseVisibility = async () => {
     try {
       setIsLoading(true);
-      await onDelete(course._id);
-      onClose();
+      // Toggle the unlist status
+      const updatedData = {
+        ...courseData,
+        unlist: !courseData.unlist,
+      };
+      
+      setCourseData(updatedData);
+      await onUpdate(course._id, updatedData);
+      toast.success(updatedData.unlist ? "Course unlisted successfully" : "Course listed successfully");
     } catch (error) {
-      toast.error("Failed to delete course", {
-        description: "Please try again later",
-      });
+      toast.error("Failed to update course visibility");
     } finally {
       setIsLoading(false);
     }
@@ -188,12 +225,12 @@ export default function CourseEditDialog({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-blue-900 text-white border-blue-700">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-gray-900 text-white border-gray-700">
           <DialogHeader>
             <DialogTitle className="text-2xl text-white">
               Edit Course
             </DialogTitle>
-            <DialogDescription className="text-blue-300">
+            <DialogDescription className="text-gray-300">
               Make changes to your course details below
             </DialogDescription>
           </DialogHeader>
@@ -210,9 +247,10 @@ export default function CourseEditDialog({
                     name="Title"
                     value={courseData.Title}
                     onChange={handleInputChange}
-                    className={`bg-blue-800 border-blue-700 text-white focus:border-blue-500 ${
+                    className={`bg-gray-800 border-gray-700 text-white focus:border-indigo-500 ${
                       formErrors.Title ? "border-red-500" : ""
                     }`}
+                    disabled={course.Approved_by_admin === "approved"}
                   />
                   {formErrors.Title && (
                     <p className="text-red-400 text-sm mt-1">
@@ -231,15 +269,51 @@ export default function CourseEditDialog({
                     value={courseData.Description}
                     onChange={handleInputChange}
                     rows={4}
-                    className={`bg-blue-800 border-blue-700 text-white focus:border-blue-500 ${
+                    className={`bg-gray-800 border-gray-700 text-white focus:border-indigo-500 ${
                       formErrors.Description ? "border-red-500" : ""
                     }`}
+                    disabled={course.Approved_by_admin === "approved"}
                   />
                   {formErrors.Description && (
                     <p className="text-red-400 text-sm mt-1">
                       {formErrors.Description}
                     </p>
                   )}
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-white">Course Image</Label>
+                  <div className="relative rounded-md overflow-hidden border border-gray-700 h-48 flex items-center justify-center bg-gray-800">
+                    <input
+                      type="file"
+                      ref={courseImageRef}
+                      onChange={handleChangeCourseImage}
+                      accept="image/*"
+                      hidden
+                      disabled={course.Approved_by_admin === "approved"}
+                    />
+                    {courseData.image ? (
+                      <Image
+                        src={courseData.image}
+                        className="object-contain w-full h-full"
+                        width={400}
+                        height={300}
+                        alt="Course Image"
+                      />
+                    ) : (
+                      <div className="text-gray-400">No image selected</div>
+                    )}
+                    {course.Approved_by_admin !== "approved" && (
+                      <div 
+                        className="absolute inset-0 bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer"
+                        onClick={() => courseImageRef.current?.click()}
+                      >
+                        <Upload size={32} className="text-white mb-2" />
+                        <span className="text-white text-sm">
+                          {isImageUploading ? "Uploading..." : "Change Image"}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -252,9 +326,10 @@ export default function CourseEditDialog({
                     type="number"
                     value={courseData.Price}
                     onChange={handleInputChange}
-                    className={`bg-blue-800 border-blue-700 text-white focus:border-blue-500 ${
+                    className={`bg-gray-800 border-gray-700 text-white focus:border-indigo-500 ${
                       formErrors.Price ? "border-red-500" : ""
                     }`}
+                    disabled={course.Approved_by_admin === "approved"}
                   />
                   {formErrors.Price && (
                     <p className="text-red-400 text-sm mt-1">
@@ -272,9 +347,10 @@ export default function CourseEditDialog({
                     name="Category"
                     value={courseData.Category}
                     onChange={handleInputChange}
-                    className={`bg-blue-800 border-blue-700 text-white focus:border-blue-500 p-2 rounded-md w-full ${
+                    className={`bg-gray-800 border-gray-700 text-white focus:border-indigo-500 p-2 rounded-md w-full ${
                       formErrors.Category ? "border-red-500" : ""
-                    }`}>
+                    }`}
+                    disabled={course.Approved_by_admin === "approved"}>
                     <option value="">Select a Category</option>
                     {categories.map((category: any) => (
                       <option key={category._id} value={category._id}>
@@ -299,9 +375,10 @@ export default function CourseEditDialog({
                     value={courseData.Content}
                     onChange={handleInputChange}
                     rows={4}
-                    className={`bg-blue-800 border-blue-700 text-white focus:border-blue-500 ${
+                    className={`bg-gray-800 border-gray-700 text-white focus:border-indigo-500 ${
                       formErrors.Content ? "border-red-500" : ""
                     }`}
+                    disabled={course.Approved_by_admin === "approved"}
                   />
                   {formErrors.Content && (
                     <p className="text-red-400 text-sm mt-1">
@@ -312,22 +389,22 @@ export default function CourseEditDialog({
               </div>
 
               <div className="space-y-6">
-                <div className="rounded-lg overflow-hidden border border-blue-700">
-                  <div className="bg-blue-700 text-white p-3 font-medium flex items-center justify-between">
+                <div className="rounded-lg overflow-hidden border border-gray-700">
+                  <div className="bg-gray-800 text-white p-3 font-medium flex items-center justify-between">
                     <span>Course Lessons</span>
-                    <Badge className="bg-blue-900 text-blue-200">
+                    <Badge className="bg-indigo-700 text-white">
                       {lessons.length}
                     </Badge>
                   </div>
 
-                  <div className="divide-y divide-blue-700 max-h-96 overflow-y-auto bg-blue-800">
+                  <div className="divide-y divide-gray-700 max-h-96 overflow-y-auto bg-gray-900">
                     {lessons.length > 0 ? (
                       lessons.map((lesson, index) => (
                         <div
                           key={lesson._id}
-                          className="p-3 hover:bg-blue-700 flex items-center justify-between text-white">
+                          className="p-3 hover:bg-gray-800 flex items-center justify-between text-white">
                           <div className="flex items-center gap-2">
-                            <div className="bg-blue-900 text-blue-300 w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium">
+                            <div className="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium">
                               {index + 1}
                             </div>
                             <span className="line-clamp-1">
@@ -335,22 +412,26 @@ export default function CourseEditDialog({
                             </span>
                           </div>
                           <Button
-                            onClick={() => handleEditLesson(lesson)}
+                            onClick={() => handleViewOrEditLesson(lesson)}
                             variant="ghost"
                             size="sm"
-                            className="text-blue-300 hover:text-white hover:bg-blue-600">
-                            <Edit size={14} />
+                            className="text-gray-300 hover:text-white hover:bg-gray-700">
+                            {course.Approved_by_admin === "approved" ? (
+                              <Eye size={14} />
+                            ) : (
+                              <Edit size={14} />
+                            )}
                           </Button>
                         </div>
                       ))
                     ) : (
-                      <div className="p-4 text-center text-blue-400">
+                      <div className="p-4 text-center text-gray-400">
                         No lessons found for this course
                       </div>
                     )}
                   </div>
                   <div
-                    className={`border-t border-blue-700 p-3 bg-blue-800 flex items-center ${
+                    className={`border-t border-gray-700 p-3 bg-gray-800 flex items-center ${
                       course.Approved_by_admin !== "approved"
                         ? "justify-between"
                         : "justify-end"
@@ -359,7 +440,7 @@ export default function CourseEditDialog({
                       <Button
                         type="button"
                         variant="outline"
-                        className="text-blue-200 border-blue-600 hover:bg-blue-700 hover:text-white flex items-center gap-1"
+                        className="text-white border-indigo-600 hover:bg-indigo-700 hover:text-white flex items-center gap-1"
                         onClick={() => setIsAddLessonOpen(true)}>
                         <Plus size={16} />
                         <span>Add Lesson</span>
@@ -369,17 +450,17 @@ export default function CourseEditDialog({
                       <Button
                         type="button"
                         variant="ghost"
-                        className="text-white bg-blue-950 hover:bg-blue-500"
+                        className="text-white bg-gray-800 hover:bg-gray-700"
                         onClick={onClose}>
-                        {course.Approved_by_admin == "approved"
+                        {course.Approved_by_admin === "approved"
                           ? "Close"
                           : "Cancel"}
                       </Button>
                       {course.Approved_by_admin !== "approved" && (
                         <Button
                           type="submit"
-                          className="bg-blue-600 hover:bg-blue-500 text-white"
-                          disabled={isLoading}>
+                          className="bg-indigo-600 hover:bg-indigo-500 text-white"
+                          disabled={isLoading || isImageUploading}>
                           {isLoading ? "Saving..." : "Save Changes"}
                         </Button>
                       )}
@@ -388,13 +469,13 @@ export default function CourseEditDialog({
                 </div>
 
                 {/* Course statistics and additional information */}
-                <div className="mt-6 rounded-lg border border-blue-700 overflow-hidden">
-                  <div className="bg-blue-700 p-3 font-medium text-white">
+                <div className="mt-6 rounded-lg border border-gray-700 overflow-hidden">
+                  <div className="bg-gray-800 p-3 font-medium text-white">
                     Course Statistics
                   </div>
-                  <div className="p-4 bg-blue-800 grid grid-cols-3 gap-4">
+                  <div className="p-4 bg-gray-900 grid grid-cols-3 gap-4">
                     <div className="space-y-1">
-                      <div className="text-blue-300 text-sm flex items-center gap-1">
+                      <div className="text-gray-300 text-sm flex items-center gap-1">
                         <Users size={14} /> Students Enrolled
                       </div>
                       <div className="text-white text-lg font-medium">
@@ -402,7 +483,7 @@ export default function CourseEditDialog({
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <div className="text-blue-300 text-sm flex items-center gap-1">
+                      <div className="text-gray-300 text-sm flex items-center gap-1">
                         <Calendar size={14} /> Created On
                       </div>
                       <div className="text-white text-lg font-medium">
@@ -410,7 +491,7 @@ export default function CourseEditDialog({
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <div className="text-blue-300 text-sm flex items-center gap-1">
+                      <div className="text-gray-300 text-sm flex items-center gap-1">
                         <Clock size={14} /> Last Updated
                       </div>
                       <div className="text-white text-lg font-medium">
@@ -420,23 +501,35 @@ export default function CourseEditDialog({
                   </div>
                 </div>
                 <div className="mt-4 flex justify-between items-center">
-                  {(
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="text-red-400 border-red-800 hover:bg-red-900 hover:text-red-200 flex items-center gap-1"
-                      onClick={handleDeleteCourse}>
-                      <Trash2 size={16} />
-                      <span>{course.unlist?'List':'Unlist'} Course</span>
-                    </Button>
-                  )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className={`border flex items-center gap-2 ${
+                      courseData.unlist 
+                        ? 'text-white border-emerald-600 hover:bg-emerald-800' 
+                        : 'text-white border-gray-600 hover:bg-gray-700'
+                    }`}
+                    onClick={handleToggleCourseVisibility}
+                    disabled={isLoading}>
+                    {courseData.unlist ? (
+                      <>
+                        <Eye size={16} />
+                        <span>List Course</span>
+                      </>
+                    ) : (
+                      <>
+                        <EyeOff size={16} />
+                        <span>Unlist Course</span>
+                      </>
+                    )}
+                  </Button>
 
                   <div className="flex items-center gap-2">
-                    <span className="text-blue-300 text-sm">
+                    <span className="text-gray-300 text-sm">
                       Course Status:
                     </span>
                     {course.Approved_by_admin === "approved" ? (
-                      <Badge className="bg-green-600 text-white flex items-center gap-1">
+                      <Badge className="bg-emerald-600 text-white flex items-center gap-1">
                         <CheckCircle size={12} /> Approved
                       </Badge>
                     ) : (
@@ -460,7 +553,7 @@ export default function CourseEditDialog({
           course={course}
           isOpen={isAddLessonOpen}
           onClose={() => setIsAddLessonOpen(false)}
-          onSave={async (newLesson, task) => {
+          onSave={async (newLesson) => {
             try {
               await addLesson(newLesson, course._id);
               setIsAddLessonOpen(false);
@@ -494,6 +587,7 @@ export default function CourseEditDialog({
           }}
           courses={[course]}
           setCourses={() => {}}
+          viewOnly={course.Approved_by_admin === "approved" }
         />
       )}
     </>

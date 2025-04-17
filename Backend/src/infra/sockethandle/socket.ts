@@ -1,22 +1,34 @@
 import { Server, Socket } from "socket.io";
 import IsocketUsecase from "../../domain/interface/socket";
 import { chatEnum } from "../../app/useCases/enum/chatEnum";
+function debounce<T extends (...args: any[]) => void>(
+  func: T,
+  delay: number
+): (...args: Parameters<T>) => void {
+  let timeoutId: ReturnType<typeof setTimeout>;
+
+  return function (...args: Parameters<T>) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      func(...args);
+    }, delay);
+  };
+}
 
 export default class HandleSocket {
   constructor(private io: Server, private socketusecase: IsocketUsecase) {}
 
   public registerEvent(socket: Socket) {
-    console.log('reached herer');
-    
+    console.log("reached herer");
+
     socket.on("sendNotification", (data) => {
       this.io.emit("receiveNotification", data);
     });
-    socket.on('SubmitForm',(data)=>{
-      console.log('data is fasd',data);
-      
-      this.io.emit('adminNotification',data)
-      
-    })
+    socket.on("SubmitForm", (data) => {
+      console.log("data is fasd", data);
+
+      this.io.emit("adminNotification", data);
+    });
     socket.on(
       chatEnum.joinRoom,
       async (room: { roomId: string; username: string; email: string }) => {
@@ -27,11 +39,11 @@ export default class HandleSocket {
             room.email
           );
           console.log(res);
-          console.log('thisisisis',res);
-          
+          console.log("thisisisis", res);
+
           if (res) {
-            console.log('thisissi');
-            
+            console.log("thisissi");
+
             this.handleJoinRoom(socket, room);
           } else {
             socket.emit(chatEnum.error, "unknown user");
@@ -67,10 +79,23 @@ export default class HandleSocket {
     room: { roomId: string; username: string; email: string }
   ): void {
     try {
+      
       console.log(
         `User ${room.username} is trying to join room: ${room.roomId} ${socket.id}`
       );
+      socket.on("leave-room", async (data) => {
+  
+        // console.log("Total connected clients:", connectedSockets.length);
 
+        socket.leave(data.roomId);
+        console.log("User leaving room:", socket.id, data.roomId);
+
+        if (room.username) {
+          console.log("thisisisisiisis", room.username);
+
+          socket.to(data.roomId).emit("u-disconnect", room.username);
+        }
+      });
       socket.join(room.roomId);
       console.log(`User ${room.username} joined room: ${room.roomId}`);
       socket.emit(chatEnum.joined, { id: socket.id, room });
@@ -93,9 +118,9 @@ export default class HandleSocket {
           userEmail: string,
           username: string
         ) => {
-          console.log(message,'mesis');
-          
-          this.handleSendMessage(socket, {
+          console.log(message, "mesis");
+          const val = debounce(this.handleSendMessage.bind(this), 1000);
+          val(socket, {
             roomId,
             message,
             userEmail,
@@ -103,12 +128,6 @@ export default class HandleSocket {
           });
         }
       );
-
-      socket.on("leave-room", (data) => {
-        console.log("User leaving room:", data.roomId);
-        socket.to(data.roomId).emit("u-disconnect", room.username);
-        socket.leave(data.roomId);
-      });
 
       socket.on("disconnect", () => {
         console.log("User disconnected unexpectedly");
@@ -180,7 +199,7 @@ export default class HandleSocket {
     }: { roomId: string; message: string; userEmail: string; username: string }
   ): Promise<void> {
     try {
-      console.log(`Sending message in room ${roomId}: ${message}`);
+      console.log(`Sending message in room ${roomId}: ${message}`, socket);
 
       const savedMessage = await this.socketusecase.sendMessage(
         roomId,
@@ -189,7 +208,7 @@ export default class HandleSocket {
         username
       );
 
-      this.io.to(roomId).emit(chatEnum.receive, savedMessage);
+      socket.broadcast.to(roomId).emit(chatEnum.receive, savedMessage);
       console.log(`Message delivered to room ${roomId}:`, savedMessage);
     } catch (error: any) {
       console.error("Error in handleSendMessage:", error);

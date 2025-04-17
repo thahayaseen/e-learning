@@ -256,8 +256,8 @@ export const getallchat = async (roomid: string) => {
   console.log(data);
   return data;
 };
-export const getChatrooms = async () => {
-  const data = await axios.get("/mentor/getchats");
+export const getChatrooms = async (page: number = 1) => {
+  const data = await axios.get("/mentor/getchats?page=" + page);
   console.log(data);
   return data;
 };
@@ -456,6 +456,6 @@ export const getAllcertificate = async (
   url.toString();
   return await axios.get("/allcertificate?" + url.toString());
 };
-export const unlistCourse = async(courseid: string) => {
-  await axios.put("/mentor/action-action-course-list?courseid="+ courseid );
+export const unlistCourse = async (courseid: string) => {
+  await axios.put("/mentor/action-action-course-list?courseid=" + courseid);
 };

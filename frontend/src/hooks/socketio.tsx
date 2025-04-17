@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Socket, io } from "socket.io-client";
 export const useSocket = () => {
-  const dispatch=useDispatch()
+  const dispatch = useDispatch();
   const [socket, setSocket] = useState<Socket | null>(null);
   useEffect(() => {
     const instens = io(process.env.NEXT_PUBLIC_DOMAIN);
@@ -16,8 +16,10 @@ export const useSocket = () => {
       console.log("connected edd");
     });
     return () => {
+      instens.off("receiveNotification");
+      // instance.disconnect();
       instens.disconnect();
     };
-  }, []);
+  }, [dispatch]);
   return socket;
 };
