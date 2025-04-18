@@ -48,6 +48,7 @@ export interface IVideoTask extends ITask {
 export interface ICourses {
   _id: string;
   Title: string | null;
+  username?:string;
   Mentor_id: UserDTO | null;
   Description: string | null;
   CreatedAt: string | null;

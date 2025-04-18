@@ -50,7 +50,7 @@ const ProfileSchema = z.object({
 interface EditProfileProps {
   user: {
     name: string;
-    username: string;
+    username?: string;
     email: string;
     role: "admin" | "student" | "mentor";
     verified?: boolean;
