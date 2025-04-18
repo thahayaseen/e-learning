@@ -40,8 +40,8 @@ export function Account({
 console.log(userData,'datatattae');
 
   return (
-    <TabsContent
-      value="account"
+    <div
+  
       className="space-y-6 bg-[#0a192f] min-h-screen p-6 rounded-xl">
       <EditProfileDialog
         isOpen={open}
@@ -190,6 +190,6 @@ console.log(userData,'datatattae');
           </div>
         </CardContent>
       </Card>
-    </TabsContent>
+    </div>
   );
 }

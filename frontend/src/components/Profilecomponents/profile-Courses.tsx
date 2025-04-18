@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { TabsContent } from "@/components/ui/tabs";
+
 
 import { Clock, CheckCircle } from "lucide-react";
 
@@ -46,11 +46,9 @@ export function Courses({
   // Early return if no courses
   if (!courses || courses.length === 0) {
     return (
-      <TabsContent
-        value="courses"
-        className="flex items-center justify-center min-h-screen bg-[#0a192f] p-6">
+      <div className="flex items-center justify-center min-h-screen bg-[#0a192f] p-6">
         <p className="text-gray-400">No courses available</p>
-      </TabsContent>
+      </div>
     );
   }
 
@@ -69,7 +67,7 @@ export function Courses({
   };
 
   return (
-    <TabsContent
+    <div
       value="courses"
       className="space-y-4 bg-[#0a192f] min-h-screen p-6 rounded-xl">
       <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-3">
@@ -151,7 +149,6 @@ export function Courses({
         })}
       </div>
       {/* <Button onClick={nextPage}>see More</Button> */}
-    
-    </TabsContent>
+    </div>
   );
 }

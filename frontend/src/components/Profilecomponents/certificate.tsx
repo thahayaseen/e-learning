@@ -72,8 +72,8 @@ export function Certificates({ userData }: CertificateProps) {
   };
   const router = useRouter();
   return (
-    <TabsContent
-      value="certificate"
+    <div
+   
       className="space-y-6 bg-[#0a192f] min-h-screen p-6 rounded-xl">
       <Card className="bg-[#112240] border-[#1a2b4a] rounded-xl shadow-2xl overflow-hidden">
         <CardHeader className="border-b border-[#1a2b4a] bg-gradient-to-br from-[#0a192f] to-[#112240] p-6">
@@ -234,6 +234,6 @@ export function Certificates({ userData }: CertificateProps) {
         setPage={Setpage}
         total={total}
       />
-    </TabsContent>
+    </div>
   );
 }

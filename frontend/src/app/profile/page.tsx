@@ -10,7 +10,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Mail, Link, Shield, CheckCircle2 } from "lucide-react";
 const limit = 10;
@@ -227,54 +227,47 @@ const UserProfilePage = () => {
               <div className="w-full lg:w-3/4">
                 <Tabs defaultValue="overview" className="w-full">
                   <TabsList className="grid grid-cols-5 mb-6 bg-gray-800">
-                    <TabsTrigger
-                      value="overview"
-                      className="data-[state=active]:bg-indigo-900 data-[state=active]:text-white">
-                      Overview
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="courses"
-                      className="data-[state=active]:bg-indigo-900 data-[state=active]:text-white">
-                      My Courses
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="account"
-                      className="data-[state=active]:bg-indigo-900 data-[state=active]:text-white">
-                      Account
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="orders"
-                      className="data-[state=active]:bg-indigo-900 data-[state=active]:text-white">
-                      order
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="certificate"
-                      className="data-[state=active]:bg-indigo-900 data-[state=active]:text-white">
-                      certificate
-                    </TabsTrigger>
+                    <TabsTrigger value="overview">Overview</TabsTrigger>
+                    <TabsTrigger value="courses">My Courses</TabsTrigger>
+                    <TabsTrigger value="account">Account</TabsTrigger>
+                    <TabsTrigger value="orders">Orders</TabsTrigger>
+                    <TabsTrigger value="certificate">Certificate</TabsTrigger>
                   </TabsList>
 
-                  <Overview
-                    userData={userData}
-                    courses={courses}
-                    key={1}
-                    progress={progressdata}
-                  />
-                  <Account
-                    userData={userData}
-                    Beamentor={Beamentor}
-                    onSave={onsave}
-                  />
-                  <Courses
-                    courses={courses}
-                    key={2}
-                    limit={limit}
-                    page={page}
-                    setPage={setPage}
-                    total={total}
-                  />
-                  <Orders />
-                  <Certificates />
+                  {/* Each content must be wrapped in TabsContent */}
+                  <TabsContent value="overview">
+                    <Overview
+                      userData={userData}
+                      courses={courses}
+                      progress={progressdata}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="courses">
+                    <Courses
+                      courses={courses}
+                      limit={limit}
+                      page={page}
+                      setPage={setPage}
+                      total={total}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="account">
+                    <Account
+                      userData={userData}
+                      Beamentor={Beamentor}
+                      onSave={onsave}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="orders">
+                    <Orders />
+                  </TabsContent>
+
+                  <TabsContent value="certificate">
+                    <Certificates />
+                  </TabsContent>
                 </Tabs>
               </div>
             </div>

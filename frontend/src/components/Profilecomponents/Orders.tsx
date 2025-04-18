@@ -69,23 +69,23 @@ export function Orders() {
 
   if (isLoading) {
     return (
-      <TabsContent
-        value="orders"
+      <div
+      
         className="flex items-center justify-center min-h-screen bg-gray-950 p-6">
         <div className="flex flex-col items-center gap-2">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
           <p className="text-white">Loading your orders...</p>
         </div>
-      </TabsContent>
+      </div>
     );
   }
 
   // If no orders
   if (!orders || orders.length === 0) {
     return (
-      <TabsContent
-        value="orders"
-        className="flex items-center justify-center min-h-screen bg-gray-950 p-6">
+      <div
+ 
+        className="flex items-center justify-center min-h-screen bg-[#0a192f] p-6">
         <div className="text-center space-y-3">
           <ShoppingCart className="h-12 w-12 mx-auto text-gray-300" />
           <p className="text-white text-lg">No orders found</p>
@@ -96,14 +96,14 @@ export function Orders() {
             Browse Courses
           </Button>
         </div>
-      </TabsContent>
+      </div>
     );
   }
 
   return (
-    <TabsContent
-      value="orders"
-      className="space-y-6 bg-gray-950 min-h-screen p-6 rounded-xl">
+    <div
+      
+      className="flex items-center justify-center min-h-screen bg-[#0a192f] p-6">
       <Card className="bg-gray-900 border-gray-800 rounded-xl shadow-xl overflow-hidden">
         <CardHeader className="border-b border-gray-800 bg-gradient-to-r from-gray-900 to-gray-800">
           <CardTitle className="text-white font-bold text-xl flex items-center">
@@ -196,6 +196,6 @@ export function Orders() {
           </div>
         </CardContent>
       </Card>
-    </TabsContent>
+    </div>
   );
 }

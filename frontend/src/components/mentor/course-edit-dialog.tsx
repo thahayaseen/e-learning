@@ -37,6 +37,7 @@ import type { ICourses, ILesson } from "@/services/interface/CourseDto";
 import Image from "next/image";
 
 import useUploadS3 from "@/hooks/addtis3";
+import { unlistCourse } from "@/services/fetchdata";
 
 // Course validation schema
 const courseSchema = z.object({
@@ -213,7 +214,7 @@ export default function CourseEditDialog({
       };
       
       setCourseData(updatedData);
-      await onUpdate(course._id, updatedData);
+      await unlistCourse(course._id);
       toast.success(updatedData.unlist ? "Course unlisted successfully" : "Course listed successfully");
     } catch (error) {
       toast.error("Failed to update course visibility");

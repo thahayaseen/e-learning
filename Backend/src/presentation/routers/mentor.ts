@@ -121,7 +121,7 @@ router.put(
   mentorController.updateMeetingStatus.bind(mentorController)
 );
 router.put(
-  "/action-action-course-list",
+  "/action-course-list",
   jwtVerify,
   mentorController.ListactionCourse.bind(mentorController)
 );

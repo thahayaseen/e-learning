@@ -457,5 +457,5 @@ export const getAllcertificate = async (
   return await axios.get("/allcertificate?" + url.toString());
 };
 export const unlistCourse = async (courseid: string) => {
-  await axios.put("/mentor/action-action-course-list?courseid=" + courseid);
+  await axios.put("/mentor/action-course-list?courseid=" + courseid);
 };
