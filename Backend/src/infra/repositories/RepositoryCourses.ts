@@ -292,7 +292,9 @@ export class RepositoryCourses implements ICoursesRepository {
               {
                 $project: {
                   Lessone_name: 1,
+                  Content:1,
                   Task: 1,
+
                 },
               },
               {
@@ -308,6 +310,7 @@ export class RepositoryCourses implements ICoursesRepository {
                   Lessone_name: 1,
                   "Task._id": 1,
                   "Task.Type": 1,
+                  Content:1,
                 },
               },
             ],
