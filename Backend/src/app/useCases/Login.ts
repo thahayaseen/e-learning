@@ -5,7 +5,7 @@ import {
   // jwtTockenProvider,
 } from "../../config/dependencies";
 import { userError } from "./enum/User";
-import IUserReposetory from "../../domain/repository/IUser";
+import IUserReposetory from "../../domain/repository/IUser.repository";
 import { ILogin } from "../../domain/interface/Ilogin";
 import { IJwtService } from "../../domain/Provider/Ijwt";
 

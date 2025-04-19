@@ -1,7 +1,7 @@
 import mongoose, { Types } from "mongoose";
 import { CourseDTO } from "../../app/dtos/coursesDto";
 import { orderDto } from "../../app/dtos/orderDto";
-import { ICoursesRepository } from "../../domain/repository/IRepositoryCourses";
+import { ICoursesRepository } from "../../domain/repository/IRepositoryCourses.repository";
 import Courses, { ICourses } from "../database/models/course";
 import Lesson, { ILesson } from "../database/models/lessone";
 import { OrderSchemas } from "../database/models/order";

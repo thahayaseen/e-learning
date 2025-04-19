@@ -1,4 +1,4 @@
-import IUser, { Alluserinterface } from "../../domain/repository/IUser";
+import IUser, { Alluserinterface } from "../../domain/repository/IUser.repository";
 import UserModel, { IUserModel } from "../database/models/User";
 import catchAsync from "../../utils/catechAsync";
 import User from "../../domain/entities/UserSchema";

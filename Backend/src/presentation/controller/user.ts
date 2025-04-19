@@ -393,7 +393,7 @@ export default class UserController {
         });
       }
       if (!courseid) {
-        return;
+        throw new Error('cannot find the course')
       }
       console.log(_id, "ciddd");
 

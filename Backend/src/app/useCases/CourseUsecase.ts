@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 import { ICourseUseCase } from "../../domain/interface/courseUsecase";
-import { ICoursesRepository } from "../../domain/repository/IRepositoryCourses";
-import { IReviewRepo } from "../../domain/repository/IReviewRepositroy";
-import IUserReposetory from "../../domain/repository/IUser";
+import { ICoursesRepository } from "../../domain/repository/IRepositoryCourses.repository";
+import { IReviewRepo } from "../../domain/repository/IReview.repository";
+import IUserReposetory from "../../domain/repository/IUser.repository";
 import { ICourses } from "../../infra/database/models/course";
 import { ILesson } from "../../infra/database/models/lessone";
 import {

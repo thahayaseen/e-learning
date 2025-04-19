@@ -1,4 +1,4 @@
-import IRcategory from "../../domain/repository/IRcategory";
+import IRcategory from "../../domain/repository/IRcategory.repository";
 import Category, { ICategory } from "../database/models/Category";
 
 export class RepositoryCategory implements IRcategory {

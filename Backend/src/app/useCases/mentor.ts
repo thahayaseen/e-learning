@@ -1,6 +1,6 @@
-import IUserReposetory from "../../domain/repository/IUser";
-import IRcategory from "../../domain/repository/IRcategory";
-import { ICoursesRepository } from "../../domain/repository/IRepositoryCourses";
+import IUserReposetory from "../../domain/repository/IUser.repository";
+import IRcategory from "../../domain/repository/IRcategory.repository";
+import { ICoursesRepository } from "../../domain/repository/IRepositoryCourses.repository";
 import { ICategory } from "../../infra/database/models/Category";
 import { ICourses } from "../../infra/database/models/course";
 import { Task } from "../../infra/database/models/tasks";

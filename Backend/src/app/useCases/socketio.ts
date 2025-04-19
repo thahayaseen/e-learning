@@ -3,8 +3,8 @@ import { IChatroom } from "../../domain/entities/Chatroom";
 import { IMessage } from "../../domain/entities/Message";
 import { IuserUseCase } from "../../domain/interface/IUseruseCase";
 import IsocketUsecase from "../../domain/interface/socket";
-import { IRchatroom } from "../../domain/repository/IRchatroom";
-import { IRmessage } from "../../domain/repository/IRmessage";
+import { IRchatroom } from "../../domain/repository/IRchatroom.repository";
+import { IRmessage } from "../../domain/repository/IRmessage.repository";
 import { getChatroom } from "../../infra/repositories/RepositoryChatroom";
 import { ImessageUsecase } from "../../domain/interface/ImessageUsecase";
 

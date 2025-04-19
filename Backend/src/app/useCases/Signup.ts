@@ -8,7 +8,7 @@ import { userError, EOtp, Roles } from "./enum/User";
 
 import { GoogleLoginDTO, userCreateDTO } from "../dtos/Duser";
 import { HttpStatusCode } from "./enum/Status";
-import IUserReposetory from "../../domain/repository/IUser";
+import IUserReposetory from "../../domain/repository/IUser.repository";
 
 import { IJwtService } from "../../domain/Provider/Ijwt";
 

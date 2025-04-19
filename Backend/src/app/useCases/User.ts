@@ -1,12 +1,12 @@
 import { UserDTO } from "../dtos/Duser";
-import IUserReposetory from "../../domain/repository/IUser";
+import IUserReposetory from "../../domain/repository/IUser.repository";
 import { IuserUseCase } from "../../domain/interface/IUseruseCase";
-import { ICoursesRepository } from "../../domain/repository/IRepositoryCourses";
-import IRcategory from "../../domain/repository/IRcategory";
+import { ICoursesRepository } from "../../domain/repository/IRepositoryCourses.repository";
+import IRcategory from "../../domain/repository/IRcategory.repository";
 import { ICourses } from "../../infra/database/models/course";
 import bcrypt from "bcrypt";
 import { IUserModel } from "../../infra/database/models/User";
-import { ImentorRequestRepo } from "../../domain/repository/ImentroRequstrepository";
+import { ImentorRequestRepo } from "../../domain/repository/ImentroRequst.repository";
 import {
   alldata,
   Imentorrequst,

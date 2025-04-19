@@ -1,5 +1,5 @@
-import mentrorouter from "../presentation/routers/mentor";
-import user from "../presentation/routers/user";
+import mentrorouter from "../presentation/routers/mentor.route";
+import user from "../presentation/routers/user.route";
 import { Router } from "express";
 const router = Router();
 

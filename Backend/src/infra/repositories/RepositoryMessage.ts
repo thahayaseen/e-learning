@@ -1,5 +1,5 @@
 import { IMessage } from "../../domain/entities/Message";
-import { IRmessage } from "../../domain/repository/IRmessage";
+import { IRmessage } from "../../domain/repository/IRmessage.repository";
 import Message from "../database/models/Message";
 
 

@@ -1,10 +1,10 @@
-import IUserReposetory from "../../domain/repository/IUser";
+import IUserReposetory from "../../domain/repository/IUser.repository";
 import { IAdmin } from "../../domain/interface/Iadmin";
-import IRcategory from "../../domain/repository/IRcategory";
+import IRcategory from "../../domain/repository/IRcategory.repository";
 import { SystemError } from "./enum/systemError";
 import { HttpStatusCode } from "./enum/Status";
 import { ICategory } from "../../infra/database/models/Category";
-import { ICoursesRepository } from "../../domain/repository/IRepositoryCourses";
+import { ICoursesRepository } from "../../domain/repository/IRepositoryCourses.repository";
 class AppError extends Error {
   constructor(message: string, private statuscode: number) {
     super(message);

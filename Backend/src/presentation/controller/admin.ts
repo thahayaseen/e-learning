@@ -6,7 +6,7 @@ import { SystemError } from "../../app/useCases/enum/systemError";
 import { IAdminUsecase } from "../../app/useCases/admin";
 import { HttpStatusCode } from "../../app/useCases/enum/Status";
 import { SuccessMessage } from "../../app/useCases/enum/httpSuccess";
-import { ImentorRequestRepo } from "../../domain/repository/ImentroRequstrepository";
+import { ImentorRequestRepo } from "../../domain/repository/ImentroRequst.repository";
 import { UserUsecase } from "../../app/useCases/User";
 
 export default class Admincontroler {
@@ -39,15 +39,6 @@ export default class Admincontroler {
   }
   async userData(req: AuthServices, res: Response) {
     try {
-      const { role } = req.user;
-      console.log(role, "in  usedatass");
-
-      // if (!role || role !== Roles.ADMIN) {
-      //   res
-      //     .status(HttpStatusCode.UNAUTHORIZED)
-      //     .json({ success: true, message: "Unauthorized" });
-      //   return;
-      // }
       const { page, limit } = req.query;
       if (!page || !limit) {
         res
@@ -76,11 +67,6 @@ export default class Admincontroler {
   async createCategorys(req: AuthServices, res: Response) {
     try {
       console.log("adding");
-      // if (req.user.role !== Roles.ADMIN) {
-      //   res.status(HttpStatusCode.BAD_REQUEST);
-      //   return;
-      // }
-
       const { name, description } = req.body;
       const datass = await this.adminUsecase.getCategoryNameUsecase(name);
       console.log(datass);

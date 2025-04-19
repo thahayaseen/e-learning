@@ -1,7 +1,7 @@
 import { IMessage } from "peer";
 import { ImessageUsecase } from "../../domain/interface/ImessageUsecase";
-import { IRmetting } from "../../domain/repository/IRmeeting";
-import IUserReposetory from "../../domain/repository/IUser";
+import { IRmetting } from "../../domain/repository/IRmeeting.repository";
+import IUserReposetory from "../../domain/repository/IUser.repository";
 import { MeetingDto } from "../dtos/MeetingDto";
 import { userError } from "./enum/User";
 import { Types } from "mongoose";

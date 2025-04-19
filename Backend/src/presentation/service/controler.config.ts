@@ -1,5 +1,6 @@
+import { courseMiddlewere } from "../middilwere/coursevarify.middleware";
 // const controller=new Controller(signUpUser)
-import { CourseUsecase } from "../../app/useCases/CourseUsecase";
+
 import RevenueUseCase from "../../app/useCases/revenue.usecase";
 import {
   adminUsecase,
@@ -15,6 +16,7 @@ import {
 import revenueRepository from "../../infra/repositories/revenueRepository";
 import { MentorController } from "../controller/Cmentor";
 import UserController from "../controller/user";
+import { Coursecontroller } from "../controller/course.controller";
 const revenueuseCase = new RevenueUseCase(revenueRepository);
 
 export const controller = new UserController(
@@ -34,3 +36,8 @@ export const mentorController = new MentorController(
   socketusecases,
   meetUsecase
 );
+export const courseMiddleweres = new courseMiddlewere(
+  userUseCase,
+  courseUsecase
+);
+export const courseContoller = new Coursecontroller(courseUsecase,Mentorusecase);
