@@ -69,9 +69,7 @@ export function Orders() {
 
   if (isLoading) {
     return (
-      <div
-      
-        className="flex items-center justify-center min-h-screen bg-gray-950 p-6">
+      <div className="flex items-center justify-center min-h-screen bg-gray-950 p-6">
         <div className="flex flex-col items-center gap-2">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
           <p className="text-white">Loading your orders...</p>
@@ -83,9 +81,7 @@ export function Orders() {
   // If no orders
   if (!orders || orders.length === 0) {
     return (
-      <div
- 
-        className="flex items-center justify-center min-h-screen bg-[#0a192f] p-6">
+      <div className="flex items-center justify-center min-h-screen bg-[#0a192f] p-6">
         <div className="text-center space-y-3">
           <ShoppingCart className="h-12 w-12 mx-auto text-gray-300" />
           <p className="text-white text-lg">No orders found</p>
@@ -101,9 +97,7 @@ export function Orders() {
   }
 
   return (
-    <div
-      
-      className="flex items-center justify-center min-h-screen bg-[#0a192f] p-6">
+    <div className="flex  justify-center min-h-screen bg-[#0a192f] p-6">
       <Card className="bg-gray-900 border-gray-800 rounded-xl shadow-xl overflow-hidden">
         <CardHeader className="border-b border-gray-800 bg-gradient-to-r from-gray-900 to-gray-800">
           <CardTitle className="text-white font-bold text-xl flex items-center">
@@ -157,8 +151,8 @@ export function Orders() {
                           className="hover:bg-primary hover:text-white text-white border-primary transition-colors"
                           onClick={async () => {
                             const data = await reorder(order._id);
-                            console.log(data,'data is ');
-                            
+                            console.log(data, "data is ");
+
                             router.push(data.url);
                           }}>
                           <Clock className="mr-1 h-4 w-4" /> Complete Payment

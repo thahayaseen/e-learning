@@ -6,13 +6,10 @@ import {
   Users,
   Star,
   Check,
-  ShoppingCart,
-  CreditCard,
-  Lock,
-  ArrowRight,
-  Gift,
   Loader2,
   IndianRupee,
+  Lock,
+  ArrowRight
 } from "lucide-react";
 import { getSelectedCourse, purchaseCourse } from "@/services/fetchdata";
 import { useParams, useRouter } from "next/navigation";
@@ -25,8 +22,6 @@ const stripePromise = await loadStripe(
 );
 
 const CoursePurchasePage = () => {
-  const [selectedPlan, setSelectedPlan] = useState("standard");
-  const [paymentMethod, setPaymentMethod] = useState("credit");
   const [courseDetails, setCourseDetails] = useState<any>();
   const [loading, setLoading] = useState(true);
   const [processingPayment, setProcessingPayment] = useState(false);
@@ -61,100 +56,79 @@ const CoursePurchasePage = () => {
     );
   }
 
-  const handleStripeCheckout = async () => {
+  const handleCheckout = async () => {
     try {
       setProcessingPayment(true);
 
-      const datas = {
+      const purchaseData = {
         courseId: params.id,
-        planType: selectedPlan,
-        price:
-          selectedPlan === "premium"
-            ? courseDetails.PremiumPrice || courseDetails.Price * 1.5
-            : courseDetails.Price,
+        price: courseDetails.Price,
         courseName: courseDetails.Title,
+        planType:"standard"
       };
-      console.log(datas, "data issisisisisi");
+
       if (params.id && typeof params.id == "string") {
-        const session: any = await purchaseCourse(params.id, datas);
-        console.log(session);
+        const session: any = await purchaseCourse(params.id, purchaseData);
+        
         if (!session?.success) {
           const errorData = await session.data;
           throw new Error(
             errorData?.message || "Failed to create checkout session"
           );
         }
+        
         if (session.orderid) {
           localStorage.setItem("orderid", session.orderid);
         }
 
-        console.log(session, "sesstopj is ");
-
         if (!session || !session.id) {
           throw new Error("Invalid checkout session");
         }
+        
         if (stripePromise) {
           const { error } = await stripePromise.redirectToCheckout({
             sessionId: session.id,
           });
+          
           if (error) {
             throw new Error(error.message);
           }
-          console.log(error);
         }
       }
     } catch (error: any) {
-      toast.error(error.message || error.data.message || "Payment failed");
+      toast.error(error.message || error.data?.message || "Payment failed");
       console.error("Payment error:", error);
     } finally {
       setProcessingPayment(false);
     }
   };
 
-  const handlePurchase = async () => {
-    // Handle PayPal or other payment methods
-    try {
-      if (paymentMethod === "credit") {
-        handleStripeCheckout();
-      }
-      // const result = await purchaseCourse(params.id);
-      // if (result) {
-      //   toast.success("Purchase successful");
-      //   router.push("/");
-      // }
-    } catch (error: any) {
-      toast.error(error.message || "Purchase failed");
-      router.push("/");
-    }
-  };
-
   return (
-    <div className="bg-[#0F172A] text-white min-h-screen py-12 px-4">
-      <div className="max-w-6xl mx-auto bg-[#1E293B] rounded-2xl shadow-2xl overflow-hidden">
-        {/* Course Overview Section */}
-        <div className="grid md:grid-cols-2 gap-8 p-8">
-          {/* Course Details Column */}
-          <div>
-            <div className="bg-[#2563EB]/20 p-4 rounded-lg mb-6">
-              <h1 className="text-3xl font-bold text-blue-300 mb-4">
+    <div className="bg-gradient-to-b from-blue-950 to-slate-900 text-white min-h-screen py-12 px-4">
+      <div className="max-w-5xl mx-auto bg-slate-800/80 backdrop-blur rounded-xl shadow-2xl overflow-hidden">
+        <div className="grid md:grid-cols-5 gap-0">
+          {/* Course Details Column (3/5 width) */}
+          <div className="md:col-span-3 p-8">
+            <div className="bg-gradient-to-r from-blue-900/40 to-indigo-900/40 p-6 rounded-xl mb-6 border border-blue-700/30">
+              <h1 className="text-3xl font-bold text-blue-200 mb-4">
                 {courseDetails.Title}
               </h1>
 
-              <div className="flex items-center space-x-4 mb-4">
-                <div className="flex items-center">
-                  <Star className="text-yellow-500 mr-2" size={24} />
+              <div className="flex flex-wrap items-center gap-4 mb-4">
+                <div className="flex items-center bg-blue-900/30 px-3 py-1 rounded-lg">
+                  <Star className="text-yellow-400 mr-2" size={18} />
                   <span className="text-blue-100">
-                    {courseDetails.rating || "No ratings yet"}
+                    {courseDetails.rating || "New Course"}
                   </span>
                 </div>
-                <div className="flex items-center">
-                  <Users className="text-green-500 mr-2" size={24} />
+                <div className="flex items-center bg-blue-900/30 px-3 py-1 rounded-lg">
+                  <Users className="text-green-400 mr-2" size={18} />
                   <span className="text-blue-100">
                     {courseDetails.students || "0"} Students
                   </span>
                 </div>
-                <div className="flex items-center">
-                  <Clock className="text-purple-500 mr-2" size={24} />
+                <div className="flex items-center bg-blue-900/30 px-3 py-1 rounded-lg">
+                  <Clock className="text-purple-400 mr-2" size={18} />
                   <span className="text-blue-100">
                     {courseDetails.duration || "Self-paced"}
                   </span>
@@ -162,175 +136,89 @@ const CoursePurchasePage = () => {
               </div>
             </div>
 
-            <p className="text-blue-100 mb-6">{courseDetails.Description}</p>
+            <p className="text-blue-100 mb-8 leading-relaxed">
+              {courseDetails.Description}
+            </p>
 
             <div className="mb-6">
-              <h3 className="text-xl font-semibold mb-3 text-blue-300">
-                Course Lessons
+              <h3 className="text-xl font-semibold mb-4 text-blue-300 flex items-center">
+                <Book className="mr-2" size={20} />
+                Course Curriculum
               </h3>
-              <ul className="space-y-2">
-                {courseDetails.lessons &&
-                  courseDetails.lessons.map((item: any, index: number) => (
-                    <li key={index} className="flex items-center text-blue-100">
-                      <Check className="text-green-500 mr-2" size={20} />
-                      <span>{item.Lessone_name}</span>
-                    </li>
-                  ))}
-              </ul>
-            </div>
-          </div>
-
-          {/* Pricing and Payment Column */}
-          <div>
-            {/* Plan Selection */}
-            <div className="bg-[#334155] rounded-lg p-6 mb-6">
-              <div className="flex justify-center mb-6">
-                <button
-                  onClick={() => setSelectedPlan("standard")}
-                  className={`mr-4 px-4 py-2 rounded-lg transition-all ${
-                    selectedPlan === "standard"
-                      ? "bg-blue-600 text-white"
-                      : "bg-[#1E293B] text-blue-300 hover:bg-blue-900"
-                  }`}>
-                  Standard Plan
-                </button>
-                <button
-                  onClick={() => setSelectedPlan("premium")}
-                  className={`px-4 py-2 rounded-lg transition-all ${
-                    selectedPlan === "premium"
-                      ? "bg-blue-600 text-white"
-                      : "bg-[#1E293B] text-blue-300 hover:bg-blue-900"
-                  }`}>
-                  Premium Plan
-                </button>
-              </div>
-
-              <div className="text-center mb-6">
-                <div className="flex justify-center align-middle items-center">
-                  <IndianRupee color="blue" />
-                  <h2 className="text-4xl font-bold text-blue-400">
-                    {courseDetails.Price}
-                  </h2>
-                </div>
-                <p className="text-blue-200">One-time payment</p>
-              </div>
-
-              <div className="mb-6">
-                <h3 className="text-xl font-semibold mb-3 text-blue-300">
-                  Plan Features
-                </h3>
+              <div className="bg-slate-900/60 rounded-lg p-4">
                 <ul className="space-y-3">
-                  {selectedPlan === "standard" ? (
-                    <>
-                      <li className="flex items-center text-blue-100">
-                        <Check className="text-green-500 mr-2" size={20} />
-                        <span>Full course access</span>
+                  {courseDetails.lessons &&
+                    courseDetails.lessons.map((item: any, index: number) => (
+                      <li 
+                        key={index} 
+                        className="flex items-center text-blue-100 p-2 hover:bg-slate-800/60 rounded-lg transition-colors"
+                      >
+                        <Check className="text-emerald-500 mr-3 flex-shrink-0" size={18} />
+                        <span>{item.Lessone_name}</span>
                       </li>
-                      <li className="flex items-center text-blue-100">
-                        <Check className="text-green-500 mr-2" size={20} />
-                        <span>Basic exercise solutions</span>
-                      </li>
-                      <li className="flex items-center text-blue-100">
-                        <Check className="text-green-500 mr-2" size={20} />
-                        <span>Certificate of completion</span>
-                      </li>
-                    </>
-                  ) : (
-                    <>
-                      <li className="flex items-center text-blue-100">
-                        <Check className="text-green-500 mr-2" size={20} />
-                        <span>Full course access</span>
-                      </li>
-                      <li className="flex items-center text-blue-100">
-                        <Check className="text-green-500 mr-2" size={20} />
-                        <span>Advanced exercise solutions</span>
-                      </li>
-                      <li className="flex items-center text-blue-100">
-                        <Check className="text-green-500 mr-2" size={20} />
-                        <span>Certificate of completion</span>
-                      </li>
-                      <li className="flex items-center text-blue-100">
-                        <Check className="text-green-500 mr-2" size={20} />
-                        <span>1-on-1 instructor support</span>
-                      </li>
-                      <li className="flex items-center text-blue-100">
-                        <Check className="text-green-500 mr-2" size={20} />
-                        <span>Lifetime updates</span>
-                      </li>
-                    </>
-                  )}
+                    ))}
                 </ul>
               </div>
             </div>
+          </div>
 
-            {/* Payment Method Selection */}
-            <div className="bg-[#334155] rounded-lg p-6">
-              <h3 className="text-xl font-semibold mb-4 text-blue-300">
-                Payment Method
-              </h3>
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <button
-                  onClick={() => setPaymentMethod("credit")}
-                  className={`flex items-center justify-center p-4 rounded-lg transition-all ${
-                    paymentMethod === "credit"
-                      ? "bg-blue-600 text-white"
-                      : "bg-[#1E293B] text-blue-300 hover:bg-blue-900"
-                  }`}>
-                  <CreditCard className="mr-2" size={24} />
-                  Credit Card
-                </button>
-                <button
-                  onClick={() => setPaymentMethod("paypal")}
-                  className={`flex items-center justify-center p-4 rounded-lg transition-all ${
-                    paymentMethod === "paypal"
-                      ? "bg-blue-600 text-white"
-                      : "bg-[#1E293B] text-blue-300 hover:bg-blue-900"
-                  }`}>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6 mr-2"
-                    viewBox="0 0 24 24"
-                    fill="currentColor">
-                    <path d="M10.5 14.25H9.75v-5.5h.75c1.519 0 2.75 1.231 2.75 2.75s-1.231 2.75-2.75 2.75zM12 3C7.031 3 3 7.031 3 12s4.031 9 9 9 9-4.031 9-9-4.031-9-9-9zm0 16.5c-4.142 0-7.5-3.358-7.5-7.5S7.858 4.5 12 4.5s7.5 3.358 7.5 7.5-3.358 7.5-7.5 7.5z" />
-                  </svg>
-                  PayPal
-                </button>
+          {/* Payment Column (2/5 width) */}
+          <div className="md:col-span-2 bg-slate-900 p-8">
+            <div className="sticky top-8">
+              {/* Price Display */}
+              <div className="text-center mb-8 bg-gradient-to-br from-blue-800/30 to-purple-900/30 p-6 rounded-xl border border-blue-600/20">
+                <p className="text-blue-300 mb-2">Course Price</p>
+                <div className="flex justify-center items-center">
+                  <IndianRupee className="text-blue-400" size={24} />
+                  <h2 className="text-5xl font-bold text-blue-200 ml-1">
+                    {courseDetails.Price}
+                  </h2>
+                </div>
+                <p className="text-blue-300 mt-2 text-sm">One-time payment</p>
               </div>
 
-              {paymentMethod === "credit" && (
-                <div className="bg-[#1E293B] rounded-lg p-4 mb-6">
-                  <p className="text-blue-200 mb-2">
-                    You'll be redirected to our secure payment partner Stripe to
-                    complete your purchase.
-                  </p>
-                  <div className="flex items-center">
-                    <Lock className="text-green-500 mr-2" size={20} />
-                    <span className="text-blue-100">
-                      256-bit SSL encrypted payment
-                    </span>
-                  </div>
+              {/* Course Features */}
+              <div className="mb-8">
+                <h3 className="text-xl font-semibold mb-4 text-blue-300">
+                  What You'll Get
+                </h3>
+                <ul className="space-y-3">
+                  <li className="flex items-center text-blue-100">
+                    <Check className="text-emerald-500 mr-3" size={20} />
+                    <span>Full lifetime course access</span>
+                  </li>
+                  <li className="flex items-center text-blue-100">
+                    <Check className="text-emerald-500 mr-3" size={20} />
+                    <span>All exercise solutions included</span>
+                  </li>
+                  <li className="flex items-center text-blue-100">
+                    <Check className="text-emerald-500 mr-3" size={20} />
+                    <span>Certificate of completion</span>
+                  </li>
+                  <li className="flex items-center text-blue-100">
+                    <Check className="text-emerald-500 mr-3" size={20} />
+                    <span>24/7 community support</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Payment Security Info */}
+              <div className="bg-blue-950/50 rounded-lg p-4 mb-6 border border-blue-800/30">
+                <div className="flex items-center mb-2">
+                  <Lock className="text-emerald-500 mr-2" size={20} />
+                  <span className="text-blue-100 font-medium">Secure Payment</span>
                 </div>
-              )}
+                <p className="text-blue-200 text-sm">
+                  Your payment is processed securely through Stripe with 256-bit SSL encryption.
+                </p>
+              </div>
 
-              {/* Coupon and Promo */}
-              {/* <div className="mt-6 bg-[#1E293B] rounded-lg p-4 flex items-center">
-                <Gift className="text-blue-400 mr-3" size={24} />
-                <input
-                  type="text"
-                  placeholder="Enter promo code"
-                  className="bg-transparent w-full text-blue-100 outline-none"
-                />
-                <button className="bg-blue-600 text-white px-4 py-2 rounded-lg ml-2">
-                  Apply
-                </button>
-              </div> */}
-
-              {/* Enroll Button */}
+              {/* Purchase Button */}
               <button
-                className={`w-full bg-blue-600 text-white py-4 rounded-lg hover:bg-blue-700 transition mt-6 flex items-center justify-center ${
+                className={`w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition mt-6 flex items-center justify-center font-medium ${
                   processingPayment ? "opacity-70 cursor-not-allowed" : ""
                 }`}
-                onClick={handlePurchase}
+                onClick={handleCheckout}
                 disabled={processingPayment}>
                 {processingPayment ? (
                   <>
@@ -339,11 +227,15 @@ const CoursePurchasePage = () => {
                   </>
                 ) : (
                   <>
-                    Complete Purchase
+                    Enroll Now
                     <ArrowRight className="ml-2" size={20} />
                   </>
                 )}
               </button>
+              
+              <p className="text-center text-blue-400 text-sm mt-4">
+                30-day money-back guarantee
+              </p>
             </div>
           </div>
         </div>

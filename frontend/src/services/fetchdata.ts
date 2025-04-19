@@ -180,7 +180,10 @@ export const purchaseCourse = async (courseId: string, data: any) => {
   try {
     console.log(data, "in regint ");
 
-    return await axios.post("/purchase/" + courseId, { data });
+    return await axios.post("/purchase/" + courseId, {
+      data,
+
+    });
   } catch (error) {
     console.log(error.message);
 

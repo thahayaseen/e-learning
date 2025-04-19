@@ -50,6 +50,7 @@ import {
 import { Explore } from "@/components/mybtns/myBtns";
 import PaginationComponent from "@/components/default/pagination";
 import { Debouncing } from "@/services/debauncing";
+import { useRouter } from "next/navigation";
 
 // Types and Interfaces
 interface Mentor {
@@ -267,7 +268,7 @@ const CourseList: React.FC = () => {
       },
     },
   };
-
+  const router = useRouter();
   return (
     <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-slate-100 min-h-screen p-6">
       <div className="container mx-auto">
@@ -392,7 +393,9 @@ const CourseList: React.FC = () => {
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {courses.map((course) => (
                   <motion.div key={course._id} variants={cardVariants}>
-                    <Card className="bg-slate-800/70 border-slate-700/50 backdrop-blur-lg overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+                    <Card
+                      onClick={() => router.push("/course/" + course._id)}
+                      className="bg-slate-800/70 border-slate-700/50 backdrop-blur-lg overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
                       <div className="relative aspect-video overflow-hidden">
                         <Image
                           src={course.image || "/api/placeholder/500/280"}

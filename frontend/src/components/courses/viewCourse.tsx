@@ -651,9 +651,9 @@ const CourseView = ({ id }: { id: string }) => {
             undefined, // No response for quiz
             100, // Score from validation or default to 100
             selectedlessonid
-          ).then((data:any) => {
-            console.log(data, "data adter update",data.data.OverallScore);
-            settotalprogress(data.data.OverallScore)
+          ).then((data: any) => {
+            console.log(data, "data adter update", data.data.OverallScore);
+            settotalprogress(data.data.OverallScore);
           });
         } else {
           toast.error("Incorrect answer. Please try again.");
@@ -784,6 +784,8 @@ const CourseView = ({ id }: { id: string }) => {
         const progress =
           taskProgress[selectedTask._id] ||
           findTaskProgressStatus(selectedTask._id);
+        console.log(JSON.stringify(progress), "progfreessss is");
+
         const watchProgress = progress
           ? Math.floor(
               (progress.watchedDuration / (progress.totalDuration || 1)) * 100
@@ -834,22 +836,6 @@ const CourseView = ({ id }: { id: string }) => {
                     {progress?.watchedDuration || 0}s /{" "}
                     {progress?.totalDuration || 0}s
                   </span>
-                </div>
-              </div>
-
-              {/* Notes section - NEW */}
-              <div className="mt-6 border-t pt-6">
-                <h4 className="text-sm font-medium text-gray-700 mb-2">
-                  Take Notes
-                </h4>
-                <textarea
-                  placeholder="Write your notes here to help you remember key points..."
-                  className="w-full h-24 p-3 border rounded-md focus:ring-2 focus:ring-primary/50 focus:outline-none resize-none text-sm"
-                />
-                <div className="flex justify-end mt-2">
-                  <Button variant="outline" size="sm" className="text-xs">
-                    Save Notes
-                  </Button>
                 </div>
               </div>
 
