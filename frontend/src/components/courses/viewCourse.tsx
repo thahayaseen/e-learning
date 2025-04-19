@@ -827,15 +827,19 @@ const CourseView = ({ id }: { id: string }) => {
                   )}
                 </div>
                 <Progress
-                  value={watchProgress}
+                  value={progress.isCompleted ? 100 : watchProgress}
                   className="mt-2 h-2.5 bg-gray-100"
                 />
                 <div className="flex justify-between text-sm text-gray-500 mt-1">
-                  <span>{watchProgress}% watched</span>
                   <span>
-                    {progress?.watchedDuration || 0}s /{" "}
-                    {progress?.totalDuration || 0}s
+                    {progress?.isCompleted ? 100 : watchProgress}% watched
                   </span>
+                  {progress.isCompleted && (
+                    <span>
+                      {progress?.watchedDuration || 0}s /{" "}
+                      {progress?.totalDuration || 0}s
+                    </span>
+                  )}
                 </div>
               </div>
 
