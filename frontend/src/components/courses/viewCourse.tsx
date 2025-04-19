@@ -834,7 +834,7 @@ const CourseView = ({ id }: { id: string }) => {
                   <span>
                     {progress?.isCompleted ? 100 : watchProgress}% watched
                   </span>
-                  {progress.isCompleted && (
+                  {!progress.isCompleted && (
                     <span>
                       {progress?.watchedDuration || 0}s /{" "}
                       {progress?.totalDuration || 0}s
