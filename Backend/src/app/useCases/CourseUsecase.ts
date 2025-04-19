@@ -451,7 +451,7 @@ export class CourseUsecase implements ICourseUseCase {
       type
     );
     if (data && type) {
-      throw new Error("Payment is already in progress");
+      throw new Error("Payment is already in prossess");
     }
     return data;
   }

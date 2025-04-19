@@ -122,7 +122,7 @@ export function Overview({
                       }`}>
                     {course.progress.OverallScore === 100
                       ? "Completed"
-                      : course.Score > 5
+                      : course.progress.OverallScore > 5
                       ? "In Progress"
                       : "Not Started"}
                   </Badge>
@@ -152,7 +152,7 @@ export function Overview({
                 <div className="flex justify-between text-xs text-gray-400 mt-2">
                   <span className="flex items-center gap-1">
                     <Clock className="h-3 w-3 text-indigo-400" />
-                    Last Updated: {course.UpdatedAt}
+                    Last Updated: {course.UpdatedAt.split("T")[0]}
                   </span>
                   {course.Score === 100 ? (
                     <span className="flex items-center gap-1">
