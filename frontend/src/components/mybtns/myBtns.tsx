@@ -132,11 +132,13 @@ export function Continue({
 
 export const User = () => {};
 export const LogoutBtn = () => {
+  const router = useRouter();
   const dispatch = useDispatch();
   return (
     <Button
       onClick={async () => {
         await clearGs(dispatch);
+        router.push("/");
       }}>
       Logout
     </Button>
