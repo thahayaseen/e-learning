@@ -52,7 +52,7 @@ const MessageAdminDashboard = () => {
         socket.off(chatEnum.receive);
         // Leave all rooms when component unmounts
         joinedRooms.current.forEach((roomId) => {
-          socket.emit("leave-room", { roomId })
+          socket.emit("leave-room", { roomId });
         });
         joinedRooms.current.clear();
       };
@@ -67,7 +67,7 @@ const MessageAdminDashboard = () => {
   useEffect(() => {
     if (selectedChat) {
       fetchMessages(selectedChat._id);
-  
+
       if (socket && !joinedRooms.current.has(selectedChat._id)) {
         // Leave previous rooms first
         joinedRooms.current.forEach((roomId) => {
@@ -76,25 +76,25 @@ const MessageAdminDashboard = () => {
             joinedRooms.current.delete(roomId);
           }
         });
-  
+
         // Join the new room
         socket.emit(chatEnum.joinRoom, {
           roomId: selectedChat._id,
           username: state.name,
           email: state.email,
         });
-  
+
         joinedRooms.current.add(selectedChat._id);
       }
     }
-  
+
     return () => {
       // Clean up when chat changes
       if (socket && selectedChat) {
         socket.emit("leave-room", { roomId: selectedChat._id });
       }
     };
-  }, [selectedChat, socket, state.email, state.name]);
+  }, [selectedChat, socket, state?.email, state?.name]);
 
   useEffect(() => {
     // Scroll to bottom when messages change
@@ -207,7 +207,7 @@ const MessageAdminDashboard = () => {
   const closeChat = useCallback(() => {
     // When closing chat, we should leave the room
     if (socket && selectedChat) {
-      socket.emit("leave-room", { roomId: selectedChat._id })
+      socket.emit("leave-room", { roomId: selectedChat._id });
       joinedRooms.current.delete(selectedChat._id);
     }
     setSelectedChat(null);
