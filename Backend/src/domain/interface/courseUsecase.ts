@@ -10,6 +10,7 @@ import { IPaginationResult } from "../../infra/repositories/RepositoryCourses";
 import { CourseInterface } from "../entities/returndata";
 
 export interface ICourseUseCase {
+  getCourseByName(name: string, Mentor_id: string): Promise<any>;
   getAllCourse(
     page: number,
     limit: number,
@@ -102,6 +103,5 @@ export interface ICourseUseCase {
     limit: number,
     search: any
   ): Promise<{ data: CertificateDTO[]; total: number }>;
-  actionCourse(coureseId: string, action: boolean):Promise<void> 
-  // getActiveOrder(_id: string, courseId: string): Promise<any>;
+  actionCourse(coureseId: string, action: boolean): Promise<void>;
 }

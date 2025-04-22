@@ -23,11 +23,11 @@ export const addCategory = async ({ Category, Description }: ICategory) => {
     return false;
   }
 };
-export const allCategorys = async () => {
+export const allCategorys = async (qury) => {
   try {
-    const data = await axios.get("/mentor/categorys");
+    const data = await axios.get("/mentor/categorys" + qury);
     console.log(data);
-    return data.data;
+    return data;
   } catch (error) {
     console.log(error);
     return error;
@@ -182,7 +182,6 @@ export const purchaseCourse = async (courseId: string, data: any) => {
 
     return await axios.post("/purchase/" + courseId, {
       data,
-
     });
   } catch (error) {
     console.log(error.message);

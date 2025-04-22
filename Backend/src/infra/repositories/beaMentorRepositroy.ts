@@ -1,4 +1,4 @@
-import { ImentorRequestRepo } from "../../domain/repository/ImentroRequstrepository";
+import { ImentorRequestRepo } from "../../domain/repository/ImentroRequst.repository";
 import MentorRequest from "../database/models/mentorRequest";
 export interface Imentorrequst {
   fullname: string;

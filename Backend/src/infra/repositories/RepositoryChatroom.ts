@@ -1,6 +1,6 @@
 import { IChatroom } from "../../domain/entities/Chatroom";
 import { IMessage } from "../../domain/entities/Message";
-import { IRchatroom } from "../../domain/repository/IRchatroom";
+import { IRchatroom } from "../../domain/repository/Ichatroom.repository";
 import Chatroom from "../database/models/Chatroom";
 export interface getChatroom {
   data: IChatroom[];

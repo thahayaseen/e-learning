@@ -1,13 +1,11 @@
-import mongoose from 'mongoose'
+import mongoose from "mongoose";
 
-const mongo=async()=>{
-   try {
-    await mongoose.connect("mongodb+srv://thaha:thahaha@socialmedia.ifra0aw.mongodb.net/?retryWrites=true&w=majority&appName=socialmedia")
+const mongo = async () => {
+  try {
+    await mongoose.connect(process.env.MONGODBLINK!);
     console.log("mongodb connected");
-    
-   } catch (error) {
+  } catch (error) {
     console.log(error);
-    
-   }
-}
-export default mongo
+  }
+};
+export default mongo;

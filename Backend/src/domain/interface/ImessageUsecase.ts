@@ -1,7 +1,7 @@
 import { IMessage } from "peer";
 import { MeetingDto } from "../../app/dtos/MeetingDto";
 
-export interface ImessageUsecase {
+export interface IMeetusecase {
   create(data: MeetingDto): Promise<void>;
   updateMeetTime(
     meetId: string,

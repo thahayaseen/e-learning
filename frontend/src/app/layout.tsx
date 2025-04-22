@@ -5,6 +5,8 @@ import RProviders from "./RProvider";
 import { Toaster } from "react-hot-toast";
 import SesstionProvider from "./SessionProvider";
 import Protection from "@/components/auth/Redisautofill";
+import { Suspense } from "react";
+import Loading from "@/components/loading";
 // import Protaction from '@/components/auth/Redisautofill'
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,9 +21,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Edu-learning",
   description: "Edu-learning",
-  icons:{
-    icon:'./favicone.ico'
-  }
+  icons: {
+    icon: "./favicone.ico",
+  },
 };
 
 export default function RootLayout({
@@ -37,7 +39,7 @@ export default function RootLayout({
           <RProviders>
             <Protection>
               <Toaster position="top-right" />
-            {children}
+              <Suspense fallback={<Loading />}>{children}</Suspense>
             </Protection>
           </RProviders>
         </SesstionProvider>

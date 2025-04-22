@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import PaginationComponent from "../default/pagination";
 import { UserCheck, UserX, Search, Filter, RefreshCcw } from "lucide-react";
 import AdminTable from "./adminuserTable";
@@ -22,101 +22,96 @@ import UserBlockbtn from "../mybtns/userBlockbtn";
 
 const UserManagementPage = () => {
   const [users, setUsers] = useState<Adminshousers[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<Adminshousers[]>([]);
+
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [roleFilter, setRoleFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
-  const [limit,setLimit]=useState(5)
+  const [limit, setLimit] = useState(2);
 
-  const fetchUser = async () => {
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setPage(1); // Reset to first page on search
+    }, 500); // 500ms delay
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [searchTerm]);
+
+  const fetchUser = useCallback(async () => {
     setIsLoading(true);
     try {
-      
-      const response = await fetchUsers(`/allusers?page=${page}&limit=${limit}`);
-      console.log(response,'resis');
-      
+      const urlparams = new URLSearchParams();
+      urlparams.append("page", String(page));
+      urlparams.append("limit", String(limit));
+      if (roleFilter.trim() !== "") {
+        urlparams.append("rolefilter", roleFilter);
+      }
+      if (statusFilter.trim() !== "") {
+        urlparams.append("statusFilter", statusFilter);
+      }
+      if (debouncedSearchTerm.trim() !== "") {
+        urlparams.append("search", debouncedSearchTerm);
+      }
+
+      const response = await fetchUsers(`/allusers?` + urlparams.toString());
+      console.log(response, "resis");
+
       setTotal(response.totalpages);
       setUsers(response.data);
-      setFilteredUsers(response.data);
     } catch (error) {
       toast.error("Failed to fetch users");
       console.error("Error fetching users:", error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [page, limit, statusFilter, debouncedSearchTerm, roleFilter]);
 
   useEffect(() => {
     fetchUser();
-  }, [page]);
+  }, [page, limit, statusFilter, debouncedSearchTerm, roleFilter, fetchUser]);
 
-  useEffect(() => {
-    applyFilters();
-  }, [searchTerm, roleFilter, statusFilter,users]);
-console.log(roleFilter);
-
-  const applyFilters = () => {
-    let result = [...users];
-
-    // Apply search filter
-    if (searchTerm) {
-      result = result.filter(
-        (user) =>
-          user.name.toLowerCase().startsWith(searchTerm.toLowerCase()) ||
-          user.email.toLowerCase().startsWith(searchTerm.toLowerCase())
-      );
-    }
-
-    // Apply role filter
-    if (roleFilter !== "All") {
-      result = result.filter((user) => user.role === roleFilter);
-    }
-
-    // Apply status filter
-    if (statusFilter === "Active") {
-      result = result.filter((user) => !user.isBlocked);
-    } else if (statusFilter === "isBlocked") {
-      result = result.filter((user) => user.isBlocked);
-    }
-
-    setFilteredUsers(result);
-  };
-
-  const toggleBlock = async (id:string, type) => {
-    console.log(id,'user id is ');
+  const toggleBlock = async (id: string, type) => {
+    console.log(id, "user id is ");
     try {
-      const response = await axios.put("/blockuser", {
+      const response: any = await axios.put("/blockuser", {
         userid: id,
         type: !type,
       });
 
-      setUsers(
-        users.map((user) =>
-          user._id == id ? { ...user, isBlocked: !user.isBlocked } : user
-        )
+      setUsers((prev) =>
+        prev.map((user) => {
+          return user._id == id
+            ? { ...user, isBlocked: !user.isBlocked }
+            : user;
+        })
       );
-      console.log(response,'responce afblocking');
+      console.log(response, "responce afblocking");
 
       toast.success(response.message || "User status updated");
     } catch (error) {
       console.log(error.message);
-      
-      toast.error(error.message||"Failed to update user status");
+
+      toast.error(error.message || "Failed to update user status");
       console.error("Error updating user status:", error);
     }
   };
 
   const resetFilters = () => {
     setSearchTerm("");
+    setDebouncedSearchTerm("");
     setRoleFilter("All");
     setStatusFilter("All");
   };
 
   const activeUsers = useMemo(
-    () => (users.filter((user) => !user.isBlocked).length),
+    () => users.filter((user) => !user.isBlocked).length,
     [users]
   );
   const blockedUsers = useMemo(
@@ -167,7 +162,7 @@ console.log(roleFilter);
     {
       key: "actions",
       header: "Actions",
-      render: (item) =><UserBlockbtn toggleBlock={toggleBlock} user={item} />, // This will be handled by the component's built-in actions
+      render: (item) => <UserBlockbtn toggleBlock={toggleBlock} user={item} />, // This will be handled by the component's built-in actions
     },
   ];
   return (
@@ -204,7 +199,7 @@ console.log(roleFilter);
           </div>
 
           <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
-            {/* Search */}
+            {/* Search with debouncing */}
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-blue-300" />
               <Input
@@ -213,6 +208,11 @@ console.log(roleFilter);
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
+              {searchTerm !== debouncedSearchTerm && (
+                <span className="absolute right-2 top-2.5 text-xs text-blue-300">
+                  Searching...
+                </span>
+              )}
             </div>
 
             {/* Filters */}
@@ -233,7 +233,6 @@ console.log(roleFilter);
                   <SelectItem value="mentor">Mentor</SelectItem>
                 </SelectContent>
               </Select>
-              
 
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="bg-blue-800 border-blue-700 text-white w-32">
@@ -260,16 +259,19 @@ console.log(roleFilter);
 
         <AdminTable
           columns={userColumns}
-          data={filteredUsers}
+          data={users}
           isLoading={isLoading}
           toggleBlock={toggleBlock}
         />
 
-
-          <div className="mt-4">
-            <PaginationComponent page={page} setPage={setPage} total={total} itemsPerPage={limit} />
-          </div>
-        
+        <div className="mt-4">
+          <PaginationComponent
+            page={page}
+            setPage={setPage}
+            total={total}
+            itemsPerPage={limit}
+          />
+        </div>
       </div>
     </div>
   );

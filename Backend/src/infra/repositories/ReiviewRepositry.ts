@@ -1,4 +1,4 @@
-import { IReviewRepo } from "../../domain/repository/IReviewRepositroy";
+import { IReviewRepo } from "../../domain/repository/IReview.repositroy";
 import review, { IReview } from "../database/models/reiview";
 
 class ReviewRepositroy implements IReviewRepo {

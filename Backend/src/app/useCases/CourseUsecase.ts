@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 import { ICourseUseCase } from "../../domain/interface/courseUsecase";
-import { ICoursesRepository } from "../../domain/repository/IRepositoryCourses";
-import { IReviewRepo } from "../../domain/repository/IReviewRepositroy";
-import IUserReposetory from "../../domain/repository/IUser";
+import { ICoursesRepository } from "../../domain/repository/Icourses.repository";
+import { IReviewRepo } from "../../domain/repository/IReview.repositroy";
+import IUserReposetory from "../../domain/repository/IUser.repository";
 import { ICourses } from "../../infra/database/models/course";
 import { ILesson } from "../../infra/database/models/lessone";
 import {
@@ -487,5 +487,9 @@ export class CourseUsecase implements ICourseUseCase {
   async actionCourse(coureseId: string, action: boolean): Promise<void> {
     await this.CourseRepo.UpdataCourse(String(coureseId), { unlist: action });
   }
+  async getCourseByName(name: string, Mentor_id: string) {
+    return await this.CourseRepo.getByname(name, Mentor_id);
+  }
 }
+
 // interface I

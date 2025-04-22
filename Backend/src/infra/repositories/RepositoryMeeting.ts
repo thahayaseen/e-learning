@@ -1,6 +1,6 @@
 import { IMessage } from "peer";
 import { MeetingDto } from "../../app/dtos/MeetingDto";
-import { IRmetting } from "../../domain/repository/IRmeeting";
+import { IRmetting } from "../../domain/repository/Imeeting.repository";
 import { Meeting } from "../database/models/meeting";
 
 class RepositoryMeeting implements IRmetting {

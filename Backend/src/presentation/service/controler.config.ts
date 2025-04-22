@@ -13,8 +13,10 @@ import {
   userUseCase,
 } from "../../config/dependencies";
 import revenueRepository from "../../infra/repositories/revenueRepository";
-import { MentorController } from "../controller/Cmentor";
-import UserController from "../controller/user";
+import { MentorController } from "../controller/Cmentor.controller";
+import { courseControllerClass } from "../controller/course.controller";
+import { Ordercontroller } from "../controller/order.controller";
+import UserController from "../controller/user.controller";
 const revenueuseCase = new RevenueUseCase(revenueRepository);
 
 export const controller = new UserController(
@@ -24,13 +26,21 @@ export const controller = new UserController(
   userUseCase,
   courseUsecase,
   socketusecases,
-  meetUsecase,
-  revenueuseCase
+  meetUsecase
 );
 export const mentorController = new MentorController(
   Mentorusecase,
   userUseCase,
   courseUsecase,
   socketusecases,
-  meetUsecase
+  meetUsecase,
+  revenueuseCase
 );
+export const courseController = new courseControllerClass(
+  courseUsecase,
+  meetUsecase,
+  userUseCase,
+  LoginUsecase,
+  Mentorusecase
+);
+export const OrderController = new Ordercontroller(courseUsecase, userUseCase);

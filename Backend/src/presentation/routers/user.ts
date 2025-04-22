@@ -1,13 +1,19 @@
 import express, { Router, Request, Response } from "express";
-import { controller, mentorController } from "../service/controler.config";
-import { jwtVerify } from "../middilwere/varify";
-import Admincontroler from "../controller/admin";
+import {
+  controller,
+  courseController,
+  mentorController,
+  OrderController,
+} from "../service/controler.config";
+
+import Admincontroler from "../controller/admin.controller";
 import {
   adminUsecase,
+  Middlewares,
   signUpUser,
   userUseCase,
 } from "../../config/dependencies";
-import { roleChecker } from "../middilwere/roleChecking";
+
 import { Roles } from "../../app/useCases/enum/User";
 
 const adminControler = new Admincontroler(adminUsecase, userUseCase);
@@ -20,10 +26,14 @@ router.post(
 );
 router.post("/login", controller.login.bind(controller));
 router.post("/glogin", controller.glogin.bind(controller));
-router.post("/resent", jwtVerify, controller.resendOtp.bind(controller));
+router.post(
+  "/resent",
+  Middlewares.jwtVerify,
+  controller.resendOtp.bind(controller)
+);
 router.get(
   "/autherisation",
-  jwtVerify,
+  Middlewares.jwtVerify,
   controller.reduxvarify.bind(controller)
 );
 router.post("/forgotpass", controller.forgotPassOtpsent.bind(controller)); //for send otp and make tocken
@@ -34,180 +44,207 @@ router.post(
 ); //for varify otp of forgat pass
 router.put(
   "/resetchangepassword",
-  jwtVerify,
+  Middlewares.jwtVerify,
   controller.changepass.bind(controller)
 );
 router.post("/logout", controller.logout.bind(controller));
 router.get(
   "/allusers",
-  jwtVerify,
-  roleChecker(Roles.ADMIN),
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.ADMIN),
   adminControler.userData.bind(adminControler)
 );
 router.put(
   "/blockuser",
-  jwtVerify,
-  roleChecker(Roles.ADMIN),
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.ADMIN),
 
   adminControler.blockUser.bind(adminControler)
 );
 router.get(
   "/getcourse/:page/:type",
-  jwtVerify,
-  roleChecker(Roles.ADMIN),
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.ADMIN),
 
   adminControler.getCourseunaproved.bind(adminControler)
 );
 router.get(
   "/allcourses",
-  // jwtVerify,
+  // Middlewares.jwtVerify,
 
-  controller.getAllcourseUser.bind(controller)
+  courseController.getAllcourseUser.bind(courseController)
 );
-router.get("/profile", jwtVerify, controller.uProfile.bind(controller));
-// router.get('/mentoraplication',jwtVerify,controller.uProfile.bind(controller))
+router.get(
+  "/profile",
+  Middlewares.jwtVerify,
+  controller.uProfile.bind(controller)
+);
+// router.get('/mentoraplication',Middlewares.jwtVerify,controller.uProfile.bind(controller))
 router.post(
   "/addcategory",
-  jwtVerify,
-  roleChecker(Roles.ADMIN),
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.ADMIN),
 
   adminControler.createCategorys.bind(adminControler)
 );
 router.put(
   "/actionCategory/:categoryid",
-  jwtVerify,
-  roleChecker(Roles.ADMIN),
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.ADMIN),
   adminControler.actionCategory.bind(adminControler)
 );
 router.put(
   "/editcategory/:categoryid",
-  jwtVerify,
-  roleChecker(Roles.ADMIN),
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.ADMIN),
   adminControler.editCategory.bind(adminControler)
 );
 router.get(
   "/course/:courseid",
-  jwtVerify,
-  controller.GetCourse.bind(controller)
+  Middlewares.jwtVerify,
+  courseController.GetCourse.bind(courseController)
 );
 router.post(
   "/course/:courseid/qustionans/:taskid",
-  jwtVerify,
-  controller.getQustionans.bind(controller)
+  Middlewares.jwtVerify,
+  courseController.getQustionans.bind(courseController)
 ); //for task qustion anser
 router.post(
   "/purchase/:courseId",
-  jwtVerify,
-  controller.BuyCourse.bind(controller)
+  Middlewares.jwtVerify,
+  OrderController.BuyCourse.bind(OrderController)
 );
 router.post(
   "/paymentsuccess",
-  jwtVerify,
-  controller.paymentsuccss.bind(controller)
+  Middlewares.jwtVerify,
+  OrderController.paymentsuccss.bind(OrderController)
 );
 
 // router.post('/changepass',controller.)
 router.post(
   "/startchat",
-  jwtVerify,
+  Middlewares.jwtVerify,
   mentorController.startChat.bind(mentorController)
 );
-router.get("/getchat/:roomid", jwtVerify, controller.getchats.bind(controller));
+router.get(
+  "/getchat/:roomid",
+  Middlewares.jwtVerify,
+  controller.getchats.bind(controller)
+);
 router.post(
   "/requestmeet",
-  jwtVerify,
+  Middlewares.jwtVerify,
   controller.Requesmeeting.bind(controller)
 );
 router.put(
   "/updatetime/:meetid",
-  jwtVerify,
-  roleChecker(Roles.MENTOR),
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.MENTOR),
   controller.UpdateTime.bind(controller)
 );
-router.get("/meeting/:id", jwtVerify, controller.addUsermeet.bind(controller));
+router.get(
+  "/meeting/:id",
+  Middlewares.jwtVerify,
+  controller.addUsermeet.bind(controller)
+);
 router.get(
   "/leavemeeting/:id",
-  jwtVerify,
+  Middlewares.jwtVerify,
   controller.leaveMeeting.bind(controller)
 );
 // router.post('/makesesstion',controller.stripeSesstion.bind(controller))
 router.put(
   "/progress/update-video",
-  jwtVerify,
+  Middlewares.jwtVerify,
   controller.updateVideoProgress.bind(controller)
 );
 router.post(
   "/progress/mark-completed",
-  jwtVerify,
+  Middlewares.jwtVerify,
   controller.updatacompleteLesson.bind(controller)
 );
 router.get(
   "/progress/:courseid",
-  jwtVerify,
+  Middlewares.jwtVerify,
   controller.getSelectedProgressContorller.bind(controller)
 );
-router.get("/getreviews/:courseid", controller.getAllReviews.bind(controller));
-router.post("/addreview", jwtVerify, controller.addReivews.bind(controller));
+router.get(
+  "/getreviews/:courseid",
+  courseController.getAllReviews.bind(courseController)
+);
+router.post(
+  "/addreview",
+  Middlewares.jwtVerify,
+  courseController.addReivews.bind(courseController)
+);
 router.post(
   "/b-a-mentor",
-  jwtVerify,
+  Middlewares.jwtVerify,
   controller.requestMentor.bind(controller)
 );
 router.get(
   "/getall-mentor-requst",
-  jwtVerify,
-  roleChecker(Roles.ADMIN),
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.ADMIN),
   adminControler.getAllmentorrequst.bind(adminControler)
 );
 router.put(
   "/action-be-mentor/:dataid",
-  jwtVerify,
-  roleChecker(Roles.ADMIN),
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.ADMIN),
 
   adminControler.actionToRequst.bind(adminControler)
 );
 router.put(
   "/update-profile",
-  jwtVerify,
+  Middlewares.jwtVerify,
   controller.changeProfile.bind(controller)
 );
 router.put(
   "/changepassword",
-  jwtVerify,
+  Middlewares.jwtVerify,
   controller.changePassword.bind(controller)
 );
-router.get("/orders", jwtVerify, controller.orders.bind(controller));
+router.get(
+  "/orders",
+  Middlewares.jwtVerify,
+  courseController.orders.bind(courseController)
+);
 router.get(
   "/certificate/:courseId",
-  jwtVerify,
-  controller.Coursecetrificate.bind(controller)
+  Middlewares.jwtVerify,
+  courseController.Coursecetrificate.bind(courseController)
 );
-router.get("/reorder/:orderid", jwtVerify, controller.reOrder.bind(controller));
+router.get(
+  "/reorder/:orderid",
+  Middlewares.jwtVerify,
+  OrderController.reOrder.bind(OrderController)
+);
 router.get(
   "/revenue/total",
-  jwtVerify,
-  roleChecker(Roles.ADMIN),
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.ADMIN),
 
-  controller.getTotalRevenue.bind(controller)
+  mentorController.getTotalRevenue.bind(mentorController)
 );
 router.get(
   "/revenue/mentors",
-  jwtVerify,
-  roleChecker(Roles.ADMIN),
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.ADMIN),
 
-  controller.getMentorRevenue.bind(controller)
+  mentorController.getMentorRevenue.bind(mentorController)
 );
 router.get(
   "/revenue/time",
-  jwtVerify,
-  roleChecker(Roles.ADMIN),
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.ADMIN),
 
-  controller.getTimeRevenue.bind(controller)
+  mentorController.getTimeRevenue.bind(mentorController)
 );
 router.get(
   "/allcertificate",
-  jwtVerify,
-  controller.getAllCertificate.bind(controller)
+  Middlewares.jwtVerify,
+  courseController.getAllCertificate.bind(courseController)
 );
 
 export default router;

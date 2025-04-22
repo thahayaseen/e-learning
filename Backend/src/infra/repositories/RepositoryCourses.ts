@@ -1,7 +1,7 @@
 import mongoose, { Types } from "mongoose";
 import { CourseDTO } from "../../app/dtos/coursesDto";
 import { orderDto } from "../../app/dtos/orderDto";
-import { ICoursesRepository } from "../../domain/repository/IRepositoryCourses";
+import { ICoursesRepository } from "../../domain/repository/Icourses.repository";
 import Courses, { ICourses } from "../database/models/course";
 import Lesson, { ILesson } from "../database/models/lessone";
 import { OrderSchemas } from "../database/models/order";
@@ -18,7 +18,7 @@ import {
   VideoTask,
 } from "../database/models/tasks";
 import User from "../database/models/User";
-import { pipeline } from "nodemailer/lib/xoauth2";
+
 export interface IPaginationResult<T> {
   courses: T[];
   total: number;

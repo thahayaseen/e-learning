@@ -1,128 +1,133 @@
 import { Router, Request, Response } from "express";
-import { controller, mentorController } from "../service/controler.config";
-import { jwtVerify } from "../middilwere/varify";
+import {
+  controller,
+  courseController,
+  mentorController,
+} from "../service/controler.config";
+
 import uploads from "../service/multer";
-import { roleChecker } from "../middilwere/roleChecking";
+
 import { Roles } from "../../app/useCases/enum/User";
+import { Middlewares } from "../../config/dependencies";
 const router = Router();
 router.get("/categorys", mentorController.getcategorys.bind(mentorController));
 router.post(
   "/addcourse",
-  jwtVerify,
-  roleChecker(Roles.MENTOR),
-  mentorController.createCourses.bind(mentorController)
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.MENTOR),
+  courseController.createCourses.bind(courseController)
 );
 router.get(
   "/courses",
-  jwtVerify,
-  roleChecker(Roles.MENTOR),
-  mentorController.getCourses.bind(mentorController)
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.MENTOR),
+  courseController.getCourses.bind(courseController)
 );
 router.post(
   "/lessons",
-  jwtVerify,
-  roleChecker(Roles.MENTOR),
-  mentorController.controlergetLesson.bind(mentorController)
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.MENTOR),
+  courseController.controlergetLesson.bind(courseController)
 );
 router.post(
   "/action/:id",
-  jwtVerify,
-  roleChecker(Roles.ADMIN),
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.ADMIN),
   mentorController.applayAction.bind(mentorController)
 );
 router.post(
   "/courseupdate/:courseid",
-  jwtVerify,
-  roleChecker(Roles.MENTOR),
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.MENTOR),
   mentorController.updateCoursecontroler.bind(mentorController)
 );
 router.post(
   "/deletelesson/:id",
-  jwtVerify,
-  roleChecker(Roles.MENTOR),
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.MENTOR),
   mentorController.deleteLesson.bind(mentorController)
 );
 router.post(
   "/addTask/:lessonid",
-  jwtVerify,
-  roleChecker(Roles.MENTOR),
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.MENTOR),
   mentorController.addTask.bind(mentorController)
 );
 router.post(
   "/updatetask/:taskid",
-  jwtVerify,
-  roleChecker(Roles.MENTOR),
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.MENTOR),
   mentorController.updateTask.bind(mentorController)
 );
 router.post(
   "/updatelesson/:lessonid",
-  jwtVerify,
-  roleChecker(Roles.MENTOR),
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.MENTOR),
   mentorController.updataLesson.bind(mentorController)
 );
 router.post(
   "/addlesson",
-  jwtVerify,
-  roleChecker(Roles.MENTOR),
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.MENTOR),
   mentorController.addlesson.bind(mentorController)
 );
 router.post(
   "/course/delete",
-  jwtVerify,
-  roleChecker(Roles.MENTOR),
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.MENTOR),
   mentorController.deleteCourse.bind(mentorController)
 );
 router.post(
   "/task/delete",
-  jwtVerify,
-  roleChecker(Roles.MENTOR),
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.MENTOR),
   mentorController.DeleteTask.bind(mentorController)
 );
 router.get(
   "/getchats",
-  jwtVerify,
-  roleChecker(Roles.MENTOR),
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.MENTOR),
   mentorController.getRoomsByid.bind(mentorController)
 );
 router.get(
   "/getusers",
-  jwtVerify,
-  roleChecker(Roles.MENTOR),
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.MENTOR),
   mentorController.studentManagment.bind(mentorController)
 );
 router.get(
   "/getorders",
-  jwtVerify,
-  roleChecker(Roles.MENTOR),
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.MENTOR),
   mentorController.getorderMentorId.bind(mentorController)
 );
 router.get(
   "/getrevenue",
-  jwtVerify,
-  roleChecker(Roles.MENTOR),
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.MENTOR),
   mentorController.getRevenue.bind(mentorController)
 );
 router.get(
   "/getstate",
-  jwtVerify,
-  roleChecker(Roles.MENTOR),
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.MENTOR),
   mentorController.getState.bind(mentorController)
 );
 router.get(
   "/meets",
-  jwtVerify,
-  roleChecker(Roles.MENTOR),
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.MENTOR),
   mentorController.getMeetings.bind(mentorController)
 );
 router.put(
   "/meetstatus/:meetid",
-  jwtVerify,
-  roleChecker(Roles.MENTOR),
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.MENTOR),
   mentorController.updateMeetingStatus.bind(mentorController)
 );
 router.put(
   "/action-course-list",
-  jwtVerify,
+  Middlewares.jwtVerify,
   mentorController.ListactionCourse.bind(mentorController)
 );
 export default router;
