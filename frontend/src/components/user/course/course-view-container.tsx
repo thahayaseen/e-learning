@@ -8,7 +8,9 @@ import CourseSidebar from "./course-sidebar"
 import CourseContent from "./course-content"
 import MeetingDialog from "./meeting-dialog"
 import { getSelectedCourse, getProgress, requestmeeting, startChat } from "@/services/fetchdata"
-import type { Course, Task, Meeting, TaskProgress } from "@/types/course"
+import { Course, Task, Meeting, TaskProgress } from "@/type/course"
+import CourseRatingComponent from "@/components/courses/review"
+// import type { Course, Task, Meeting, TaskProgress } from "@/types/course"
 
 const CourseViewContainer = ({ id }: { id: string }) => {
   const [meet, setMeet] = useState<Meeting | null>(null)
@@ -233,6 +235,7 @@ const CourseViewContainer = ({ id }: { id: string }) => {
         onOpenChange={setMeetingDialogOpen}
         onRequestMeeting={handleRequestMeeting}
       />
+      <CourseRatingComponent courseid={course._id} />
     </div>
   )
 }

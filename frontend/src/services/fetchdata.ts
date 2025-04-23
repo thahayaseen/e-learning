@@ -23,7 +23,7 @@ export const addCategory = async ({ Category, Description }: ICategory) => {
     return false;
   }
 };
-export const allCategorys = async (qury) => {
+export const allCategorys = async (qury="") => {
   try {
     const data = await axios.get("/mentor/categorys" + qury);
     console.log(data);

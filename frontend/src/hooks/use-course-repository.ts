@@ -103,6 +103,17 @@ export function useCourseRepository() {
         });
         return updatedList;
       });
+      setLatestCourses((prevCourses) => {
+        const updatedList = prevCourses.map((course) => {
+          if (course._id === courseId) {
+            const newCourse = { ...course, ...updated };
+            console.log("Updated course inside setCourses:", newCourse);
+            return newCourse;
+          }
+          return course;
+        });
+        return updatedList;
+      });
 
       console.log(
         courses.map((data) => {
@@ -117,9 +128,12 @@ export function useCourseRepository() {
       return updatedCourse;
     } catch (error) {
       console.error("Error updating course:", error);
-      toast.error(error instanceof Error?error.message:'cannot update Course', {
-        description: "Failed to save course data. Please try again.",
-      });
+      toast.error(
+        error instanceof Error ? error.message : "cannot update Course",
+        {
+          description: "Failed to save course data. Please try again.",
+        }
+      );
       // throw new Error(error);
     } finally {
       setIsLoading(false);
@@ -127,7 +141,7 @@ export function useCourseRepository() {
   };
 
   // Delete a course
-  const deleteCourse = useCallback(async (courseId: string) => {
+  const ActionCourse = useCallback(async (courseId: string) => {
     setIsLoading(true);
     try {
       await unlistCourse(courseId);
@@ -160,6 +174,6 @@ export function useCourseRepository() {
     pendingCourses,
     fetchCourses,
     updateCourse,
-    deleteCourse,
+    ActionCourse,
   };
 }

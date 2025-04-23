@@ -29,7 +29,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import useUploadS3 from "@/hooks/addtis3";
+import useUploadS3 from "@/hooks/addtos3";
 import { cn } from "@/lib/utils";
 import { beaMentor } from "@/services/fetchdata";
 import { useSocket } from "@/hooks/socketio";

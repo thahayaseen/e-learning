@@ -39,7 +39,7 @@ export default function RootLayout({
           <RProviders>
             <Protection>
               <Toaster position="top-right" />
-              <Suspense fallback={<Loading />}>{children}</Suspense>
+              <Suspense  fallback={<Loading />}>{children}</Suspense>
             </Protection>
           </RProviders>
         </SesstionProvider>

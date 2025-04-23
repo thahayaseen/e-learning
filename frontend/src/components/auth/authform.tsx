@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useDispatch, useSelector } from "react-redux";
 import { Loader2, Globe } from "lucide-react";
 import { useSession, signIn, signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { storeType } from "@/lib/store";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -13,16 +13,15 @@ import {
   googleLogin,
 } from "@/lib/features/authService";
 import { InputField } from "./inputFeiled";
-
 interface ELearningAuthProps {
   places?: string;
 }
-
 const ELearningAuth: React.FC<ELearningAuthProps> = ({ places }) => {
+  const qeury = useSearchParams();
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [choosePath, setChoosePath] = useState(false);
+  console.log("qury is ", qeury.get("path"));
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -42,13 +41,15 @@ const ELearningAuth: React.FC<ELearningAuthProps> = ({ places }) => {
   const Rstate = useSelector((state: storeType) => state.User);
   const { data: session } = useSession();
   const routeing = places ? "/" + places : "/";
-
   // Toggle functions
   const toggleLogin = () => setIsLogin(!isLogin);
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
   const toggleConfirmPasswordVisibility = () =>
     setShowConfirmPassword(!showConfirmPassword);
 
+  useEffect(() => {
+    setIsLogin(qeury.get("path") ? false : true);
+  }, []);
   // Handle input changes - FIXED to prevent losing focus
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -199,36 +200,6 @@ const ELearningAuth: React.FC<ELearningAuthProps> = ({ places }) => {
             <Loader2 className="animate-spin text-white" size={50} />
             <p className="text-white mt-2">Loading...</p>
           </div>
-        </div>
-      )}
-
-      {/* Role Selection Modal */}
-      {choosePath && (
-        <div className="min-h-screen w-screen fixed z-50 backdrop-blur-sm flex items-center border-0 justify-center p-4">
-          <Card className="w-full max-w-md bg-slate-900 shadow-xl">
-            <CardContent className="p-6 ">
-              <h1 className="text-2xl font-bold text-white text-center mb-8">
-                Choose Your Role
-              </h1>
-
-              <div className="space-y-4">
-                <Button
-                  className="w-full h-14 text-lg bg-blue-800 hover:bg-blue-900 text-white"
-                  onClick={() => {
-                    router.push("/mentor");
-                    setChoosePath(false);
-                  }}>
-                  Mentor
-                </Button>
-
-                <Button
-                  className="w-full h-14 text-lg bg-blue-800 hover:bg-blue-900 text-white"
-                  onClick={() => router.push("/")}>
-                  Student
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       )}
 

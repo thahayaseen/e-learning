@@ -240,7 +240,7 @@ function Header({
                   </Button>
                   <Button
                     className="bg-gradient-to-r from-indigo-500 to-cyan-400 hover:from-indigo-600 hover:to-cyan-500 text-white"
-                    onClick={() => router.push("/signup")}>
+                    onClick={() => router.push("/signup?path=register")}>
                     Sign up
                   </Button>
                 </div>

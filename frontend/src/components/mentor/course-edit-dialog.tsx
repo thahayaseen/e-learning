@@ -36,7 +36,7 @@ import EditLessonDialog from "@/components/courses/editCourse";
 import type { ICourses, ILesson } from "@/services/interface/CourseDto";
 import Image from "next/image";
 
-import useUploadS3 from "@/hooks/addtis3";
+import useUploadS3 from "@/hooks/addtos3";
 import { unlistCourse } from "@/services/fetchdata";
 
 // Course validation schema
@@ -53,7 +53,7 @@ interface CourseEditDialogProps {
   onClose: () => void;
   course: ICourses;
   onUpdate: (courseId: string, courseData: any) => Promise<void>;
-  onDelete: (courseId: string) => Promise<void>;
+  onAction: (courseId: string) => Promise<void>;
 }
 
 export default function CourseEditDialog({
@@ -61,7 +61,7 @@ export default function CourseEditDialog({
   onClose,
   course,
   onUpdate,
-  onDelete,
+  onAction,
 }: CourseEditDialogProps) {
   const courseImageRef = useRef<HTMLInputElement | null>(null);
   const [courseData, setCourseData] = useState<any>({

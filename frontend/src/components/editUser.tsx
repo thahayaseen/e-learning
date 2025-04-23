@@ -24,7 +24,7 @@ import {
 import { Camera, Edit, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { updateData } from "@/services/fetchdata";
-import useUploadS3 from "@/hooks/addtis3";
+import useUploadS3 from "@/hooks/addtos3";
 
 // Zod schema for validation
 const ProfileSchema = z.object({

@@ -40,7 +40,7 @@ export function Sighnout({ isLoggedIn }: { isLoggedIn: boolean }) {
         <Button
           className="bg-gradient-to-r from-indigo-500 to-cyan-400 hover:from-indigo-600 hover:to-cyan-500 text-white"
           onClick={() => {
-            router.push("/auth");
+            router.push("/auth?path=register");
           }}>
           Sign up
         </Button>

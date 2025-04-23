@@ -13,7 +13,7 @@ export function useCategoryRepository() {
     setIsLoading(true);
     try {
       const response = await allCategorys();
-      setCategories(response || []);
+      setCategories(response.data || []);
       return response;
     } catch (error) {
       console.error("Error fetching categories:", error);

@@ -26,7 +26,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Loader2, Upload, Video, X } from "lucide-react";
-import useUploadS3 from "@/hooks/addtis3";
+import useUploadS3 from "@/hooks/addtos3";
 
 import { Select } from "@/components/ui/select";
 import {

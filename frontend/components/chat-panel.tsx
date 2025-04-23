@@ -3,9 +3,9 @@
 import type React from "react"
 
 import { useEffect } from "react"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card"
+import { Input } from "./ui/input"
+import { Button } from "./ui/button"
 import { Send } from "lucide-react"
 
 interface Message {
