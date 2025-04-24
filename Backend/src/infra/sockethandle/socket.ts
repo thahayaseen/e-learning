@@ -65,6 +65,7 @@ export default class HandleSocket {
           socket.emit(chatEnum.error, "Unable to verify");
         } else {
           console.log("in here");
+
           this.handleJoinRoom(socket, { roomId: room, username, email });
         }
       } catch (error: any) {
@@ -79,12 +80,10 @@ export default class HandleSocket {
     room: { roomId: string; username: string; email: string }
   ): void {
     try {
-      
       console.log(
         `User ${room.username} is trying to join room: ${room.roomId} ${socket.id}`
       );
       socket.on("leave-room", async (data) => {
-  
         // console.log("Total connected clients:", connectedSockets.length);
 
         socket.leave(data.roomId);
@@ -95,6 +94,7 @@ export default class HandleSocket {
 
           socket.to(data.roomId).emit("u-disconnect", room.username);
         }
+        return;
       });
       socket.join(room.roomId);
       console.log(`User ${room.username} joined room: ${room.roomId}`);
@@ -109,7 +109,7 @@ export default class HandleSocket {
 
       console.log("call this ");
       this.handleVidoconnection(socket, room);
-
+      socket.removeAllListeners(chatEnum.sendMessage);
       socket.on(
         chatEnum.sendMessage,
         (
@@ -119,8 +119,7 @@ export default class HandleSocket {
           username: string
         ) => {
           console.log(message, "mesis");
-          const val = debounce(this.handleSendMessage.bind(this), 1000);
-          val(socket, {
+          this.handleSendMessage(socket, {
             roomId,
             message,
             userEmail,
