@@ -44,7 +44,7 @@ const MessageAdminDashboard = () => {
   useEffect(() => {
     // Set up socket event listeners only once
     if (socket) {
-      // socket.on(chatEnum.receive, handleNewMessage)
+      socket.on(chatEnum.receive, handleNewMessage)
 
       // Clean up function
       return () => {
@@ -135,11 +135,15 @@ const MessageAdminDashboard = () => {
   // Fix: Use useCallback to prevent recreation of this function on every render
   const handleNewMessage = useCallback(
     (message: Partial<IMessage>) => {
+      
       if (!isMounted.current) return;
-
-      if (selectedChat && message.chatroomId === selectedChat._id) {
-        setMessages((prev) => [...prev, message]);
-      }
+      console.log('hellooo',message);
+      
+      setMessages(prev=>[...prev,message])
+      // setSelectedChat((prev) => {
+      //   console.log(prev,'recv');
+        
+      // });
     },
     [selectedChat]
   );

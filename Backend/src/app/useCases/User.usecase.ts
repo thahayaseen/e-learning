@@ -51,19 +51,12 @@ export class UserUsecase implements IuserUseCase {
     }
     if (mentorid) {
       filter.purchasedCourses = {
-        $in: (await this.CourseRepo.getCourseBymentor(mentorid)).map(
+        $in: (await this.CourseRepo.getCourseBymentorRepository(mentorid)).map(
           (data: any) => new Types.ObjectId(data?._id as string)
         ),
       };
     }
-    // if (mentorid) {
-    //   const courseData = await this.CourseRepo.getCourseBymentor(mentorid);
-    //   if (courseData) {
-    //     filter.purchasedCourses = {
-    //       $in: courseData.Mentor_id,
-    //     };
-    //   }
-    // }
+
     console.log(mentorid, "mentoridis",filter);
 
     const sortOptions = { [sort]: order === "asc" ? 1 : -1 };

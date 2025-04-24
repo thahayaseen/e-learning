@@ -1,5 +1,5 @@
 import { CertificateDTO } from "../../app/dtos/Certificate";
-import { CourseDTO } from "../../app/dtos/coursesDto";
+
 import { orderDto } from "../../app/dtos/orderDto";
 import { ICourses } from "../../infra/database/models/course";
 import { ILesson } from "../../infra/database/models/lessone";
@@ -7,6 +7,7 @@ import { IProgressCollection } from "../../infra/database/models/progress";
 import { IReview } from "../../infra/database/models/reiview";
 import { IQuizTask, ITask } from "../../infra/database/models/tasks";
 import { IPaginationResult } from "../../infra/repositories/courses.repository";
+import { Course } from "../entities/course.entitis";
 import { CourseInterface } from "../entities/returndata";
 
 export interface ICourseUseCase {
@@ -40,7 +41,7 @@ export interface ICourseUseCase {
     data: ITask,
     lessonId: string
   ): Promise<ILesson | null>;
-  getCourseBymentor(id: string): Promise<ICourses | null>;
+
   getLesson(lessonid: string): Promise<ILesson | null>;
   updateTaskProgress(
     studentId: string,
@@ -60,7 +61,6 @@ export interface ICourseUseCase {
     lessonid: string,
     data: Omit<ILesson, "Task">
   ): Promise<ILesson | null>;
-  updateCourse(courseId: string, data: CourseDTO): Promise<void>;
   addLessoninCourse(courseId: string, lessonid: string): Promise<void>;
   deleteCourse(courseid: string): Promise<void>;
   deletedtask(taskid: string, lessonid: string): Promise<void>;

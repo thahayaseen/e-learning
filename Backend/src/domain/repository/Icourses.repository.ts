@@ -53,7 +53,7 @@ export interface ICoursesRepository {
     page?: number,
     limit?: number
   ): Promise<ICourses[]>;
-  getCourseBymentor(user: string): Promise<ICourses[]>;
+  getCourseBymentorRepository(user: string): Promise<ICourses[]>;
   deleteCourse(courseId: string): Promise<void>;
   DeleteTaskFromLesson(lessonid: string, taskid: string): Promise<void>;
   deleteTask(id: string): Promise<void>;

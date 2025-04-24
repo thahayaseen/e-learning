@@ -15,6 +15,7 @@ export interface ICourses extends Document {
   lessons: string[];
   Content: string | null;
   Offer_id: ObjectId | null;
+  unlist: boolean;
 }
 
 const CoursesSchema: Schema = new Schema({

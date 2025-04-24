@@ -4,7 +4,6 @@ import { auth, IJwtService } from "../../domain/Provider/Ijwt";
 
 dotenv.config();
 
-// const secretKey: Secret = String(process.env.JWT_SECRET || "default_secret");
 interface AuthServises {
   error?: string;
   user?: string;

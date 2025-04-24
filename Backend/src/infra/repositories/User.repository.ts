@@ -11,6 +11,7 @@ import { OrderSchemas } from "../database/models/order";
 import { Roles } from "../../app/useCases/enum/User";
 
 export default class UserRepository implements IUser {
+  
   constructor() {}
   create = catchAsync(async (users: IUserModel): Promise<UserDTO | null> => {
     console.log("users from create", users);

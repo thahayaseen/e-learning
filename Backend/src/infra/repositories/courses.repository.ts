@@ -566,7 +566,7 @@ export class RepositoryCourses implements ICoursesRepository {
 
     return anss[0];
   }
-  async getCourseBymentor(mentorid: string): Promise<ICourses[]> {
+  async getCourseBymentorRepository(mentorid: string): Promise<ICourses[]> {
     return await Courses.find({ Mentor_id: mentorid });
   }
   async deleteCourse(courseId: string): Promise<void> {

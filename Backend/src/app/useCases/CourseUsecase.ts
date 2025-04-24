@@ -17,7 +17,26 @@ import { CourseDTO } from "../dtos/coursesDto";
 import { orderDto } from "../dtos/orderDto";
 import { ICertificaterepository } from "../../domain/repository/Icertificate.repository";
 import { CertificateDTO } from "../dtos/Certificate";
-
+import { Course } from "../../domain/entities/course.entitis";
+const fn = (data: ICourses) => {
+  return new Course(
+    String(data._id),
+    data.Title,
+    data.Mentor_id,
+    data.Description,
+    data.CreatedAt,
+    String(data.Category),
+    Number(data.Price),
+    data.Approved_by_admin,
+    data.Students_enrolled,
+    data.UpdatedAt,
+    data.image,
+    data.lessons,
+    data.Content,
+    String(data.Offer_id),
+    data.unlist
+  );
+};
 export class CourseUsecase implements ICourseUseCase {
   constructor(
     private userRepo: IUserReposetory,
@@ -25,9 +44,7 @@ export class CourseUsecase implements ICourseUseCase {
     private ReviewRepo: IReviewRepo,
     private CertificateRepo: ICertificaterepository
   ) {}
-  async getCourseBymentor(id: string): Promise<ICourses | null> {
-    return (await this.CourseRepo.getCourseBymentor(id))[0];
-  }
+ 
   async getAllCourse(
     page: number,
     limit: number,
@@ -157,13 +174,6 @@ export class CourseUsecase implements ICourseUseCase {
     } as any);
   }
 
-  async updateCourse(
-    courseId: string,
-    data: Omit<CourseDTO, "lessons">
-  ): Promise<void> {
-    const datas = await this.CourseRepo.UpdataCourse(courseId, data);
-    return;
-  }
   async deleteCourse(courseid: string): Promise<void> {
     await this.CourseRepo.deleteCourse(courseid);
     console.log("in use case delete course");
