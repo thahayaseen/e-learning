@@ -5,7 +5,7 @@ import { IuserUseCase } from "../../domain/interface/IUseruseCase";
 import IsocketUsecase from "../../domain/interface/socket";
 import { IRchatroom } from "../../domain/repository/Ichatroom.repository";
 import { IRmessage } from "../../domain/repository/Imessage.repository";
-import { getChatroom } from "../../infra/repositories/RepositoryChatroom";
+import { getChatroom } from "../../infra/repositories/chatroom.repository";
 import { IMeetusecase } from "../../domain/interface/ImessageUsecase";
 
 export class SocketuseCase implements IsocketUsecase {

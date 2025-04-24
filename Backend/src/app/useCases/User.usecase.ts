@@ -10,7 +10,7 @@ import { ImentorRequestRepo } from "../../domain/repository/ImentroRequst.reposi
 import {
   alldata,
   Imentorrequst,
-} from "../../infra/repositories/beaMentorRepositroy";
+} from "../../infra/repositories/beaMentor.repositroy";
 import { Roles } from "./enum/User";
 import { Types } from "mongoose";
 

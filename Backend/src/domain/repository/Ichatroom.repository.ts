@@ -1,4 +1,4 @@
-import { getChatroom } from "../../infra/repositories/RepositoryChatroom";
+import { getChatroom } from "../../infra/repositories/chatroom.repository";
 import { IChatroom } from "../entities/Chatroom"
 import { IMessage } from "../entities/Message";
 

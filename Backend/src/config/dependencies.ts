@@ -3,11 +3,11 @@ import JwtService from "../infra/provider/JwtService";
 import RedisProvider from "../infra/provider/Redis";
 import MailProvider from "../infra/provider/nodemailer";
 import { MailServices } from "../app/adapters/MailerAdapter";
-import UserRepository from "../infra/repositories/User";
-import { MessageRepository } from "../infra/repositories/RepositoryMessage";
-import { ChatroomRepository } from "../infra/repositories/RepositoryChatroom";
+import UserRepository from "../infra/repositories/User.repository";
+import { MessageRepository } from "../infra/repositories/Message.repository";
+import { ChatroomRepository } from "../infra/repositories/chatroom.repository";
 import RedisUsecases from "../app/adapters/RedisAdapter";
-import { RepositoryCategory } from "../infra/repositories/RepositoryCategory";
+import { RepositoryCategory } from "../infra/repositories/Category.repository";
 import {
   JWT_SECRET,
   JWT_REFRESH_KEY,
@@ -33,14 +33,14 @@ import Login from "../app/useCases/Login.usecase";
 import admin from "../app/useCases/admin.usecase";
 import { UserUsecase } from "../app/useCases/User.usecase";
 import { MentorUsecase } from "../app/useCases/mentor.usecase";
-import { RepositoryCourses } from "../infra/repositories/RepositoryCourses";
+import { RepositoryCourses } from "../infra/repositories/courses.repository";
 import { CourseUsecase } from "../app/useCases/CourseUsecase";
 import { SocketuseCase } from "../app/useCases/socketio.usecase";
 import MeetingUsecase from "../app/useCases/Meeting.usecase";
-import RepositoryMeeting from "../infra/repositories/RepositoryMeeting";
-import ReiviewRepositry from "../infra/repositories/ReiviewRepositry";
-import beaMentorRepositroy from "../infra/repositories/beaMentorRepositroy";
-import certificateRepository from "../infra/repositories/certificateRepository";
+import RepositoryMeeting from "../infra/repositories/meeting.repository";
+import ReiviewRepositry from "../infra/repositories/Reiview.repositry";
+import beaMentorRepositroy from "../infra/repositories/beaMentor.repositroy";
+import certificateRepository from "../infra/repositories/certificate.repository";
 import { AllMiddleware } from "../presentation/middilwere/roleChecking";
 export const CourseRepositoy = new RepositoryCourses();
 export const Mentorusecase = new MentorUsecase(

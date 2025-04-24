@@ -1,4 +1,4 @@
-import { alldata, Imentorrequst } from "../../infra/repositories/beaMentorRepositroy";
+import { alldata, Imentorrequst } from "../../infra/repositories/beaMentor.repositroy";
 
 export interface ImentorRequestRepo {
   addrequest(userid: string, data: Omit<Imentorrequst, "userid">): Promise<void>;

@@ -6,7 +6,7 @@ import { ILesson } from "../../infra/database/models/lessone";
 import { IProgressCollection } from "../../infra/database/models/progress";
 import { IReview } from "../../infra/database/models/reiview";
 import { IQuizTask, ITask } from "../../infra/database/models/tasks";
-import { IPaginationResult } from "../../infra/repositories/RepositoryCourses";
+import { IPaginationResult } from "../../infra/repositories/courses.repository";
 import { CourseInterface } from "../entities/returndata";
 
 export interface ICourseUseCase {

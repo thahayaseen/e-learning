@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Imentorrequst } from "../../repositories/beaMentorRepositroy";
+import { Imentorrequst } from "../../repositories/beaMentor.repositroy";
 const MentorRequst = new mongoose.Schema({
   fullname: { type: String },
   email: {

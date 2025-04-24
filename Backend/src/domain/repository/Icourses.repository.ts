@@ -11,7 +11,7 @@ import { IQuizTask, ITask, Task } from "../../infra/database/models/tasks";
 import {
   ICourseFilter,
   IPaginationResult,
-} from "../../infra/repositories/RepositoryCourses";
+} from "../../infra/repositories/courses.repository";
 import { CourseInterface } from "../entities/returndata";
 
 export interface ICoursesRepository {

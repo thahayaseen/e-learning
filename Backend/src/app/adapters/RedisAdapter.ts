@@ -32,10 +32,7 @@ export default class RedisUseCases {
     return await this.otprepos.getBtId(id);
   }
   async createTockens(userId: string): Promise<string> {
-    console.log(userId, "in tokenmaing");
-
     const data = await this.otprepos.findTockn(userId);
-    console.log("data is ", data);
     if (data) {
       return data;
     }

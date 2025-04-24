@@ -50,8 +50,6 @@ export default class Admin implements IAdmin {
           filters["role"] = filter.rolefilter;
         }
       }
-      console.log(JSON.stringify(filters), "filters issss");
-
       const data = await this.UserRepository.findAlluser(
         Number(limit),
         Number(skip),
@@ -67,7 +65,6 @@ export default class Admin implements IAdmin {
   }
   async Blockuser(id: string, type: boolean) {
     try {
-      console.log(id, "id is");
 
       await this.UserRepository.Blockuser(id, type);
       return;

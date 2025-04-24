@@ -1,12 +1,12 @@
-import { adminUsecase, adminUsecaseType } from "../../config/dependencies";
-import { json, Request, Response } from "express";
+
+import {  Response } from "express";
 import { Roles, userError } from "../../app/useCases/enum/User";
 import { AuthServices } from "./user.controller";
 import { SystemError } from "../../app/useCases/enum/systemError";
 import { IAdminUsecase } from "../../app/useCases/admin.usecase";
 import { HttpStatusCode } from "../../app/useCases/enum/Status";
 import { SuccessMessage } from "../../app/useCases/enum/httpSuccess";
-import { ImentorRequestRepo } from "../../domain/repository/ImentroRequst.repository";
+
 import { UserUsecase } from "../../app/useCases/User.usecase";
 
 export default class Admincontroler {
@@ -16,11 +16,6 @@ export default class Admincontroler {
   ) {}
   async blockUser(req: AuthServices, res: Response) {
     try {
-      console.log(req.user);
-
-      // if (req.user.role !== Roles.ADMIN) {
-      //   throw new Error(userError.Unauthorised);
-      // }
       console.log("yses", req.body);
       if (String(req.user._id) == String(req.body.userid)) {
         throw new Error("Cannot self Block");

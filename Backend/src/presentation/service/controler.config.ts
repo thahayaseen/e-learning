@@ -12,7 +12,7 @@ import {
   userRepository,
   userUseCase,
 } from "../../config/dependencies";
-import revenueRepository from "../../infra/repositories/revenueRepository";
+import revenueRepository from "../../infra/repositories/Repository.revenue";
 import { MentorController } from "../controller/Cmentor.controller";
 import { courseControllerClass } from "../controller/course.controller";
 import { Ordercontroller } from "../controller/order.controller";

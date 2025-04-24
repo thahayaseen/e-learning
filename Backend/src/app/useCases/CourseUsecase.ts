@@ -12,7 +12,7 @@ import {
 } from "../../infra/database/models/progress";
 import { IReview } from "../../infra/database/models/reiview";
 import { IQuizTask, ITask } from "../../infra/database/models/tasks";
-import { IPaginationResult } from "../../infra/repositories/RepositoryCourses";
+import { IPaginationResult } from "../../infra/repositories/courses.repository";
 import { CourseDTO } from "../dtos/coursesDto";
 import { orderDto } from "../dtos/orderDto";
 import { ICertificaterepository } from "../../domain/repository/Icertificate.repository";
@@ -43,11 +43,8 @@ export class CourseUsecase implements ICourseUseCase {
   ): Promise<any> {
     try {
       let progress = null;
-      console.log(id);
 
       const data = await this.CourseRepo.getSingleCourse(id, isValid);
-
-      console.log(data, "in usecase");
       if (userid && data) {
         const resu = await this.CourseRepo.getSelectedcourseprogress(
           id,

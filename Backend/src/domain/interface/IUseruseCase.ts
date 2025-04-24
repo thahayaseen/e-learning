@@ -5,7 +5,7 @@ import { IUserModel } from "../../infra/database/models/User";
 import {
   alldata,
   Imentorrequst,
-} from "../../infra/repositories/beaMentorRepositroy";
+} from "../../infra/repositories/beaMentor.repositroy";
 
 export interface IuserUseCase {
   UseProfileByemail(email: string): Promise<UserDTO | null>;
