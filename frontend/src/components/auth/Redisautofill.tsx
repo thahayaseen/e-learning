@@ -29,7 +29,7 @@ function Protection({ children }: { children: React.ReactNode }) {
   });
 
   const authRoutes = ["/auth"];
-  const unrestrictedRoutes = ["/","/course"];
+  const unrestrictedRoutes = ["/", "/course"];
   // Add /payment to common paths so all authenticated users can access it
   const commonPaths = [
     "/settings",
@@ -112,18 +112,16 @@ function Protection({ children }: { children: React.ReactNode }) {
 
       case Roles.MENTOR:
         // Mentor can access mentor routes, student routes and common paths
-        return (
-          mentorRoutes.some((route) => {
-            console.log(
-              route,
-              "routeis",
-              path === route,
-              path.startsWith(`${route}/`)
-            );
+        return mentorRoutes.some((route) => {
+          console.log(
+            route,
+            "routeis",
+            path === route,
+            path.startsWith(`${route}/`)
+          );
 
-            return path === route || path.startsWith(`${route}/`);
-          })
-        );
+          return path === route || path.startsWith(`${route}/`);
+        });
 
       case Roles.STUDENT:
         // Students can access student routes, dashboard, courses and common paths
@@ -165,10 +163,10 @@ function Protection({ children }: { children: React.ReactNode }) {
         setPageState({ isLoading: true, isAccessDenied: false });
 
         // Verify user authentication - wait for this to complete before making decisions
-        const result = await dispatch(Varify()).unwrap();
+        const result: any = await dispatch(Varify()).unwrap();
 
         // User is authenticated
-        if (result.success && user?.role) {
+        if (result?.success && user?.role) {
           // Handle auth routes (login/register) - prevent authenticated users from accessing
           if (isAuthRoute) {
             // User is already logged in, redirect to their home page
@@ -185,7 +183,10 @@ function Protection({ children }: { children: React.ReactNode }) {
 
           // Check permissions for the current path
           if (hasPathPermission(user.role, path)) {
-            console.log("from hererererererer",hasPathPermission(user.role, path));
+            console.log(
+              "from hererererererer",
+              hasPathPermission(user.role, path)
+            );
 
             setPageState({ isLoading: false, isAccessDenied: false });
           } else {

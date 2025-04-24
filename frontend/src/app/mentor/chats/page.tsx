@@ -34,83 +34,92 @@ const MessageAdminDashboard = () => {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  console.log(socket?.id,'socket is ');
 
-  // Fix: Use a ref to track socket room joining to prevent duplicate joins
-  const joinedRooms = useRef(new Set());
-  // Fix: Use a ref to track if the component is mounted
+  // Track if the component is mounted
   const isMounted = useRef(true);
+  const currentChatIdRef = useRef<string | null>(null);
 
-  // Fix: Remove the console.log that was causing unnecessary renders
+  // Set up socket event listeners only once
   useEffect(() => {
-    // Set up socket event listeners only once
-    if (socket) {
-      socket.on(chatEnum.receive, handleNewMessage)
+    if (!socket) return;
 
-      // Clean up function
-      return () => {
-        isMounted.current = false;
-        socket.off(chatEnum.receive);
-        // Leave all rooms when component unmounts
-        joinedRooms.current.forEach((roomId) => {
-          socket.emit("leave-room", { roomId });
-        });
-        joinedRooms.current.clear();
-      };
-    }
-  }, [socket]); // Only depend on socket, not page
+    // Set up the message listener
+    socket.on(chatEnum.receive, handleNewMessage);
 
-  // Separate effect for fetching chatrooms
+    return () => {
+      isMounted.current = false;
+      // Remove event listeners
+      socket.off(chatEnum.receive);
+
+      // Leave any active chat room when unmounting
+      if (currentChatIdRef.current) {
+
+        socket.emit("leave-room", { roomId: currentChatIdRef.current,from:'socket chaging' });
+        currentChatIdRef.current = null;
+      }
+    };
+  }, [socket]);
+
+  // Fetch chatrooms when page changes
   useEffect(() => {
     fetchChatrooms();
   }, [page]);
 
+  // Handle chat selection and room joining
   useEffect(() => {
-    if (selectedChat) {
-      fetchMessages(selectedChat._id);
+    if (!selectedChat || !socket) return;
 
-      if (socket && !joinedRooms.current.has(selectedChat._id)) {
-        // Leave previous rooms first
-        joinedRooms.current.forEach((roomId) => {
-          if (roomId !== selectedChat._id) {
-            socket.emit("leave-room", { roomId });
-            joinedRooms.current.delete(roomId);
-          }
-        });
+    const chatId = selectedChat._id;
 
-        // Join the new room
-        socket.emit(chatEnum.joinRoom, {
-          roomId: selectedChat._id,
-          username: state.name,
-          email: state.email,
-        });
-
-        joinedRooms.current.add(selectedChat._id);
+    // If selecting a different chat
+    if (currentChatIdRef.current !== chatId) {
+      // Leave previous room if exists
+      if (currentChatIdRef.current) {
+        
+        socket.emit("leave-room", { roomId: currentChatIdRef.current });
       }
+
+      // Join new room
+      socket.emit(chatEnum.joinRoom, {
+        roomId: chatId,
+        username: state?.name,
+        email: state?.email,
+      });
+
+      // Update reference
+      currentChatIdRef.current = chatId;
+
+      // Fetch messages for the selected chat
+      fetchMessages(chatId);
     }
 
     return () => {
-      // Clean up when chat changes
-      if (socket && selectedChat) {
-        socket.emit("leave-room", { roomId: selectedChat._id });
-      }
+      // Clean up function is empty here because we handle room leaving
+      // when selecting a different chat or in component unmount
     };
-  }, [selectedChat, socket, state?.email, state?.name]);
+  }, [selectedChat?._id, socket, state?.email, state?.name]);
 
+  // Scroll to bottom when messages change
   useEffect(() => {
-    // Scroll to bottom when messages change
     scrollToBottom();
   }, [messages]);
 
+  // Fetch all chatrooms
   const fetchChatrooms = async () => {
     try {
       setIsLoading(true);
       const data = await getChatrooms(page);
+
       if (isMounted.current) {
         setTotal(data.data.total);
         setChatrooms(data.data.data);
-        console.log(data.data.data[0], "data usssssss");
 
-        setSelectedChat(data.data.data[0]);
+        // Only set selectedChat if not already selected or on first load
+        if (!selectedChat && data.data.data.length > 0) {
+          setSelectedChat(data.data.data[0]);
+        }
+
         setIsLoading(false);
       }
     } catch (error) {
@@ -121,10 +130,11 @@ const MessageAdminDashboard = () => {
     }
   };
 
-  const fetchMessages = async (chatroomId: any) => {
+  // Fetch messages for a specific chatroom
+  const fetchMessages = async (chatroomId) => {
     try {
       const data = await getallchat(chatroomId);
-      if (isMounted.current) {
+      if (isMounted.current && currentChatIdRef.current === chatroomId) {
         setMessages(data.data);
       }
     } catch (error) {
@@ -132,54 +142,75 @@ const MessageAdminDashboard = () => {
     }
   };
 
-  // Fix: Use useCallback to prevent recreation of this function on every render
-  const handleNewMessage = useCallback(
-    (message: Partial<IMessage>) => {
-      
-      if (!isMounted.current) return;
-      console.log('hellooo',message);
-      
-      setMessages(prev=>[...prev,message])
-      // setSelectedChat((prev) => {
-      //   console.log(prev,'recv');
-        
-      // });
-    },
-    [selectedChat]
-  );
+  // Handle new incoming messages
+  const handleNewMessage = useCallback((message) => {
+    if (!isMounted.current) return;
 
-  const handleSendMessage = useCallback(() => {
-    if (newMessage.trim() && selectedChat && socket) {
-      socket.emit(
-        chatEnum.sendMessage,
-        newMessage,
-        selectedChat._id,
-        state.email,
-        state.name
-      );
-
-      // Add message to UI immediately for better UX
-      const localMessage = {
-        _id: Date.now().toString(),
-        message: newMessage,
-        username: state.name,
-        userEmail: state.email,
-        chatroomId: selectedChat._id,
-        createdAt: new Date().toISOString(),
-      };
-
-      setMessages((prev) => [...prev, localMessage]);
-
-      // Clear input
-      setNewMessage("");
+    // Only update messages if it belongs to the current chat
+    if (currentChatIdRef.current === message.chatroomId) {
+      setMessages((prevMessages) => [...prevMessages, message]);
     }
-  }, [newMessage, selectedChat, socket, state]);
+  }, []);
 
+  // Send a new message
+  const handleSendMessage = useCallback(() => {
+    if (!newMessage.trim() || !selectedChat || !socket) return;
+
+    const chatId = selectedChat._id;
+
+    // Emit the message through socket
+    socket.emit(
+      chatEnum.sendMessage,
+      newMessage,
+      chatId,
+      state?.email,
+      state?.name
+    );
+
+    // Add message to UI immediately for better UX
+    const localMessage = {
+      _id: Date.now().toString(),
+      message: newMessage,
+      username: state?.name,
+      userEmail: state?.email,
+      chatroomId: chatId,
+      createdAt: new Date().toISOString(),
+    };
+
+    setMessages((prev) => [...prev, localMessage]);
+
+    // Clear input
+    setNewMessage("");
+  }, [newMessage, selectedChat?._id, socket, state?.email, state?.name]);
+
+  // Select a chat to view
+  const selectChat = useCallback((chatroom) => {
+    // Only update if it's a different chat
+    if (currentChatIdRef.current !== chatroom._id) {
+      setSelectedChat(chatroom);
+    }
+  }, []);
+
+  // Close the current chat
+  const closeChat = useCallback(() => {
+    // Leave the room if socket exists
+    console.log('emitingggg',socket);
+
+    socket.emit("leave-room", { roomId: currentChatIdRef.current ,from:"dfadfsd"});
+    currentChatIdRef.current = null;
+    if (socket && currentChatIdRef.current) {
+    }
+
+    setSelectedChat(null);
+  }, [socket]);
+
+  // Helper to scroll to bottom of messages
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const formatDate = (dateString: any) => {
+  // Format date for display
+  const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleString([], {
       month: "short",
@@ -189,36 +220,15 @@ const MessageAdminDashboard = () => {
     });
   };
 
-  const formatTime = (dateString: any) => {
+  // Format time for messages
+  const formatTime = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
-  // Fix: Improved chat selection logic
-  const selectChat = useCallback(
-    (chatroom: any) => {
-      if (socket && selectedChat && selectedChat._id !== chatroom._id) {
-        // Leave the previous room
-        socket.emit("leave-room", { roomId: selectedChat._id });
-        joinedRooms.current.delete(selectedChat._id);
-      }
-
-      setSelectedChat(chatroom);
-    },
-    [socket, selectedChat]
-  );
-
-  const closeChat = useCallback(() => {
-    // When closing chat, we should leave the room
-    if (socket && selectedChat) {
-      socket.emit("leave-room", { roomId: selectedChat._id });
-      joinedRooms.current.delete(selectedChat._id);
-    }
-    setSelectedChat(null);
-  }, [socket, selectedChat]);
-
+  // Filter chatrooms based on search term
   const filteredChatrooms = chatrooms.filter(
-    (chatroom: any) =>
+    (chatroom) =>
       chatroom.userId.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (chatroom.courseName &&
         chatroom.courseName.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -226,6 +236,16 @@ const MessageAdminDashboard = () => {
         chatroom.lastMessage.message
           .toLowerCase()
           .includes(searchTerm.toLowerCase()))
+  );
+
+  // Handle keyboard press for sending message
+  const handleKeyPress = useCallback(
+    (e) => {
+      if (e.key === "Enter" && newMessage.trim()) {
+        handleSendMessage();
+      }
+    },
+    [handleSendMessage, newMessage]
   );
 
   return (
@@ -295,7 +315,7 @@ const MessageAdminDashboard = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredChatrooms.map((chatroom: any) => (
+                      {filteredChatrooms.map((chatroom) => (
                         <TableRow
                           key={chatroom._id}
                           className="border-b border-slate-700 hover:bg-slate-700/50 cursor-pointer"
@@ -307,7 +327,6 @@ const MessageAdminDashboard = () => {
                                   <AvatarImage
                                     src={
                                       chatroom.userId.profile.avatar ||
-                                      "/placeholder.svg" ||
                                       "/placeholder.svg"
                                     }
                                     alt={chatroom.userId.name}
@@ -410,7 +429,6 @@ const MessageAdminDashboard = () => {
                         <AvatarImage
                           src={
                             selectedChat.userId.profile.avatar ||
-                            "/placeholder.svg" ||
                             "/placeholder.svg"
                           }
                           alt={selectedChat.userId.name}
@@ -448,20 +466,20 @@ const MessageAdminDashboard = () => {
                       <div
                         key={message._id || index}
                         className={`flex ${
-                          message.username === state.name
+                          message.username === state?.name
                             ? "justify-end"
                             : "justify-start"
                         }`}>
                         <div
                           className={`max-w-[80%] p-3 rounded-lg ${
-                            message.username === state.name
+                            message.username === state?.name
                               ? "bg-blue-600 text-white rounded-tr-none"
                               : "bg-slate-700 text-slate-200 rounded-tl-none"
                           }`}>
                           <p className="break-words">{message.message}</p>
                           <p
                             className={`text-xs mt-1 ${
-                              message.username === state.name
+                              message.username === state?.name
                                 ? "text-blue-200"
                                 : "text-slate-400"
                             }`}>
@@ -492,7 +510,7 @@ const MessageAdminDashboard = () => {
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder="Type your message..."
                     className="flex-grow bg-slate-700 border-slate-600 text-slate-200 placeholder:text-slate-400 focus-visible:ring-blue-500"
-                    onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+                    onKeyPress={handleKeyPress}
                   />
                   <Button
                     onClick={handleSendMessage}

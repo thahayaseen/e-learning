@@ -88,7 +88,7 @@ export default class HandleSocket {
         // console.log("Total connected clients:", connectedSockets.length);
 
         socket.leave(data.roomId);
-        console.log("User leaving room:", socket.id, data.roomId);
+        console.log("User leaving room:", socket.id, data);
 
         if (room.username) {
           console.log("thisisisisiisis", room.username);
