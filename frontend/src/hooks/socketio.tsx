@@ -13,8 +13,7 @@ export const useSocket = () => {
       dispatch(addNotification(data));
     });
     instens.on("connect", () => {
-      console.log("connected edd");
-    });
+     });
     return () => {
       instens.off("receiveNotification");
       // instance.disconnect();

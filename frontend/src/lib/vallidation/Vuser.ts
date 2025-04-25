@@ -9,13 +9,9 @@ export interface User {
 }
 export function validateAuthForm({ name, email, password, confirmPassword, isLogin }: User) {
     const errors: Record<string, string> = {};
-    console.log(name,email,password,confirmPassword);
-    
-    // Email validation
+     // Email validation
     if (!email.trim()) {
-      console.log('here ');
-      
-      errors.email = 'Email is required';
+       errors.email = 'Email is required';
     } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email)) {
       errors.email = 'Invalid email address';
     }

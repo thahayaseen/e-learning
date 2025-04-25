@@ -98,7 +98,7 @@ export default class Admin implements IAdmin {
     }
     const limit = 6;
     const skip = (page - 1) * limit;
-    console.log(skip);
+ 
 
     return await this.CourseRepo.getUnaproved({ limit, skip }, filter);
   }

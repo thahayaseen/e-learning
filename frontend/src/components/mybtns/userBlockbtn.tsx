@@ -11,9 +11,7 @@ function UserBlockbtn({
   toggleBlock: (userId: string, type: boolean) => void;
   user: Adminshousers;
 }) {
-  console.log(user);
-  
-  return (
+   return (
     <Button
       variant={user.isBlocked ? "outline" : "destructive"}
       size="sm"

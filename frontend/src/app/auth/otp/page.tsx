@@ -30,9 +30,7 @@ function Page() {
   const { id } = useParams();
 
   const handleChanges = (e: any) => {
-    console.log("here");
-
-    if (/^\d*$/.test(e)) {
+     if (/^\d*$/.test(e)) {
       setValue(e);
     } else {
       toast.error("Please Enter number");
@@ -40,9 +38,7 @@ function Page() {
   };
   const handleResend = async () => {
     try {
-      console.log(get_cookie("varifyToken"));
-
-      const data: any = await axios.post(
+       const data: any = await axios.post(
         "/resent",
         {
           userid: get_cookie("varifyToken"),
@@ -53,16 +49,12 @@ function Page() {
           },
         }
       );
-      console.log(data);
-      toast.success(data.message);
-      console.log("sened");
-      setRopt((prev) => !prev);
+       toast.success(data.message);
+       setRopt((prev) => !prev);
 
       setTimer(60);
     } catch (error: any) {
-      console.log(error);
-
-      toast.error(error.response.data.message);
+       toast.error(error.response.data.message);
     }
   };
 
@@ -73,17 +65,13 @@ function Page() {
       }, 1000);
       return () => clearInterval(intervel);
     } else {
-      console.log("done");
-      setRopt(true);
+       setRopt(true);
     }
   }, [timer]);
   const handleSubmit = async () => {
     if (value.length !== 6) return;
     setIsVerifying(true);
-    console.log(value);
-    console.log(id);
-
-    try {
+      try {
       const response: any = await axios.post(
         "/verify",
         {
@@ -95,25 +83,21 @@ function Page() {
         }
       );
 
-      console.log(response);
-      delete_cookie("varifyToken");
+       delete_cookie("varifyToken");
       if (response.success) {
         toast.success("Sucessfully varifyed");
-        console.log(response);
-        // save_cookie('access',response.tocken)
+         // save_cookie('access',response.tocken)
         router.push("/");
       }
       setIsVerifying(false);
     } catch (error: any) {
-      console.log(error.message);
-      toast.error(error.message);
+       toast.error(error.message);
       setIsVerifying(false);
     } finally {
       setIsVerifying(false);
     }
   };
-  // console.log(timer);
-  // if(!ParamRouter.id||ParamRouter.id.length<17){
+   // if(!ParamRouter.id||ParamRouter.id.length<17){
   //   router.push('/auth')
   // }
   return (

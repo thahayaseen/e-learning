@@ -5,9 +5,7 @@ import React from "react";
 
 // import AdminAuth from "@/services/adminAuth";
 function Adminusers() {
-  console.log("entered admin side");
-
-  return <Sidebar path="Dashboard" Content={<AdminDashboard />} />;
+   return <Sidebar path="Dashboard" Content={<AdminDashboard />} />;
 }
 
 export default Adminusers;

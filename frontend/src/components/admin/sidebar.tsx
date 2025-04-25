@@ -50,9 +50,7 @@ const Sidebar = ({
     // { icon: Bell, label: "Notifications", badge: "3" },
     // { icon: Settings, label: "Settings", badge: null },
   ];
-  console.log('client logintn in admin');
-
-  return (
+   return (
     <div className="flex h-screen overflow-hidden">
       {/* Sidebar - fixed position */}
       <div

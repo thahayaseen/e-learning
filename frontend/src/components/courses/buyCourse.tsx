@@ -34,6 +34,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import GotoCoursebtn from "../mybtns/gotoCoursebtn";
 import MentorDialog from "../seementorProfile/mentorProfile";
+import { getImage } from "@/services/getImage";
 
 const CourseBuyPage = ({ course, aldredypurchased }) => {
   const router = useRouter();
@@ -73,7 +74,7 @@ const CourseBuyPage = ({ course, aldredypurchased }) => {
             <Image
               width={1200}
               height={400}
-              src={course.image || "/default.png"}
+              src={`${getImage(course.image)}` || "/default.png"}
               alt={course.Title}
               className="w-full h-72 object-cover"
             />

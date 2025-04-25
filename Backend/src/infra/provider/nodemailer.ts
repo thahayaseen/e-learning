@@ -19,6 +19,6 @@ export default class mailProvider implements IMailProvider {
       text,
       html,
     });
-    console.log("email sent to " + to);
+ 
   }
 }

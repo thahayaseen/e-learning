@@ -31,8 +31,7 @@ export function NavMain({
               tooltip={item.title}
               className={`${pathname === item.url ? "bg-blue-800 text-white" : "hover:bg-gray-100 dark:hover:bg-gray-800"}`}
               onClick={() => {
-                console.log("clicked", item.url);
-                router.push(item.url);
+                 router.push(item.url);
               }}
             >
               {item.icon && <item.icon className="mr-2" />}

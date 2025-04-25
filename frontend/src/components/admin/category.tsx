@@ -91,9 +91,7 @@ const AdminPanel = () => {
           itemsPerPage,
           debouncedSearchTerm
         );
-        console.log(response, "response is");
-
-        // Assuming response has this structure
+         // Assuming response has this structure
         const { data, total } = response;
 
         setCategories(data);

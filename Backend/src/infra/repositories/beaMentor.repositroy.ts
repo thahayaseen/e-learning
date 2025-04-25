@@ -26,7 +26,7 @@ class Beamentor implements ImentorRequestRepo {
     return;
   }
   async acction(dataid: string, action: string): Promise<Imentorrequst | null> {
-    console.log(dataid);
+ 
 
     return await MentorRequest.findByIdAndUpdate(dataid, { status: action });
   }
@@ -36,15 +36,15 @@ class Beamentor implements ImentorRequestRepo {
     if (filter.status) qury.status = filter.status;
     if (filter.experience) {
       const nums = filter.experience.split("-");
-      console.log(nums);
+ 
       const objj = { $gt: nums[0], $lt: nums[1] };
       qury.experience = objj;
     }
-    console.log(filter.sort,'now sort is ');
+ 
     
     if (filter.search) qury.fullname = { $regex: filter.search, $options: "i" };
     const sort = filter.sort !== "asc" ? -1 : 1;
-    console.log(sort,'ageter is ');
+ 
     
     const data = await MentorRequest
       .find(qury)
@@ -54,7 +54,7 @@ class Beamentor implements ImentorRequestRepo {
     return { data, total };
   }
   async getRequstByuserid(userid: string): Promise<Imentorrequst | null> {
-    console.log(userid,'user id s');
+ 
     
     return await MentorRequest.findOne({ userid: userid });
   }

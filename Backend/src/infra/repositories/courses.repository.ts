@@ -42,7 +42,7 @@ export class RepositoryCourses implements ICoursesRepository {
     return datas;
   }
   async createTask(tasks: ITask[]): Promise<any> {
-    console.log(tasks);
+ 
 
     const datas = await Task.create(tasks);
 
@@ -65,7 +65,7 @@ export class RepositoryCourses implements ICoursesRepository {
     );
   }
   async getCourse(id: string, pipline: any[]): Promise<any> {
-    console.log(id, pipline, "in geting");
+ 
     const data = await Courses.aggregate(pipline);
 
     return data;
@@ -74,7 +74,7 @@ export class RepositoryCourses implements ICoursesRepository {
     return await Courses.findById(courseid).populate("Mentor_id", "-_id name");
   }
   async getLessons(id: string): Promise<any | null> {
-    console.log(id);
+ 
     return await Courses.findOne({ _id: id }).populate({
       path: "lessons",
       populate: {
@@ -97,7 +97,7 @@ export class RepositoryCourses implements ICoursesRepository {
     },
     filter: object
   ): Promise<any> {
-    console.log(filter);
+ 
 
     const data = await Courses.find(filter)
       .skip(skip || 0)
@@ -150,7 +150,7 @@ export class RepositoryCourses implements ICoursesRepository {
     if (filter.category) {
       matchFilter.Category = new Types.ObjectId(filter.category);
     }
-    console.log(filter.mentor, "id isds ds");
+ 
 
     // Add mentor filter
     if (filter.mentor) {
@@ -168,8 +168,7 @@ export class RepositoryCourses implements ICoursesRepository {
     // Calculate skip for pagination
     const skip = (page - 1) * limit;
 
-    // Determine sort field and order
-    // Default to UpdatedAt if not specified
+
     const sortField = sort.field || "UpdatedAt";
     const sortOrder = sort.order === "asc" ? 1 : -1;
 
@@ -179,6 +178,7 @@ export class RepositoryCourses implements ICoursesRepository {
         [sortField]: sortOrder as 1 | -1,
       },
     };
+ 
 
     const pipeline = [
       { $match: matchFilter },
@@ -237,10 +237,10 @@ export class RepositoryCourses implements ICoursesRepository {
     ];
 
     const results = await Courses.aggregate(pipeline);
-    console.log(results, "data is ");
+ 
 
     const courses = results[0].paginatedResults;
-    console.log(courses, "course isd sd");
+ 
 
     const total = results[0].totalCount[0]?.count || 0;
     const totalPages = Math.ceil(total / limit);
@@ -259,8 +259,8 @@ export class RepositoryCourses implements ICoursesRepository {
 
   async getSingleCourse(id: string, isValid: boolean): Promise<any | null> {
     try {
-      console.log(isValid);
-      console.log(id, "id is ");
+ 
+ 
       let lessonPopulate: any = {};
       if (isValid) {
         lessonPopulate = {
@@ -365,10 +365,10 @@ export class RepositoryCourses implements ICoursesRepository {
         { $unwind: "$Category" },
         lessonPopulate,
       ];
-      console.log(pipline, "pipline is ");
+ 
 
       const query = await Courses.aggregate(pipline);
-      console.log(query, "quryis");
+ 
 
       return query[0];
     } catch (error) {
@@ -384,7 +384,7 @@ export class RepositoryCourses implements ICoursesRepository {
     return;
   }
   async UpdataCourse(courseid: string, data: any): Promise<void> {
-    console.log(data, courseid, "in reposs");
+ 
     const updated: any = {};
     for (let i in data) {
       const value = data[i];
@@ -397,10 +397,10 @@ export class RepositoryCourses implements ICoursesRepository {
       }
     }
 
-    console.log("updated is ", updated);
+ 
 
     const res = await Courses.updateOne({ _id: courseid }, updated);
-    // console.log(res);
+ 
 
     return;
   }
@@ -454,7 +454,7 @@ export class RepositoryCourses implements ICoursesRepository {
   async UpdateTask(taskId: string, data: ITask): Promise<ITask | null> {
     const existingTask = await Task.findById(taskId);
     if (!existingTask) {
-      console.log("Task not found!");
+ 
       throw new Error("Task not found!");
     }
 
@@ -470,7 +470,7 @@ export class RepositoryCourses implements ICoursesRepository {
     } else if (existingTask.Type === "Video") {
       return await VideoTask.findByIdAndUpdate(taskId, data, { new: true });
     } else {
-      // console.log("Invalid task type!");
+ 
       throw new Error("Invalid task type!");
     }
   }
@@ -497,7 +497,7 @@ export class RepositoryCourses implements ICoursesRepository {
     limit: number = 10
   ): Promise<any> {
     const skip = (page - 1) * limit;
-    console.log("courseidis", CourseIds, userId);
+ 
 
     const anss = await Courses.aggregate<ICourses>([
       {
@@ -562,7 +562,7 @@ export class RepositoryCourses implements ICoursesRepository {
         },
       },
     ]);
-    console.log(anss, "ansesr is ");
+ 
 
     return anss[0];
   }
@@ -620,7 +620,7 @@ export class RepositoryCourses implements ICoursesRepository {
       .lean();
   }
   async createOrder(orderdata: orderDto): Promise<any> {
-    console.log(orderdata, "odatais");
+ 
 
     return await new OrderSchemas(orderdata).save();
   }
@@ -629,7 +629,7 @@ export class RepositoryCourses implements ICoursesRepository {
     updatedata: Partial<orderDto>,
     session?: mongoose.ClientSession
   ): Promise<orderDto | null> {
-    console.log(orderid, updatedata);
+ 
 
     return await OrderSchemas.findByIdAndUpdate(orderid, updatedata, {
       new: true,
@@ -796,7 +796,7 @@ export class RepositoryCourses implements ICoursesRepository {
       // Calculate task completion percentage
       const taskCompletionPercentage = (completedTasks / totalTasks) * 100;
 
-      console.log(taskCompletionPercentage);
+ 
 
       progress.OverallScore =
         progress.OverallScore == 100
@@ -861,9 +861,9 @@ export class RepositoryCourses implements ICoursesRepository {
     }
   }
   async getOneorder(userid: string, orderid: string): Promise<any> {
-    console.log(userid, orderid, "nboyth is repos");
+ 
     const data = await OrderSchemas.findOne({ _id: orderid, userId: userid });
-    console.log(data);
+ 
 
     return data;
   }
@@ -874,13 +874,13 @@ export class RepositoryCourses implements ICoursesRepository {
   ): Promise<any> {
     try {
       const skip = (page - 1) * limit;
-      console.log(mentorId, "mentoer id ");
+ 
 
       // Find all courses by this mentor
       const mentorCourses = await Courses.find({ Mentor_id: mentorId }).select(
         "_id"
       );
-      console.log(mentorCourses);
+ 
 
       const courseIds = mentorCourses.map((course) => course._id);
 
@@ -893,7 +893,7 @@ export class RepositoryCourses implements ICoursesRepository {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);
-      console.log(orders, "ordersssis");
+ 
 
       const total = await OrderSchemas.countDocuments({
         courseId: { $in: courseIds },
@@ -926,7 +926,7 @@ export class RepositoryCourses implements ICoursesRepository {
     filter = {}
   ): Promise<any> {
     try {
-      console.log(page, limit, filter, "page and limit is ");
+ 
 
       const skip = (page - 1) * limit;
       const query = { ...filter };
@@ -942,7 +942,7 @@ export class RepositoryCourses implements ICoursesRepository {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);
-      console.log(orders, "orders is fasd");
+ 
 
       const total = await OrderSchemas.countDocuments(query);
       return {

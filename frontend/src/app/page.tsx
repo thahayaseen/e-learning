@@ -10,6 +10,7 @@ import Footer from "@/components/header/footer";
 import { AppDispatch, storeType } from "@/lib/store";
 import { getAllcourseUser } from "@/services/fetchdata";
 import { ICourses } from "@/services/interface/CourseDto";
+import { getImage } from "@/services/getImage";
 
 const ELearningPlatform = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -21,9 +22,7 @@ const ELearningPlatform = () => {
         await dispatch(Varify());
       }
       const datas = await getAllcourseUser({ page: 1, limit: 4 }, true);
-      console.log(datas);
-
-      setCouse(datas.courses);
+       setCouse(datas.courses);
     };
     varify();
   }, [dispatch, state.isAuthenticated]);
@@ -56,7 +55,7 @@ const ELearningPlatform = () => {
                 id={course._id}
                 price={course.Price}
                 smallDiscroption={course.Description}
-                url={course.image}
+                url={`${getImage(course.image)}`}
                 key={index}
               />
             ))}

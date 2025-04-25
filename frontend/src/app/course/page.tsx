@@ -42,15 +42,13 @@ import {
 } from "@/components/ui/tooltip";
 
 // Services and Components
-import {
-  getAllcourseUser,
-  allCategorys,
-  fetchMentors,
-} from "@/services/fetchdata";
+import { getAllcourseUser, fetchMentors } from "@/services/fetchdata";
 import { Explore } from "@/components/mybtns/myBtns";
 import PaginationComponent from "@/components/default/pagination";
 import { Debouncing } from "@/services/debauncing";
 import { useRouter } from "next/navigation";
+import { getImage } from "@/services/getImage";
+// import { getImage } from "../api/upload/route";
 
 // Types and Interfaces
 interface Mentor {
@@ -94,7 +92,7 @@ const CourseList: React.FC = () => {
   // Data States
   const [courses, setCourses] = useState<Course[]>([]);
   const [mentors, setMentors] = useState<Mentor[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
+
   const [loading, setLoading] = useState(true);
 
   // Pagination States
@@ -102,30 +100,20 @@ const CourseList: React.FC = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [totalCourses, setTotalCourses] = useState(0);
   const ITEMS_PER_PAGE = 2;
-  console.log(mentorFilter, "filter is ");
-
-  // Fetch Initial Data
+   // Fetch Initial Data
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
         // Fetch Categories and Mentors
-        const [categoriesResponse, mentorsResponse] = await Promise.all([
-          allCategorys(),
-          fetchMentors(),
-        ]);
+        const [mentorsResponse] = await Promise.all([fetchMentors()]);
 
         // Process Categories
-        const categoryNames = categoriesResponse.map((cat: any) =>
-          typeof cat === "string" ? cat : cat.name || "Uncategorized"
-        );
-        setCategories(categoryNames);
+
         setMentors(mentorsResponse);
 
         // Parse URL Parameters
         const params = new URLSearchParams(window.location.search);
-        console.log(params, "url is ");
-
-        const urlParams = {
+         const urlParams = {
           search: params.get("search"),
           level: params.get("level"),
           price: params.get("price"),
@@ -207,8 +195,10 @@ const CourseList: React.FC = () => {
           filter: filterObj,
           sort: sortConfig,
         });
+         setCourses(response.courses);
 
-        setCourses(response.courses);
+        // await getImage("haloo");
+
         setTotalPages(response.totalPages);
         setTotalCourses(response.total);
       } catch (error) {
@@ -398,7 +388,10 @@ const CourseList: React.FC = () => {
                       className="bg-slate-800/70 border-slate-700/50 backdrop-blur-lg overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
                       <div className="relative aspect-video overflow-hidden">
                         <Image
-                          src={course.image || "/api/placeholder/500/280"}
+                          src={
+                            `${getImage(course.image)}` ||
+                            "/api/placeholder/500/280"
+                          }
                           alt={course.Title}
                           fill
                           className="object-cover transition-transform hover:scale-110"

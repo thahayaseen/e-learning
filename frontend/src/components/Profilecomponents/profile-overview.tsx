@@ -55,9 +55,7 @@ export function Overview({
   userData: UserDTO;
   progress: Iprogress;
 }) {
-  console.log("data is ", courses);
-
-  return (
+   return (
     <TabsContent
       value="overview"
       className="space-y-6 bg-[#0a192f] min-h-screen p-6 rounded-xl">

@@ -59,7 +59,7 @@ const CourseBasicDetails = ({
     const fetchCategories = async () => {
       try {
         const data = await allCategorys()
-        setCategories(data)
+         setCategories(data.data)
       } catch (error) {
         console.error("Error fetching categories:", error)
       }

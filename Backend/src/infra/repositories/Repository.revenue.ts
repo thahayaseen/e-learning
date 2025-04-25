@@ -81,7 +81,7 @@ class RevenueRepository implements IRevenueRepository {
         },
         { $sort: { totalRevenue: -1 } },
       ]);
-      console.log(mentorRevenue, "order datra is ");
+ 
 
       return mentorRevenue;
     } catch (error) {
@@ -121,7 +121,7 @@ class RevenueRepository implements IRevenueRepository {
             month: { $month: "$createdAt" },
           };
       }
-      console.log(dateGrouping, dateFormat,'time pereds');
+ 
 
       const timeRevenue = await OrderSchemas.aggregate([
         { $match: { paymentStatus: "paid" } },
@@ -160,7 +160,7 @@ class RevenueRepository implements IRevenueRepository {
         },
         { $sort: { _id: 1 } },
       ]);
-console.log(timeRevenue,'ansss');
+ 
 
       return timeRevenue;
     } catch (error) {

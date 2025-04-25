@@ -16,7 +16,7 @@ export default class Admincontroler {
   ) {}
   async blockUser(req: AuthServices, res: Response) {
     try {
-      console.log("yses", req.body);
+ 
       if (String(req.user._id) == String(req.body.userid)) {
         throw new Error("Cannot self Block");
       }
@@ -54,7 +54,7 @@ export default class Admincontroler {
           filter,
         });
 
-        console.log(datas, "fasasdg");
+ 
 
         res.status(HttpStatusCode.OK).json({
           success: true,
@@ -71,7 +71,7 @@ export default class Admincontroler {
   }
   async createCategorys(req: AuthServices, res: Response) {
     try {
-      console.log("adding");
+ 
       // if (req.user.role !== Roles.ADMIN) {
       //   res.status(HttpStatusCode.BAD_REQUEST);
       //   return;
@@ -79,7 +79,7 @@ export default class Admincontroler {
 
       const { name, description } = req.body;
       const datass = await this.adminUsecase.getCategoryNameUsecase(name);
-      console.log(datass);
+ 
 
       if (datass) {
         throw new Error("Category aldredy exsist");
@@ -108,15 +108,15 @@ export default class Admincontroler {
       // }
       const { categoryid } = req.params;
       const { data } = req.body;
-      console.log(data, "editing");
+ 
 
       if (data && data.Category) {
-        console.log(data.Category, "categoryis");
+ 
 
         const result = await this.adminUsecase.getCategoryNameUsecase(
           data.Category
         );
-        console.log(result);
+ 
 
         if (result) {
           throw new Error(`This Category Aldredy exsist's`);
@@ -146,7 +146,7 @@ export default class Admincontroler {
       //   });
       //   return;
       // }
-      console.log("typessis", typeof req.body.type);
+ 
 
       await this.adminUsecase.actionCourse(categoryid, req.body.type);
       res.status(HttpStatusCode.OK).json({
@@ -170,13 +170,13 @@ export default class Admincontroler {
       //   return;
       // }
       const { page, type } = req.params;
-      console.log("page is ", page, type, req.params);
+ 
 
       const data = await this.adminUsecase.unaprovedgetCourses(
         Number(page),
         type
       );
-      console.log(data);
+ 
       if (!data) {
         throw new Error("not fount");
       }
@@ -195,14 +195,14 @@ export default class Admincontroler {
   async getAllmentorrequst(req: AuthServices, res: Response) {
     try {
       const { _id, role } = req.user;
-      console.log(role, "roeis");
+ 
 
       // if (role !== Roles.ADMIN) {
       //   throw new Error("Only admin have access to this api");
       // }
       const { page } = req.query || 1;
       const filter = req.query;
-      console.log(filter);
+ 
 
       const data = await this.userUsecase.getAllrequst(Number(page), filter);
       res.status(HttpStatusCode.OK).json({
@@ -227,10 +227,10 @@ export default class Admincontroler {
       }
       const { dataid } = req.params;
       const { action } = req.body;
-      console.log("action is ", action);
+ 
 
       const data = await this.userUsecase.updateRequst(dataid, action);
-      console.log(data.userid);
+ 
       if (action == "accepted") {
         await this.userUsecase.changeUserRoleUsecase(data.userid, "mentor");
       }

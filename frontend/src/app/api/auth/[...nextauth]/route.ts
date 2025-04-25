@@ -13,8 +13,7 @@ const handler = NextAuth({
     async signIn({ account, profile }) {
       if (account && profile && profile.email) {
         if (account.provider === "google") {
-          console.log(profile);
-          return true;
+           return true;
         }
         return true;
       }

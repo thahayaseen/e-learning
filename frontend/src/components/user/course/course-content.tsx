@@ -13,6 +13,7 @@ import { TipCard } from "@/components/ui/tip-card"
 import { updateVideoProgress, validatequstion } from "@/services/fetchdata"
 import toast from "react-hot-toast"
 import type { Course, Task, TaskProgress } from "@/types/course"
+import { getImage } from "@/services/getImage"
 
 interface CourseContentProps {
   course: Course
@@ -249,7 +250,7 @@ const CourseContent = ({
           <CardContent className="p-6">
             <div className="rounded-lg overflow-hidden border shadow-sm">
               <video
-                src={selectedTask.VideoURL}
+                src={getImage(selectedTask.VideoURL)}
                 controls
                 onTimeUpdate={(e) => handleVideoProgress(selectedTask._id, e)}
                 className="w-full aspect-video"

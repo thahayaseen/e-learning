@@ -3,8 +3,7 @@ import { logout } from "./features/User";
 import { AppDispatch } from "./store";
 
 export const clearGs = async (dispatch: AppDispatch) => {
-  console.log("in here");
-  dispatch(logout());
+   dispatch(logout());
   await axios.post(
     `${process.env.NEXT_PUBLIC_DOMAIN}/logout`,
     {},

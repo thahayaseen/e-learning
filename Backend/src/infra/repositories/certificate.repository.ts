@@ -47,7 +47,7 @@ class CertificateRepo implements ICertificaterepository {
     search?: string
   ): Promise<{ data: CertificateDTO[]; total: number }> {
     const skip = (page - 1) * limit;
-console.log(skip,limit,page,'all is in here');
+ 
 
     // Build search query
     const query: any = {
@@ -73,7 +73,7 @@ console.log(skip,limit,page,'all is in here');
     if (!data) {
       throw new Error("Cannot find certificates");
     }
-console.log(data,'anss is ');
+ 
 
     return {
       data ,

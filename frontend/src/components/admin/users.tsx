@@ -61,9 +61,7 @@ const UserManagementPage = () => {
       }
 
       const response = await fetchUsers(`/allusers?` + urlparams.toString());
-      console.log(response, "resis");
-
-      setTotal(response.totalpages);
+       setTotal(response.totalpages);
       setUsers(response.data);
     } catch (error) {
       toast.error("Failed to fetch users");
@@ -78,8 +76,7 @@ const UserManagementPage = () => {
   }, [page, limit, statusFilter, debouncedSearchTerm, roleFilter, fetchUser]);
 
   const toggleBlock = async (id: string, type) => {
-    console.log(id, "user id is ");
-    try {
+     try {
       const response: any = await axios.put("/blockuser", {
         userid: id,
         type: !type,
@@ -92,13 +89,9 @@ const UserManagementPage = () => {
             : user;
         })
       );
-      console.log(response, "responce afblocking");
-
-      toast.success(response.message || "User status updated");
+       toast.success(response.message || "User status updated");
     } catch (error) {
-      console.log(error.message);
-
-      toast.error(error.message || "Failed to update user status");
+       toast.error(error.message || "Failed to update user status");
       console.error("Error updating user status:", error);
     }
   };

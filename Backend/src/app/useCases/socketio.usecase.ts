@@ -40,8 +40,10 @@ export class SocketuseCase implements IsocketUsecase {
     if (!user || !user._id) {
       throw new Error("user Not found");
     }
-    console.log("suuuuuuuuu");
-
+ 
+    if (user.isBlocked) {
+      throw new Error("User is blocked");
+    }
     const room = await this.chatroomRepo.findByRoomid(Roomid);
     const lastmsg = await this.MessageRepo.createMessage(
       String(user._id),
@@ -49,7 +51,7 @@ export class SocketuseCase implements IsocketUsecase {
       Roomid,
       username
     );
-    console.log("last message is ");
+ 
     if (room?.mentorId == user._id) {
       await this.chatroomRepo.updateLastchatByid(Roomid, lastmsg);
     }
@@ -66,10 +68,10 @@ export class SocketuseCase implements IsocketUsecase {
   }
   async validatoinUser(roomid: string, email: string): Promise<boolean> {
     const user = await this.userUsecase.UseProfileByemail(email);
-    console.log(user);
+ 
 
     const room: any = await this.ChatroomUsecase.findByRoomid(roomid);
-    console.log(room, "roomsis");
+ 
     if (!room || !room.userId || !user || !user._id) {
       return false;
     }
@@ -77,7 +79,7 @@ export class SocketuseCase implements IsocketUsecase {
       String(room.userId) == String(user._id) ||
       String(room.mentorId._id) == String(user._id);
 
-    console.log(validatiuon, "validation result is ");
+ 
 
     if (validatiuon) {
       return true;
@@ -91,23 +93,23 @@ export class SocketuseCase implements IsocketUsecase {
     return await this.MessageRepo.getallmessages(roomid);
   }
   async valiateMeeting(room: string, email: string): Promise<boolean> {
-    console.log("in herefindihg room,", room, email);
+ 
 
     const result = await this.MeetinguseCase.fetchMeetmyId(room);
-    console.log(result);
+ 
 
     if (!result) {
-      console.log("no result found", result);
+ 
 
       return false;
     }
     const user = await this.userUsecase.UseProfileByemail(email);
-    console.log(result, "result", user, "useris");
+ 
 
     if (!user || !user._id) {
       return false;
     }
-    console.log(result.participants, user._id);
+ 
 
     const res =
       String(result.mentorId) == user._id || String(result.userId) == user._id;

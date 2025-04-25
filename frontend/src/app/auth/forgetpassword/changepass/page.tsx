@@ -21,11 +21,8 @@ const ChangePasswordForm = () => {
       toast.error("Password not match");
       return;
     }
-    console.log("Password change submitted:", formData);
-    const token = get_cookie("reset_Token2");
-    console.log("Password  submitted:", token);
-
-    try {
+     const token = get_cookie("reset_Token2");
+     try {
       await axios.put(
         "/resetchangepassword",
         {
@@ -42,8 +39,7 @@ const ChangePasswordForm = () => {
       delete_cookie("reset_Token2");
       router.push("/auth");
     } catch (error: any) {
-      console.log(error.response.data.message);
-      toast.error(error.response.data.message);
+       toast.error(error.response.data.message);
     }
   };
 

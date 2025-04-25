@@ -25,8 +25,7 @@ const PaginationComponent: React.FC<PaginationComponentProps> = ({
   const totalPages = Math.max(1, Math.ceil(total / itemsPerPage));
 
   const nextPage = () => {
-    console.log("change page", page);
-    if (page < totalPages) {
+     if (page < totalPages) {
 
       setPage((prev) => prev + 1);
     }

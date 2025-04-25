@@ -30,7 +30,7 @@ class MeetingUsecase implements IMeetusecase {
     if (filter.status) {
       match["status"] = filter.status;
     }
-    console.log(match);
+ 
 
     const sort = sortBy?.sortOrder === "desc" ? -1 : 1;
     return await this.MeetingRepo.getAllmeeting(page, limit, match, sort);
@@ -38,7 +38,7 @@ class MeetingUsecase implements IMeetusecase {
 
   async fetchMeetmyId(meetid: string): Promise<MeetingDto | null> {
     const data = await this.MeetingRepo.getMeetingByid(meetid);
-    console.log(data);
+ 
 
     return data;
   }
@@ -57,12 +57,12 @@ class MeetingUsecase implements IMeetusecase {
     mentorid: string
   ): Promise<void> {
     const meet = await this.MeetingRepo.getMeetingByid(Meetid);
-    console.log('fasdafsdafsd');
+ 
     
     if (!meet) {
       throw new Error("Meet Not find");
     }
-    console.log(String(meet.mentorId), mentorid, "meet data is ");
+ 
 
     if (String(meet.mentorId) !== String(mentorid)) {
       throw new Error(userError.Unauthorised);

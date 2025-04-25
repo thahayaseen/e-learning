@@ -94,9 +94,7 @@ const CourseCreation = ({
 
   // Check for draft when component mounts or when dialog opens
   useEffect(() => {
-    console.log(open, "open is ", hasDraft);
-
-    if (open && hasDraft) {
+     if (open && hasDraft) {
       setDraftDialogOpen(true);
     }
   }, [open, hasDraft]);
@@ -203,13 +201,9 @@ const CourseCreation = ({
 
       // Send data to API
       const result = await addCourse(finalCourseData);
-      console.log(result,'resust is ');
-
-      if (result.success) {
+       if (result.success) {
         // Clear the draft after successful submission
-        console.log('eiadfasdf');
-        
-        clearDraft();
+         clearDraft();
 
         toast.success("Success", {
           description: "Course saved successfully!",

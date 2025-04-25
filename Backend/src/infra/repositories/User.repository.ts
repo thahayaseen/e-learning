@@ -14,7 +14,7 @@ export default class UserRepository implements IUser {
   
   constructor() {}
   create = catchAsync(async (users: IUserModel): Promise<UserDTO | null> => {
-    console.log("users from create", users);
+ 
     const userdata = await UserModel.create(users);
     const obj: UserDTO = {
       name: userdata.name,
@@ -34,21 +34,21 @@ export default class UserRepository implements IUser {
 
   changepass = catchAsync(
     async (id: string, password: string): Promise<void> => {
-      console.log(typeof password, "pass is ", id);
+ 
       const pass = await bcrypt.hash(password, 10);
-      console.log("hashed");
+ 
 
-      console.log(pass, "password");
+ 
 
       await UserModel.updateOne({ _id: id }, { password: pass });
-      console.log("updated");
+ 
 
       return;
     }
   );
 
   findByEmail = catchAsync(async (email: string): Promise<UserDTO | null> => {
-    // console.log(email);
+ 
     const userdata = await UserModel.findOne({ email: email });
     if (!userdata) {
       return null;
@@ -92,7 +92,7 @@ export default class UserRepository implements IUser {
       filter: any = {},
       sort: any
     ): Promise<Alluserinterface> => {
-      console.log(limit, skip, JSON.stringify(filter), sort);
+ 
 
       const data = await UserModel.find(filter)
         .populate("purchasedCourses")
@@ -102,7 +102,7 @@ export default class UserRepository implements IUser {
         .lean();
 
       //  const formattedData = data.map(user => new AdminUserDTO(user._id as number,user.name,user.email,user.role,user.isblocked,String(user.updatedAt )));
-      console.log(data, "in reposssssss");
+ 
 
       const toatal = await UserModel.countDocuments(filter);
       const totalpages = Math.ceil(toatal / limit);
@@ -144,7 +144,7 @@ export default class UserRepository implements IUser {
   });
   Hmatch = catchAsync(
     async (Upass: string, Hpass: string): Promise<boolean> => {
-      console.log(Upass, Hpass, "jere");
+ 
 
       return bcrypt.compare(Upass, Hpass);
     }
@@ -185,10 +185,10 @@ export default class UserRepository implements IUser {
       qury["name"] = data.name.trim();
     }
 
-    console.log(data, "data is");
+ 
 
     if (data["profile.social_link"]) {
-      console.log(data["profile.social_link"]);
+ 
       qury["profile.social_link"] = data["profile.social_link"];
     }
 
@@ -196,7 +196,7 @@ export default class UserRepository implements IUser {
       qury["profile.avatar"] = data.avathar;
     }
 
-    console.log(qury, "query is");
+ 
 
     const datass = await UserModel.findByIdAndUpdate(
       userid,
@@ -204,14 +204,14 @@ export default class UserRepository implements IUser {
       { new: true }
     );
 
-    console.log(datass, "updated user data");
+ 
   }
   async getAllorders(
     userId: string,
     page: number,
     limit: number
   ): Promise<any> {
-    console.log(userId,page,limit,'in repsdatais');
+ 
     
     const orders = await OrderSchemas.find({ userId: userId })
       .populate("userId", "name email") // Select specific user fields

@@ -13,10 +13,10 @@ export default class PrRedis implements IRedis {
     });
 
     this.redis.connect().then(()=>{
-      console.log('connected success');
+ 
       
     }).catch((err)=>{
-      console.log('error when connect redis',err);
+ 
       
     })
   }
@@ -40,13 +40,13 @@ export default class PrRedis implements IRedis {
     return { userid, users };
   }
   async getBtId(uId: string): Promise<UserDTO | null> {
-    console.log(uId, "from resend");
+ 
 
     let data = await this.redis.get(`user:${uId}`);
 
     if (data) {
       const ans: User = JSON.parse(data);
-      console.log(ans);
+ 
 
       return ans as UserDTO
     }

@@ -34,12 +34,9 @@ function useUploadS3() {
         throw new Error("Failed to upload file");
       }
       const fileUrl = uploadUrl.split("?")[0];
-      console.log("image or video url is ", fileUrl);
-
-      return fileUrl;
+       return fileUrl.split("/")[3]
     } catch (error) {
-      console.log(`Error uploading ${fileType}:`, error);
-      toast.error(
+       toast.error(
         error instanceof Error
           ? error.message
           : `Failed to upload ${fileType}. Please try again.`

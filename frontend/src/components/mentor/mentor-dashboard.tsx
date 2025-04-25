@@ -71,9 +71,7 @@ const MentorDashboard = () => {
 
   // Fetch courses when filters, search term, or pagination changes
   useEffect(() => {
-    console.log(debouncedSearchTerm, "search is ");
-
-    fetchCourses({
+     fetchCourses({
       page: currentPage,
       limit: pageSize,
       search: debouncedSearchTerm,
@@ -85,15 +83,11 @@ const MentorDashboard = () => {
 
   // Update total pages when total courses changes
   useEffect(() => {
-    console.log(totalCourses, "totalcourse is ");
-
-    setTotalPages(totalCourses);
+     setTotalPages(totalCourses);
   }, [totalCourses, pageSize]);
 
   const handleEditCourse = (course: ICourses) => {
-    console.log(course, "tje cpoure");
-
-    setSelectedCourse(course);
+     setSelectedCourse(course);
     setIsEditDialogOpen(true);
   };
 
@@ -110,9 +104,7 @@ const MentorDashboard = () => {
 
   const handleUpdateCourse = async (courseId: string, courseData: any) => {
     try {
-      console.log();
-
-      // Validate with Zod
+       // Validate with Zod
       courseSchema.parse(courseData);
 
       await updateCourse(courseId, courseData);

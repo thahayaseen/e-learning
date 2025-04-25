@@ -12,14 +12,12 @@ export function Sighnout({ isLoggedIn }: { isLoggedIn: boolean }) {
   const router = useRouter();
 
   const dispatch = useDispatch();
-  console.log(isLoggedIn);
-  if (isLoggedIn) {
+   if (isLoggedIn) {
     return (
       <Button
         className="text-gray-300 bg-blue-900 hover:to-blue-950 transition-all"
         onClick={() => {
-          console.log("happended");
-          delete_cookie("access");
+           delete_cookie("access");
           clearGs(dispatch);
           router.push("/auth");
         }}>
@@ -65,9 +63,7 @@ export function Profile() {
 
 export function Explore({ _id }: { _id: string }) {
   const router = useRouter();
-  console.log(_id);
-
-  return (
+   return (
     <Button
       variant="ghost"
       className="hover:bg-indigo-800/50 text-white hover:text-white"

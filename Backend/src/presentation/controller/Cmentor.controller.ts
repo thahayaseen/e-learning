@@ -240,7 +240,7 @@ export class MentorController {
         courseid,
         false
       );
-      // console.log(!user );
+ 
       if (!user || !user._id || !course || course.data || !course.Mentor_id) {
         throw new Error("user not fount");
       }

@@ -13,16 +13,12 @@ import {
 export function useLessonRepository(courseid?: string) {
   const [lessons, setLessons] = useState<ILesson[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  console.log(lessons, "eslsldfasdfahsdkfash");
-
-  // Fetch lessons for a course
+   // Fetch lessons for a course
   const fetchLessons = useCallback(async (courseId: string) => {
     setIsLoading(true);
     try {
       const response = await getlessons(courseId);
-      console.log("responce of get lessons", response.data);
-
-      setLessons(response.data || []);
+       setLessons(response.data || []);
       return response.data;
     } catch (error) {
       console.error("Error fetching lessons:", error);
@@ -38,9 +34,7 @@ export function useLessonRepository(courseid?: string) {
     setIsLoading(true);
     try {
       const newLesson = await addnewLesson(lessonData, courseId);
-      console.log(newLesson, "newLesson", lessonData);
-
-      setLessons((prev) => [...prev, lessonData]);
+       setLessons((prev) => [...prev, lessonData]);
       return newLesson;
     } catch (error) {
       console.error("Error adding lesson:", error);
@@ -60,9 +54,7 @@ export function useLessonRepository(courseid?: string) {
           lessonData,
           courseid
         );
-        console.log(updatedLesson, "updated datais", lessonData, lessons);
-
-        setLessons((prev) =>
+         setLessons((prev) =>
           prev.map((lesson) =>
             lesson._id === lessonData._id ? lessonData : lesson
           )

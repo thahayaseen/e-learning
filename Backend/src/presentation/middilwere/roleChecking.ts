@@ -20,8 +20,8 @@ export class AllMiddleware {
       try {
         const { role } = (req as any).user; // Adjust typing if needed
 
-        console.log(role, "role is ");
-        console.log(role, "required role is", requiredRole);
+ 
+ 
 
         if (!role || role !== requiredRole) {
           throw new Error("Don't have access");
@@ -42,19 +42,19 @@ export class AllMiddleware {
 
   jwtVerify = async (req: AuthServices, res: Response, next: NextFunction) => {
     try {
-      console.log("Authorization Header:", req.headers.authorization);
+ 
       let token = req.headers.authorization?.split(" ")[1];
       let userData = null;
 
       if (token) {
         userData = await this.LoginUsecase.protectByjwt(token);
-        console.log("Access token verified:", userData);
+ 
       }
 
       if (!userData) {
-        console.log("No access token, checking refresh token...");
+ 
         const refreshToken = req.cookies.refresh;
-        console.log("Cookies:", req.cookies);
+ 
 
         if (!refreshToken) {
           res.status(401).json({ success: false, message: "Unauthorized" });

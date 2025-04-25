@@ -9,6 +9,8 @@ import {
 } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
 import { Award, Book, Briefcase, ExternalLink, PhoneCall } from "lucide-react";
+import { getImage } from "@/services/getImage";
+import Image from "next/image";
 
 export default function MentorDialog({ mentor }) {
   const [open, setOpen] = useState(false);
@@ -16,9 +18,7 @@ export default function MentorDialog({ mentor }) {
 
   const handleViewAllCourses = () => {
     setOpen(false);
-    console.log(mentor);
-    
-    router.push(`/course?mentor=${mentor.mentorId}`);
+     router.push(`/course?mentor=${mentor.mentorId}`);
   };
 
   if (!mentor) return null;
@@ -37,9 +37,12 @@ export default function MentorDialog({ mentor }) {
         <div className="px-6 pb-6 -mt-16">
           {/* Profile image */}
           <div className="flex justify-center">
-            <img
-              src={mentor.profileImage}
+            <Image
+              height={100}
+              width={100}
+              src={getImage(mentor.profileImage)}
               alt={mentor.name}
+              
               className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
             />
           </div>

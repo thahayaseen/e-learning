@@ -45,15 +45,12 @@ export const registerUser = async (
   try {
     dispatch(setloading(true));
     const response = await axios.post("/signup", data);
-    console.log(response);
-    
-    toast.success(response.message || "Registration successful!");
+     toast.success(response.message || "Registration successful!");
     
     return { success: true, data: response };
   } catch (error: any) {
     const errorMessage = error.message || "Registration failed";
-    console.log(errorMessage);
-    toast.error(errorMessage);
+     toast.error(errorMessage);
     
     
     // toast.error(errorMessage);
@@ -84,8 +81,7 @@ export const googleLogin = async (
     // save_cookie("access", response.token);
     return { success: true, data: response };
   } catch (error: any) {
-    console.log('error in ' ,error.message);
-    toast.error(error.message)
+     toast.error(error.message)
     
     // console.error(error);
     return { success: false, error };

@@ -10,7 +10,7 @@ export class MessageRepository implements IRmessage {
     roomId: string,
     username:string
   ): Promise<IMessage> {
-    console.log(username);
+ 
     
    return await Message.create({
       chatroomId: roomId,

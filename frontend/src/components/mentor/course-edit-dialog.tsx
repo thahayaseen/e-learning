@@ -38,6 +38,7 @@ import Image from "next/image";
 
 import useUploadS3 from "@/hooks/addtos3";
 import { unlistCourse } from "@/services/fetchdata";
+import { getImage } from "@/services/getImage";
 
 // Course validation schema
 const courseSchema = z.object({
@@ -70,7 +71,7 @@ export default function CourseEditDialog({
     Price: course.Price,
     Category: course.Category._id,
     Content: course.Content,
-    image: course.image,
+    image: `${getImage(course.image)}`,
     unlist: course.unlist || false,
   });
 
@@ -81,7 +82,7 @@ export default function CourseEditDialog({
       Price: course.Price,
       Category: course.Category._id,
       Content: course.Content,
-      image: course.image,
+      image: `${getImage(course.image)}`,
       unlist: course.unlist || false,
     });
   }, [course]);
@@ -173,9 +174,7 @@ export default function CourseEditDialog({
        
       }
     } catch (error) {
-      console.log(error,'the error is');
-      
-      if (error instanceof z.ZodError) {
+       if (error instanceof z.ZodError) {
         // Convert Zod errors to a more usable format
         const errors: Record<string, string> = {};
         error.errors.forEach((err) => {

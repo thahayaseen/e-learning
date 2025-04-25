@@ -31,17 +31,17 @@ export default class Login implements ILogin {
     datas: string;
   }> {
     try {
-      console.log(email);
+ 
 
       const data = await this.userRepository.findByEmail(email);
-      console.log(data);
+ 
 
       if (!data || !data.password || !data.role) {
         throw new AppError("User not Fount", 404);
       }
 
       const isvalid = await this.userRepository.Hmatch(password, data.password);
-      console.log(password, isvalid);
+ 
 
       if (!isvalid) {
         throw new AppError("incotect password", 404);
@@ -62,7 +62,7 @@ export default class Login implements ILogin {
         datas: JSON.stringify(token),
       };
     } catch (error: any) {
-      console.log(error);
+ 
       throw new AppError(error.message, error.statusCode);
     }
   }
@@ -83,7 +83,7 @@ export default class Login implements ILogin {
       });
       return { token };
     } catch (error: any) {
-      console.log(error.message, "in controller");
+ 
       throw new AppError(error.message, 404);
     }
   }
@@ -92,10 +92,10 @@ export default class Login implements ILogin {
   }
   async changepassword(userid: string, password: string) {
     try {
-      console.log("userid and pass in login", userid, password);
+ 
 
       await this.userRepository.changepass(userid, password);
-      console.log("done");
+ 
 
       return;
     } catch (error: any) {

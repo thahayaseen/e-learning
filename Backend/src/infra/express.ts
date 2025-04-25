@@ -11,7 +11,7 @@ dotenv.config();
 
 app.use(morgan("dev"));
 app.use(express.static(path.join(__dirname, "public")));
-console.log("after");
+ 
 
 app.use(
   cors({

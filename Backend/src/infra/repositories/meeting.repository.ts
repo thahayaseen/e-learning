@@ -8,7 +8,7 @@ class RepositoryMeeting implements IRmetting {
     userid: string,
     courseid: string
   ): Promise<MeetingDto | null> {
-    console.log(userid, courseid, "all data is");
+ 
 
     return await Meeting.findOne({ userId: userid, courseId: courseid });
   }
@@ -78,7 +78,7 @@ class RepositoryMeeting implements IRmetting {
       { $limit: limit },
     ];
     
-    console.log(pipeline, "pipleinedd");
+ 
 
     const countPipeline = [
       {
@@ -98,20 +98,20 @@ class RepositoryMeeting implements IRmetting {
       Meeting.aggregate(pipeline),
       Meeting.aggregate(countPipeline),
     ]);
-    console.log(data, "data is ");
+ 
 
     const total = totalResult[0]?.total || 0;
     return { data, total };
   }
 
   async updateMeetingTime(id: string, scheduledTime: Date): Promise<void> {
-    console.log(id,scheduledTime,'updatedddd');
+ 
     
     await Meeting.findByIdAndUpdate(id, { scheduledTime: scheduledTime });
   }
   async getMeetingByid(meetId: string): Promise<MeetingDto | null> {
     try {
-      console.log(meetId, "meet id is");
+ 
 
       return await Meeting.findOne({ _id: meetId });
     } catch (error: any) {
@@ -122,7 +122,7 @@ class RepositoryMeeting implements IRmetting {
     roomid: string,
     userid: string
   ): Promise<MeetingDto | null> {
-    console.log(roomid, userid);
+ 
 
     return await Meeting.findByIdAndUpdate(
       roomid,
@@ -132,7 +132,7 @@ class RepositoryMeeting implements IRmetting {
   }
 
   async removeUser(roomid: string, userid: string): Promise<MeetingDto | null> {
-    console.log(roomid, userid);
+ 
 
     return await Meeting.findByIdAndUpdate(
       roomid,

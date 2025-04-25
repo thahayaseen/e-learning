@@ -104,19 +104,19 @@ export class CourseUsecase implements ICourseUseCase {
     );
   }
   async createCourse(datas: Omit<ICourses, "_id">) {
-    console.log(datas, "lessson is");
+ 
 
     return await this.CourseRepo.createCourse(datas);
   }
   async addlessons(datas: ILesson[]): Promise<any> {
-    console.log("in addlesson", datas);
+ 
     const datiii = await Promise.all(
       datas.map(async (dat: any) => {
         if (!dat.Task) {
           dat.Task = [];
         }
         const tasks = await this.CourseRepo.createTask(dat.Task);
-        console.log(tasks, "in task creating ");
+ 
 
         dat.Task["Lesson_id"] = tasks._id;
         const ans = await this.CourseRepo.createLesson({
@@ -124,16 +124,16 @@ export class CourseUsecase implements ICourseUseCase {
           Content: dat.Content,
           Task: tasks,
         });
-        console.log(tasks, "tasks id is ");
+ 
 
-        console.log(dat, "fdsdfdadsnew");
+ 
 
-        console.log(ans);
+ 
         return ans._id;
       })
     );
 
-    console.log(datiii);
+ 
     datas = datiii;
     return datiii;
   }
@@ -141,15 +141,15 @@ export class CourseUsecase implements ICourseUseCase {
     data: ITask,
     lessonId: string
   ): Promise<ILesson | null> {
-    console.log(data);
+ 
 
     const idis = await this.CourseRepo.createTask([data]);
-    console.log(idis, "in create Task");
+ 
 
     const addtoLesosn = await this.CourseRepo.updateLesson(lessonId, {
       utask: idis,
     });
-    console.log(addtoLesosn, "in added lesson");
+ 
 
     return addtoLesosn;
   }
@@ -157,7 +157,7 @@ export class CourseUsecase implements ICourseUseCase {
     lessonid: string,
     data: Omit<ILesson, "Task">
   ): Promise<ILesson | null> {
-    console.log(data, "in usecases");
+ 
 
     const datas = await this.CourseRepo.updateLesson(lessonid, data);
     return datas;
@@ -176,7 +176,7 @@ export class CourseUsecase implements ICourseUseCase {
 
   async deleteCourse(courseid: string): Promise<void> {
     await this.CourseRepo.deleteCourse(courseid);
-    console.log("in use case delete course");
+ 
 
     return;
   }
@@ -196,11 +196,11 @@ export class CourseUsecase implements ICourseUseCase {
     coursesCount: number;
     completedCourse: number;
   }> {
-    console.log("Fetching user progress data for user:", userid);
+ 
 
     // Fetch all progress data for the user
     const progressData = await this.CourseRepo.getAllprogressByuserid(userid);
-    console.log("Progress data:", progressData);
+ 
 
     let totalProgress = 0;
     let coursesCount = 0;
@@ -282,10 +282,10 @@ export class CourseUsecase implements ICourseUseCase {
   async createProgress(courseid: string, userid: string) {
     // Fetch the course with populated lessons and tasks
     try {
-      console.log(courseid, userid, "data is ");
+ 
 
       const course = await this.CourseRepo.FindSelectedCourse(courseid);
-      console.log("courseis ", course);
+ 
 
       if (!course) {
         throw new Error("Course not found");
@@ -301,7 +301,7 @@ export class CourseUsecase implements ICourseUseCase {
 
         // Iterate through each task in the lesson
         lesson.Task.forEach((task: any) => {
-          console.log(task, "task is ");
+ 
 
           let taskProgressItem: ITaskProgress | any = {};
           if (task.Type == "Video") {
@@ -332,7 +332,7 @@ export class CourseUsecase implements ICourseUseCase {
               Status: "Not Started",
             };
           }
-          console.log(taskProgressItem);
+ 
 
           // Add the task progress to the array
           // if (taskProgressItem && taskProgressItem.keys.length !== 0) {
@@ -351,7 +351,7 @@ export class CourseUsecase implements ICourseUseCase {
         // Add the lesson progress to the array
         lessonProgress.push(lessonProgressItem);
       });
-      console.log(lessonProgress, "data adn the uid is ", userid, courseid);
+ 
 
       await this.CourseRepo.createProgress(userid, courseid, lessonProgress);
 
@@ -389,12 +389,12 @@ export class CourseUsecase implements ICourseUseCase {
       result.OverallScore == 100
     );
     if (result.OverallScore == 100) {
-      console.log("yessss entered");
+ 
       let sertificate = await this.CertificateRepo.GetCertificateByCourseid(
         result.Student_id._id,
         result.Course_id._id
       );
-      console.log(sertificate, "certificateis");
+ 
 
       if (!sertificate) {
         sertificate = await this.CertificateRepo.createCertificate(
@@ -406,7 +406,7 @@ export class CourseUsecase implements ICourseUseCase {
           new Date()
         );
       }
-      console.log(sertificate, "data isissisisisi");
+ 
       result.certificateId = sertificate?._id;
     }
 
@@ -469,13 +469,13 @@ export class CourseUsecase implements ICourseUseCase {
     return await this.CourseRepo.getOneorder(userid, orderid);
   }
   async certificate(userid: string, courseid: string): Promise<any> {
-    console.log(userid, courseid, "ididdiid");
+ 
 
     const ddd = await this.CertificateRepo.GetCertificateByCourseid(
       userid,
       courseid
     );
-    console.log(ddd, "datatat");
+ 
     return ddd;
   }
   async getAllCertificate(

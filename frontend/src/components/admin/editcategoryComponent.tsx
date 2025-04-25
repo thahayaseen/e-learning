@@ -51,19 +51,13 @@ function EditcategoryComponent({
     for (const i in data) {
       const key = i as keyof  Omit<ICategory,'createdAt'>;
 
-      console.log(data[key], key);
-      console.log(selectedCategory[key]);
-
-      if (data[key] !== selectedCategory[key]) {
+        if (data[key] !== selectedCategory[key]) {
         changedata[key]=data[key]
-        console.log(data[key]);
-      }
+       }
     }
-    console.log('changed is',changedata);
-   const datass=await edtCategory(String(selectedCategory._id),changedata)
+    const datass=await edtCategory(String(selectedCategory._id),changedata)
     if(datass){
-      console.log("Form Data:", data);
-    data._id=selectedCategory._id
+     data._id=selectedCategory._id
     handleEdit(data)
     setisopen();
     }

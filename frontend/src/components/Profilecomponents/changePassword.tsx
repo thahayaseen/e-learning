@@ -47,17 +47,14 @@ function ChangePassword({
   });
   const onSubmit = async (data) => {
     try {
-      console.log("data is ", data);
-      const res = await changepassword(data);
-      console.log(res);
-      if(res.success){
+       const res = await changepassword(data);
+       if(res.success){
         form.reset()
         setOpen(false)
       }
     } catch (error) {
       if (error instanceof Error) {
-        console.log(error.message);
-        form.setError("oldPassoword", { message: error.message });
+         form.setError("oldPassoword", { message: error.message });
       }
     }
   };

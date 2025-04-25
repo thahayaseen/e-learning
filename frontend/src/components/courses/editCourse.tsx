@@ -73,14 +73,10 @@ const EditLessonDialog = ({
     answer: "",
     videoURL: "",
   });
-  console.log(updateLesson, "thsi is the lessons");
-
-  // Initialize the form with lesson data when it changes
+   // Initialize the form with lesson data when it changes
   useEffect(() => {
     if (lesson) {
-      console.log(lesson, "lesson is ");
-
-      setUpdatedLesson({ ...lesson });
+       setUpdatedLesson({ ...lesson });
 
       setTasks(lesson.Task);
     }
@@ -205,8 +201,7 @@ const EditLessonDialog = ({
     courseid: string,
     lessonid: string
   ) => {
-    console.log(lessonid);
-    await deleteTask(taskid, lessonid, courseid);
+     await deleteTask(taskid, lessonid, courseid);
 
     const updatedTasks = [...tasks];
     updatedTasks.splice(index, 1);
@@ -702,8 +697,7 @@ const EditLessonDialog = ({
                   try {
                     setIsLoading(true);
                     await deleteLessonApi(course._id, lesson?._id);
-                    console.log("Delete course clicked");
-                    toast.success("deleted success", {
+                     toast.success("deleted success", {
                       description: "success",
                     });
                     const idex = courses.findIndex(
@@ -712,9 +706,7 @@ const EditLessonDialog = ({
                     setCourses((prev) => prev.filter((_, i) => i !== idex));
                     onClose();
                   } catch (error) {
-                    console.log("errored");
-
-                    toast.error(error, {
+                     toast.error(error, {
                       description: "unExpeted Error",
                     });
                   }

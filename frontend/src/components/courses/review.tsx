@@ -98,8 +98,7 @@ const CourseRatingComponent = ({ courseid }: { courseid: string }) => {
       };
 
       const datassss = await addReview(newReview);
-      console.log(datassss, "reiview is ");
-      newReview.user_id = {
+       newReview.user_id = {
         name: state?.name,
       };
       // Update reviews locally

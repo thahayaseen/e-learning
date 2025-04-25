@@ -41,8 +41,7 @@ export default function CourseTable({
   const [courseToDelete, setCourseToDelete] = useState<string | null>(null);
   
   useEffect(() => {
-    console.log("courses updated", courses);
-  }, [courses]);
+   }, [courses]);
   
   const handleVisibilityClick = (courseId: string) => {
     setCourseToDelete(courseId);

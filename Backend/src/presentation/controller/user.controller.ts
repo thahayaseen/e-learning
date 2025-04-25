@@ -539,13 +539,13 @@ export default class UserController {
     try {
       const { _id } = req.user;
       const data = req.body;
-      console.log(data, "resutl is ");
+ 
 
       await this.userUseCase.updateUserdata(_id, data);
       res.status(HttpStatusCode.OK).json({ success: true, message: "updated" });
       return;
     } catch (error: any) {
-      console.log(error.message);
+ 
 
       res.status(HttpStatusCode.BAD_REQUEST).json({
         success: false,

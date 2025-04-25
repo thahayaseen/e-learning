@@ -25,6 +25,7 @@ import { Camera, Edit, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { updateData } from "@/services/fetchdata";
 import useUploadS3 from "@/hooks/addtos3";
+import { getImage } from "@/services/getImage";
 
 // Zod schema for validation
 const ProfileSchema = z.object({
@@ -99,9 +100,7 @@ const EditProfileDialog: React.FC<EditProfileProps> = ({
   const [newImage, setNewimage] = useState(null);
   const [imageFile, setImagefile] = useState(null);
   const imageref = useRef(null);
-  console.log("data issisisis", updatedData);
-
-  // Handle input changes
+   // Handle input changes
   const handlechange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     form.setValue(name as keyof z.infer<typeof ProfileSchema>, value, {
@@ -126,20 +125,28 @@ const EditProfileDialog: React.FC<EditProfileProps> = ({
       if (imageFile) {
         avatarUrl = await uploadtos3(imageFile, "image");
         if (avatarUrl) {
-          newUpdatedData = { ...newUpdatedData, ...{ avathar: avatarUrl } };
-          datas = { ...datas, profile: { ...data.profile, avatar: avatarUrl } };
+          newUpdatedData = {
+            ...newUpdatedData,
+            ...{
+              avathar: avatarUrl,
+            },
+          };
+          datas = {
+            ...datas,
+            profile: {
+              ...data.profile,
+              avatar: avatarUrl,
+            },
+          };
         }
       }
 
-      console.log("databefore", newUpdatedData);
-      // Update data and close dialog
+       // Update data and close dialog
       await updateData(newUpdatedData);
       setNewimage(null);
       setNewimage(null);
       setUpdatedData({});
-      console.log(datas, "add data after update");
-
-      onSave(datas);
+       onSave(datas);
       onOpenChange(false);
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -164,8 +171,7 @@ const EditProfileDialog: React.FC<EditProfileProps> = ({
     };
     reader.readAsDataURL(file);
   };
-
-  return (
+   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className=" text-white border-blue-800 max-w-md">
         <DialogHeader>
@@ -188,7 +194,7 @@ const EditProfileDialog: React.FC<EditProfileProps> = ({
                   <Image
                     width={100}
                     height={100}
-                    src={newImage || user.profile.avatar}
+                    src={newImage ? newImage : getImage(user.profile.avatar)}
                     alt="Profile"
                     className="w-full h-full rounded-full object-cover"
                   />

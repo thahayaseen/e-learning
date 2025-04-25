@@ -15,21 +15,14 @@ export const Varify = createAsyncThunk(
   "auth/varifytocken",
   async (_, { rejectWithValue }) => {
     try {
-      console.log("clicked");
-
-      const reponse = await axios.get("/autherisation", {
+       const reponse = await axios.get("/autherisation", {
         withCredentials: true,
       });
-      console.log(reponse);
-
-      return reponse;
+       return reponse;
     } catch (error: any) {
       // toast.error( error.response.data.message)
-      console.log(error, "from axios");
-
-      axios.post("/logout");
-      console.log(error, "error in affter logit");
-      return rejectWithValue(
+       axios.post("/logout");
+       return rejectWithValue(
         error instanceof Error
           ? error.message
           : error?.response?.data?.message || "Unexpexted Error"
@@ -49,20 +42,16 @@ const slices = createSlice({
   reducers: {
     setUser: (state, action) => {
       state.isAuthenticated = true;
-      // console.log(action.payload,"pausersss");
-
-      state.user = action.payload;
+       state.user = action.payload;
     },
     logout: (state) => {
       state.isAuthenticated = false;
       state.user = null;
 
-      console.log("removed");
-    },
+     },
     setloading: (state, payload) => {
       state.loading = payload.payload;
-      console.log(state.loading, "changed");
-    },
+     },
   },
   extraReducers: (builder) => {
     builder
@@ -76,8 +65,7 @@ const slices = createSlice({
       .addCase(Varify.fulfilled, (state, action) => {
         state.isAuthenticated = true;
         state.loading = false;
-        console.log(action, "in case");
-        const { name, email, role } = action.payload.user;
+         const { name, email, role } = action.payload.user;
         state.user = { name, email, role };
 
         // state.user = action.payload.message; // Ensure `message` is the correct user object

@@ -57,7 +57,7 @@ export class UserUsecase implements IuserUseCase {
       };
     }
 
-    console.log(mentorid, "mentoridis",filter);
+ 
 
     const sortOptions = { [sort]: order === "asc" ? 1 : -1 };
     const users = await this.userReposetory.findAlluser(
@@ -66,7 +66,7 @@ export class UserUsecase implements IuserUseCase {
       filter,
       sortOptions
     );
-    console.log(users, "in form fetchibn");
+ 
 
     const userIds = users.formattedData.map((user) => user._id);
 
@@ -117,7 +117,7 @@ export class UserUsecase implements IuserUseCase {
         oldPass,
         userdata.password
       );
-      console.log(ismatch);
+ 
       if (!ismatch) {
         throw new Error("inccorect password");
       }
@@ -133,9 +133,9 @@ export class UserUsecase implements IuserUseCase {
     limit: number,
     filter: object = {}
   ): Promise<any> {
-    console.log(userId, page, limit, "in usecases");
+ 
     if (userId == "all") {
-      console.log("in all admin cases");
+ 
 
       return await this.CourseRepo.getAllordersAdmin(page, limit, filter);
     }

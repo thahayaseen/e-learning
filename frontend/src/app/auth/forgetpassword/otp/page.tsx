@@ -28,9 +28,7 @@ function Page() {
  
 
   const handleChanges = (e:any) => {
-    console.log("here");
-
-    if (/^\d*$/.test(e)) {
+     if (/^\d*$/.test(e)) {
       setValue(e);
     } else {
       toast.error("Please Enter number");
@@ -38,21 +36,16 @@ function Page() {
   };
   const handleResend = async () => {
     try {
-     console.log(get_cookie('reset_Token'));
-     
-      const data:any = await axios.post("/resent", {},{
+       const data:any = await axios.post("/resent", {},{
         headers:{
           Authorization:`Bearer ${get_cookie('reset_Token')}`
         }
       });
-      console.log(data);
-      toast.success(data.message)
+       toast.success(data.message)
       setRopt(prev=>!prev)
       setTimer(60)
     } catch (error:any) {
-      console.log(error);
-      
-      toast.error(error.response.data.message);
+       toast.error(error.response.data.message);
     }
   };
   
@@ -68,38 +61,30 @@ function Page() {
       }, 1000);
       return () => clearInterval(intervel);
     } else {
-      console.log("done");
-      setRopt(true);
+       setRopt(true);
     }
   }, [timer]);
   const handleSubmit = async () => {
     if (value.length !== 6) return;
     setIsVerifying(true);
-    console.log(value);
-    console.log(id);
-    
-    try {
+      try {
       const response:any = await axios.post("/forgtotp", {
        token:get_cookie('reset_Token'),
         otp: value,
       });
-      console.log(response);
-      delete_cookie('reset_Token')
+       delete_cookie('reset_Token')
       if(response.success){
       toast.success('Sucessfully varifyed')
-      console.log(response);
-      save_cookie('reset_Token2',response.tocken)
+       save_cookie('reset_Token2',response.tocken)
       router.push('/auth/forgetpassword/changepass')
       }
       setIsVerifying(false);
     } catch (error:any) {
-      console.log(error.response.data.message);
-      toast.error(error.response.data.message);
+       toast.error(error.response.data.message);
       setIsVerifying(false);
     }
   };
-  // console.log(timer);
-  // if(!ParamRouter.id||ParamRouter.id.length<17){
+   // if(!ParamRouter.id||ParamRouter.id.length<17){
   //   router.push('/auth')
   // }
   return (

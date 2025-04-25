@@ -43,7 +43,7 @@ export class MentorUsecase {
       // sort.Students_enrolled
       //       }
     }
-    console.log(sort, "sort is ");
+ 
 
     if (status !== "all" && status) {
       match["Approved_by_admin"] = status;
@@ -91,13 +91,13 @@ export class MentorUsecase {
       },
     ];
     const data = await this.CoursRepositry.getCourse(id, pipline);
-    console.log(data, "course data is ");
+ 
 
     return data;
   }
   async getLesson(id: string) {
     const data = await this.CoursRepositry.getLessons(id);
-    console.log(data);
+ 
     return data?.lessons;
   }
 
@@ -112,13 +112,13 @@ export class MentorUsecase {
     return await this.CoursRepositry.FindSelectedCourse(id);
   }
   async DeleteLesson(lesosnid: string): Promise<any> {
-    console.log("in hsdrasdfjhdfajsdf");
+ 
 
     const categoryis = await this.CoursRepositry.FindLessonByid(lesosnid);
-    console.log(categoryis);
+ 
 
     categoryis?.Task?.forEach(async (data) => {
-      console.log(data, "task is ");
+ 
 
       await this.CoursRepositry.deleteTask(data);
     });

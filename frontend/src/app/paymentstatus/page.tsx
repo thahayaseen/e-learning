@@ -6,13 +6,10 @@ import { useEffect } from "react";
 const PaymentSuccess = () => {
   const path = new URLSearchParams(window.location.search);
   const router = useRouter();
-  console.log(path);
-  const qury = path.get("session_id");
+   const qury = path.get("session_id");
   const status = path.get("status") === "true";
 
-  console.log(qury);
-
-  // Redirect after 5 seconds
+   // Redirect after 5 seconds
   setTimeout(() => {
     router.push("/");
   }, 5000);

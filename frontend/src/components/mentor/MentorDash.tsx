@@ -55,9 +55,7 @@ const MentorDashboard = () => {
     try {
       setLoading(true);
       const ordersResponse = await getordersMentor(page, limit);
-      console.log(ordersResponse, "mentorside order");
-
-      setOrders(ordersResponse.data.orders);
+       setOrders(ordersResponse.data.orders);
       setTotalPages(ordersResponse.data.totalPages || 1);
       setTotalOrders(ordersResponse.data.totalOrders || 0);
       setLoading(false);
@@ -77,14 +75,11 @@ const MentorDashboard = () => {
 
         // Fetch stats
         const statsResponse = await statesMentor();
-        console.log(statsResponse, "resp is ");
-        setStats(statsResponse.data.stats);
+         setStats(statsResponse.data.stats);
 
         // Fetch revenue data for chart
         const revenueResponse = await revenueMentor();
-        console.log('revenue ius ',revenueResponse);
-        
-        setRevenueData(revenueResponse.data.data);
+         setRevenueData(revenueResponse.data.data);
 
         setLoading(false);
       } catch (error) {

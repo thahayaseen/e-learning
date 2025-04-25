@@ -19,13 +19,13 @@ export default class HandleSocket {
   constructor(private io: Server, private socketusecase: IsocketUsecase) {}
 
   public registerEvent(socket: Socket) {
-    console.log("reached herer");
+ 
 
     socket.on("sendNotification", (data) => {
       this.io.emit("receiveNotification", data);
     });
     socket.on("SubmitForm", (data) => {
-      console.log("data is fasd", data);
+ 
 
       this.io.emit("adminNotification", data);
     });
@@ -33,16 +33,16 @@ export default class HandleSocket {
       chatEnum.joinRoom,
       async (room: { roomId: string; username: string; email: string }) => {
         try {
-          console.log("Joining room:", room);
+ 
           const res = await this.socketusecase.validatoinUser(
             room.roomId,
             room.email
           );
-          console.log(res);
-          console.log("thisisisis", res);
+ 
+ 
 
           if (res) {
-            console.log("thisissi");
+ 
 
             this.handleJoinRoom(socket, room);
           } else {
@@ -57,14 +57,14 @@ export default class HandleSocket {
 
     socket.on(chatEnum.joinmeet, async (room, email, username) => {
       try {
-        console.log("inhere", room, email, username);
+ 
         const ans = await this.socketusecase.valiateMeeting(room, email);
-        console.log(ans, "res");
+ 
 
         if (!ans) {
           socket.emit(chatEnum.error, "Unable to verify");
         } else {
-          console.log("in here");
+ 
 
           this.handleJoinRoom(socket, { roomId: room, username, email });
         }
@@ -84,20 +84,20 @@ export default class HandleSocket {
         `User ${room.username} is trying to join room: ${room.roomId} ${socket.id}`
       );
       socket.on("leave-room", async (data) => {
-        // console.log("Total connected clients:", connectedSockets.length);
+ 
 
         socket.leave(data.roomId);
-        console.log("User leaving room:", socket.id, data);
+ 
 
         if (room.username) {
-          console.log("thisisisisiisis", room.username);
+ 
 
           socket.to(data.roomId).emit("u-disconnect", room.username);
         }
         return;
       });
       socket.join(room.roomId);
-      console.log(`User ${room.username} joined room: ${room.roomId}`);
+ 
       socket.emit(chatEnum.joined, { id: socket.id, room });
 
       socket.broadcast.to(room.roomId).emit(chatEnum.userConnected, {
@@ -107,7 +107,7 @@ export default class HandleSocket {
         message: `${room.username} Joined`,
       });
 
-      console.log("call this ");
+ 
       this.handleVidoconnection(socket, room);
       socket.removeAllListeners(chatEnum.sendMessage);
       socket.on(
@@ -118,7 +118,7 @@ export default class HandleSocket {
           userEmail: string,
           username: string
         ) => {
-          console.log(message, "mesis");
+ 
           this.handleSendMessage(socket, {
             roomId,
             message,
@@ -129,7 +129,7 @@ export default class HandleSocket {
       );
 
       socket.on("disconnect", () => {
-        console.log("User disconnected unexpectedly");
+ 
         if (room && room.roomId) {
           socket.to(room.roomId).emit("u-disconnect", room.username);
         }
@@ -144,7 +144,7 @@ export default class HandleSocket {
     socket: Socket,
     room: { roomId: string; username: string; email: string }
   ) {
-    console.log("haloo", room);
+ 
 
     socket.on(chatEnum.videoState, (data) => {
       console.log(
@@ -177,7 +177,7 @@ export default class HandleSocket {
     });
 
     socket.on(chatEnum.signal, (data) => {
-      console.log("Handling signal from", socket.id, "to", data.to);
+ 
 
       if (data.to !== socket.id) {
         this.io.to(data.to).emit(chatEnum.signal, {
@@ -198,7 +198,7 @@ export default class HandleSocket {
     }: { roomId: string; message: string; userEmail: string; username: string }
   ): Promise<void> {
     try {
-      console.log(`Sending message in room ${roomId}: ${message}`, socket);
+ 
 
       const savedMessage = await this.socketusecase.sendMessage(
         roomId,
@@ -208,7 +208,7 @@ export default class HandleSocket {
       );
 
       socket.broadcast.to(roomId).emit(chatEnum.receive, savedMessage);
-      console.log(`Message delivered to room ${roomId}:`, savedMessage);
+ 
     } catch (error: any) {
       console.error("Error in handleSendMessage:", error);
       socket.emit(chatEnum.error, error.message || "Failed to send message");

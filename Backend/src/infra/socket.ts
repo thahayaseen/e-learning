@@ -8,7 +8,7 @@ export function socketconfig(server: http.Server) {
     cors: { origin: "*" },
   });
   io.on("connection", (socket) => {
-    console.log("connected success fully", socket.id);
+ 
 
     const handlesocket = new handleSocket(io, socketusecases);
     

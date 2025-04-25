@@ -33,16 +33,10 @@ export function useCourseRepository() {
     }) => {
       setIsLoading(true);
       try {
-        console.log(params, "param is fas");
-
-        const response = await getcourse(params);
-        console.log(response, "cours ius ");
-
-        setCourses(response.data);
+         const response = await getcourse(params);
+         setCourses(response.data);
         setLatestCourses(response.data.slice(0, 6));
-        console.log(response, "response is ");
-
-        setTotalCourses(response.total);
+         setTotalCourses(response.total);
 
         // Calculate statistics
         const students = response.data.reduce(
@@ -90,14 +84,12 @@ export function useCourseRepository() {
         }
       }
       const updatedCourse = await updateCourseApi(courseId, updated);
-      console.log(updatedCourse, "upeeddd");
-      // Update the courses list
+       // Update the courses list
       setCourses((prevCourses) => {
         const updatedList = prevCourses.map((course) => {
           if (course._id === courseId) {
             const newCourse = { ...course, ...updated };
-            console.log("Updated course inside setCourses:", newCourse);
-            return newCourse;
+             return newCourse;
           }
           return course;
         });
@@ -107,8 +99,7 @@ export function useCourseRepository() {
         const updatedList = prevCourses.map((course) => {
           if (course._id === courseId) {
             const newCourse = { ...course, ...updated };
-            console.log("Updated course inside setCourses:", newCourse);
-            return newCourse;
+             return newCourse;
           }
           return course;
         });
@@ -117,9 +108,7 @@ export function useCourseRepository() {
 
       console.log(
         courses.map((data) => {
-          console.log(data._id, data._id == courseId);
-
-          return data._id == courseId ? data : "";
+           return data._id == courseId ? data : "";
         }),
         "data i updated ",
         courseId

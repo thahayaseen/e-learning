@@ -21,6 +21,7 @@ import type { IMessage } from "@/app/course/chat/[id]/page";
 import PaginationComponent from "@/components/default/pagination";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getImage } from "@/services/getImage";
 
 const MessageAdminDashboard = () => {
   const [chatrooms, setChatrooms] = useState([]);
@@ -34,9 +35,7 @@ const MessageAdminDashboard = () => {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  console.log(socket?.id,'socket is ');
-
-  // Track if the component is mounted
+   // Track if the component is mounted
   const isMounted = useRef(true);
   const currentChatIdRef = useRef<string | null>(null);
 
@@ -54,8 +53,10 @@ const MessageAdminDashboard = () => {
 
       // Leave any active chat room when unmounting
       if (currentChatIdRef.current) {
-
-        socket.emit("leave-room", { roomId: currentChatIdRef.current,from:'socket chaging' });
+        socket.emit("leave-room", {
+          roomId: currentChatIdRef.current,
+          from: "socket chaging",
+        });
         currentChatIdRef.current = null;
       }
     };
@@ -76,7 +77,6 @@ const MessageAdminDashboard = () => {
     if (currentChatIdRef.current !== chatId) {
       // Leave previous room if exists
       if (currentChatIdRef.current) {
-        
         socket.emit("leave-room", { roomId: currentChatIdRef.current });
       }
 
@@ -194,9 +194,10 @@ const MessageAdminDashboard = () => {
   // Close the current chat
   const closeChat = useCallback(() => {
     // Leave the room if socket exists
-    console.log('emitingggg',socket);
-
-    socket.emit("leave-room", { roomId: currentChatIdRef.current ,from:"dfadfsd"});
+     socket.emit("leave-room", {
+      roomId: currentChatIdRef.current,
+      from: "dfadfsd",
+    });
     currentChatIdRef.current = null;
     if (socket && currentChatIdRef.current) {
     }
@@ -326,8 +327,9 @@ const MessageAdminDashboard = () => {
                                 {chatroom.userId.profile?.avatar ? (
                                   <AvatarImage
                                     src={
-                                      chatroom.userId.profile.avatar ||
-                                      "/placeholder.svg"
+                                      getImage(
+                                        chatroom.userId.profile.avatar
+                                      ) || "/placeholder.svg"
                                     }
                                     alt={chatroom.userId.name}
                                   />

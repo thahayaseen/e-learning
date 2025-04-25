@@ -28,6 +28,7 @@ import type { Imentorrequst } from "@/services/interface/mentorReqst";
 import { Account } from "@/components/Profilecomponents/profile-Account";
 import { Courses } from "@/components/Profilecomponents/profile-Courses";
 import { Certificates } from "@/components/Profilecomponents/certificate";
+import { getImage } from "@/services/getImage";
 
 export interface Iprogress {
   progresPersentage: number;
@@ -52,29 +53,20 @@ const UserProfilePage = () => {
 
   const [page, setPage] = useState(1);
   useEffect(() => {
-    console.log("Page state changed to:", page);
-  }, [page]);
+   }, [page]);
   const [total, setTotal] = useState(1);
-  console.log("pageis", page);
-  useEffect(() => {
+   useEffect(() => {
     const fetchdata = async () => {
       dispatch(setloading(true));
 
       // Add logging to debug the API call
-      console.log("Fetching data for page:", page, "with limit:", limit);
-      const dat = await fetchUsers("/profile?page=" + page + "&limit=" + limit);
+       const dat = await fetchUsers("/profile?page=" + page + "&limit=" + limit);
       // const orders = await fetchorders();
-      // console.log(orders, "odatais ");
-
-      console.log(isloading.current, "ref is ");
-      console.log("done");
-      if (dat.mentorRequst) {
+         if (dat.mentorRequst) {
         setBementor(dat.mentorRequst);
-        console.log("it is ", dat.mentorRequst);
-      }
+       }
       if (dat.data) {
-        console.log(dat, "udaa is ");
-        if (courses.length > 0) {
+         if (courses.length > 0) {
           setCourse((prev) => [...prev, ...dat.datas.data]);
         } else {
           setCourse(dat.datas.data);
@@ -82,17 +74,14 @@ const UserProfilePage = () => {
         setTotal(dat.datas.total);
         setUserData(dat.data);
         setProgress(dat.progresdata);
-        console.log("progressdata", dat.progresdata);
-        // if(dat.data)
+         // if(dat.data)
       }
       dispatch(setloading(false));
     };
     fetchdata();
   }, [page, dispatch]);
   const onsave = (data) => {
-    console.log("up data is ", data);
-
-    setUserData((prev) => ({ ...prev, ...data }));
+     setUserData((prev) => ({ ...prev, ...data }));
   };
   return (
     <div className="h-screen ">
@@ -109,7 +98,7 @@ const UserProfilePage = () => {
                     <Avatar className="h-28 w-28 border-4 border-indigo-400 mb-4 ring-2 ring-purple-500 ring-offset-2 ring-offset-indigo-900">
                       {userData?.profile && userData.profile.avatar ? (
                         <AvatarImage
-                          src={userData.profile.avatar || "/placeholder.svg"}
+                          src={getImage(userData.profile.avatar) || "/placeholder.svg"}
                           alt={userData.name}
                           width={100}
                           height={100}

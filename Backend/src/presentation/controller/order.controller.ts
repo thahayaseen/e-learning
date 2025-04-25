@@ -21,7 +21,7 @@ export class Ordercontroller {
   async reOrder(req: AuthServices, res: Response) {
     const { _id } = req.user;
     const { orderid } = req.params;
-    console.log(orderid, "oid is ");
+ 
 
     if (!_id) {
       throw new Error("User not found");
@@ -36,7 +36,7 @@ export class Ordercontroller {
     const session = await this.stripe.checkout.sessions.retrieve(
       data.sessionId
     );
-    console.log(session);
+ 
 
     res.status(200).json({
       success: true,
@@ -51,7 +51,7 @@ export class Ordercontroller {
       const sesstion = req.query.session_id;
       const orderid = req.query.orderid;
       const status = req.query.status == "true";
-      console.log(orderid, "oid is ", status);
+ 
       if (!orderid) {
         throw new Error("Order id cannot Found");
       }
@@ -62,13 +62,13 @@ export class Ordercontroller {
       const session = await this.stripe.checkout.sessions.retrieve(
         String(sesstion)
       );
-      console.log(session);
+ 
       const courseid = session.metadata?.courseId;
-      console.log(courseid);
+ 
       if (!courseid) {
         throw new Error("Cannot Find Course");
       }
-      console.log(purchasedCourses, courseid, "datassd");
+ 
 
       if (purchasedCourses.includes(String(courseid))) {
         throw new Error("User aldredy purchased");
@@ -82,7 +82,7 @@ export class Ordercontroller {
         updata,
         String(orderid)
       );
-      console.log(result, "resut is ");
+ 
 
       await this.CourseUseCase.purchaseCourse(
         String(result?.userId),
@@ -90,9 +90,9 @@ export class Ordercontroller {
       );
 
       console.log("Course ID:", session.metadata?.courseId); // Access stored metadata
-      console.log("Plan Type:", session.metadata?.planType);
+ 
     } catch (error: any) {
-      console.log(error, "the error is ");
+ 
 
       res
         .status(HttpStatusCode.BAD_REQUEST)
@@ -102,7 +102,7 @@ export class Ordercontroller {
   async stripeSesstion(req: AuthServices, res: Response) {
     try {
       const requestData = req.body.data;
-      console.log(requestData);
+ 
 
       const session = await this.stripe.checkout.sessions.create({
         payment_method_types: ["card"],
@@ -134,7 +134,7 @@ export class Ordercontroller {
       });
       return;
     } catch (error: any) {
-      console.log(error.message);
+ 
       res.status(HttpStatusCode.BAD_REQUEST).json({
         success: false,
         message: SystemError.SystemError,
@@ -154,8 +154,8 @@ export class Ordercontroller {
         return;
       }
       const requestData = req.body.data;
-      console.log(requestData);
-      console.log(req.user);
+ 
+ 
 
       if (!_id || !email) {
         throw new Error("cannot get uesr data");
@@ -218,7 +218,7 @@ export class Ordercontroller {
       });
       return;
     } catch (error: any) {
-      console.log(error.message);
+ 
 
       handleError(
         res,

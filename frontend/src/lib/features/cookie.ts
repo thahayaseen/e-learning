@@ -1,9 +1,7 @@
 "use client";
 
 export const save_cookie = (name: string, data: string) => {
-    console.log(data);
-    
-  document.cookie = `${name}=${data}; path=/; max-age=${60 * 60 * 24 * 7}`; // Expires in 7 days
+   document.cookie = `${name}=${data}; path=/; max-age=${60 * 60 * 24 * 7}`; // Expires in 7 days
 };
 
 export const get_cookie = (key: string) => {
@@ -11,13 +9,9 @@ export const get_cookie = (key: string) => {
 
   
   for (let cookie of cookies) {
-    console.log(cookie);
-    
-    const [cookieKey, cookieValue] = cookie.split("=");
+     const [cookieKey, cookieValue] = cookie.split("=");
     if (key === cookieKey) {
-        console.log(cookieValue,key);
-        
-      return cookieValue;
+       return cookieValue;
     }
   }
   return null;

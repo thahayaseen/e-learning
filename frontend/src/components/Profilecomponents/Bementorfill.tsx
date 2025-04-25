@@ -105,21 +105,16 @@ function BeMentorFill() {
   async function onSubmit(values) {
     setIsSubmitting(true);
     try {
-      console.log("datais ", values);
-      if (values.idProof) {
+       if (values.idProof) {
         const idprofurl = await uploadtos3(values.idProof, "image");
-        console.log(idprofurl);
-        values.idProof = idprofurl ? idprofurl : null;
+         values.idProof = idprofurl ? idprofurl : null;
       }
       if (values.profileImage) {
         const profileimage = await uploadtos3(values.profileImage, "image");
         values.profileImage = profileimage ? profileimage : null;
       }
-      console.log(values, "all datais ");
-      await beaMentor(values);
-      console.log("socket is ", socket);
-
-      socket?.emit("SubmitForm", { values });
+       await beaMentor(values);
+       socket?.emit("SubmitForm", { values });
       toast.success("Form submitted successfully!");
       form.reset();
       setProfileImagePreview(null);

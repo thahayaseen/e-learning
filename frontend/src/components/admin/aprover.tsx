@@ -25,6 +25,7 @@ import { setloading } from "@/lib/features/User";
 import AdminCourseLessonTaskView from "./course";
 import { ICourses } from "@/services/interface/CourseDto";
 import PaginationComponent from "../default/pagination";
+import { getImage } from "@/services/getImage";
 
 const AdminCourseManagement: React.FC = () => {
   const [page, setPage] = useState(1);
@@ -43,9 +44,7 @@ const AdminCourseManagement: React.FC = () => {
     try {
       dispatch(setloading(true));
       const response = await getunaprovedCourse(page, typeOfList);
-      console.log(response, "respo is ");
-
-      setTotal(response.total);
+       setTotal(response.total);
       setCourses(response.data);
     } catch (error) {
       console.error("Failed to fetch courses:", error);
@@ -63,11 +62,8 @@ const AdminCourseManagement: React.FC = () => {
   const handleCourseAction = useCallback(
     async (courseId: string, action: boolean) => {
       try {
-        console.log("actiopn ionitecd");
-        await actionCourse(courseId, action);
-        console.log("actiopn ionitecd2");
-
-        setCourses((prevCourses) =>
+         await actionCourse(courseId, action);
+         setCourses((prevCourses) =>
           prevCourses.map((course) =>
             course._id === courseId
               ? {
@@ -161,9 +157,7 @@ const AdminCourseManagement: React.FC = () => {
                     </h3>
                     <p className="text-gray-500 max-w-md mx-auto mb-6">
                       There are currently no courses matching your criteria.
-                 
                     </p>
-                   
                   </div>
                 ) : (
                   filteredCourses.map((course) => (
@@ -184,7 +178,7 @@ const AdminCourseManagement: React.FC = () => {
                     `}>
                       <Image
                         priority
-                        src={course.image || "/default.png"}
+                        src={`${getImage(course.image)}` || "/default.png"}
                         alt={course.Title}
                         width={400}
                         height={200}

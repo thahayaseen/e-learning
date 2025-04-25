@@ -133,7 +133,10 @@ function Chat() {
         console.error("Socket error:", errorData);
         setError(errorData || "An error occurred");
         // Auto-dismiss error after 5 seconds
-        setTimeout(() => setError(""), 5000);
+        setTimeout(() => {
+          setError("");
+          router.push("/auth");
+        }, 5000);
       });
 
       // Clean up listeners when component unmounts

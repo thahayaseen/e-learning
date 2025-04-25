@@ -49,9 +49,7 @@ export default function CertificateDisplay({
       setError(null);
 
       try {
-        console.log('nodata');
-   
-        if (!course_name || !category || !completed_date || !certificateId) {
+         if (!course_name || !category || !completed_date || !certificateId) {
           const response = await fetchCertificate(courseId);
 
           if (!response.success) {
@@ -59,9 +57,7 @@ export default function CertificateDisplay({
           }
 
           const data = response;
-          console.log(data);
-
-          if (data.success) {
+           if (data.success) {
             setCertificateData(data);
             setIsDialogOpen(true);
           } else {
@@ -84,14 +80,11 @@ export default function CertificateDisplay({
       }
     } else {
       // If no fetch function is provided, just open the dialog with existing props
-      console.log('nooo');
-      
-      setIsDialogOpen(true);
+       setIsDialogOpen(true);
     }
   };
 
-  console.log(certificateData, "fasfsd");
-  // Function to download certificate as image
+   // Function to download certificate as image
   const downloadCertificate = async (certificateData) => {
     try {
       const certificateElement = document.getElementById("certificate-preview");

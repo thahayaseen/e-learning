@@ -42,11 +42,8 @@ export function Certificates({ userData }: CertificateProps) {
   useEffect(() => {
     const timeout = setTimeout(() => {
       const fn = async () => {
-        console.log("herere reootooo");
-
-        const data: any = await getAllcertificate(page, limit, search);
-        console.log(data, "dataid sidididdiiddi");
-        setCertificates(data.data);
+         const data: any = await getAllcertificate(page, limit, search);
+         setCertificates(data.data);
         setTotal(data.total);
       };
 

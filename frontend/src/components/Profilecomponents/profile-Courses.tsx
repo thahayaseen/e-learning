@@ -5,7 +5,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 
-
 import { Clock, CheckCircle } from "lucide-react";
 
 import { IProgressCollection } from "@/services/interface/CourseDto";
@@ -14,6 +13,7 @@ import { Continue } from "../mybtns/myBtns";
 import PaginationComponent from "../default/pagination";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "../ui/button";
+import { getImage } from "@/services/getImage";
 export function Courses({
   courses,
   total,
@@ -28,9 +28,7 @@ export function Courses({
   limit: number;
 }) {
   // const [pagec, setpageC] = useState(page);
-  console.log("Courses component - current page:", page);
-
-  const nextPage = useCallback(() => {
+   const nextPage = useCallback(() => {
     setPage((prev) => prev + 10);
   }, []);
 
@@ -39,8 +37,7 @@ export function Courses({
   };
 
   useEffect(() => {
-    console.log("updatedddddddddddd");
-    setPage(page);
+     setPage(page);
   }, [page, setPage]);
 
   // Early return if no courses
@@ -85,7 +82,7 @@ export function Courses({
                   <Image
                     width={400}
                     height={200}
-                    src={course.image}
+                    src={`${getImage(course.image)}`}
                     alt={course.Title || "Course Image"}
                     className="w-full h-full object-cover opacity-50"
                   />

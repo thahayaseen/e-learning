@@ -1,16 +1,20 @@
-"use server"
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import s3 from "@/services/S3.init";
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectAclCommand,
+  GetObjectCommand,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { NextResponse } from "next/server";
 
-const s3 = new S3Client({
-  region: process.env.AWS_REGION!,
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  },
-});
-
+// export const getImage = async (path) => {
+ //   const command = new GetObjectCommand({
+//     Bucket: process.env.AWS_BUCKET_NAME!,
+//     Key: path,
+//   });
+ //   return;
+// };
 export async function POST(req: Request) {
   try {
     const { fileName, fileType } = await req.json(); // Get file name & type from request
@@ -19,7 +23,6 @@ export async function POST(req: Request) {
       Bucket: process.env.AWS_BUCKET_NAME!,
       Key: fileName,
       ContentType: fileType,
-      
     };
 
     const command = new PutObjectCommand(params);
@@ -27,6 +30,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ uploadUrl }); // Return pre-signed URL
   } catch (error) {
-    return NextResponse.json({ error: (error as Error).message }, { status: 500 });
+    return NextResponse.json(
+      { error: (error as Error).message },
+      { status: 500 }
+    );
   }
 }

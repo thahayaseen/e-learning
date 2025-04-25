@@ -21,6 +21,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { DialogDescription } from "@radix-ui/react-dialog";
+import { getImage } from "@/services/getImage";
 
 // Interfaces matching your previous schema
 interface ITask {
@@ -102,9 +103,7 @@ const AdminCourseLessonTaskView = ({
       [courseId]: !prev[courseId],
     }));
   };
-  console.log("datas in view", selectedcourse);
-
-  const getTaskIcon = (type: string) => {
+   const getTaskIcon = (type: string) => {
     switch (type) {
       case "Video":
         return <Video className="text-blue-500 mr-2" />;
@@ -117,8 +116,7 @@ const AdminCourseLessonTaskView = ({
     }
   };
   const RenderTaskContent = ({ task }) => {
-    // console.log(task);
-    if (!task) return <p>No task selected</p>;
+     if (!task) return <p>No task selected</p>;
     switch (task.Type) {
       case "Quiz":
         const quizTask = task;
@@ -149,7 +147,7 @@ const AdminCourseLessonTaskView = ({
           <div className="space-y-4">
             <div className="aspect-video">
               <video
-                src={videoTask.VideoURL}
+                src={getImage(videoTask.VideoURL)}
                 title="Task Video"
                 className="w-full h-full rounded"
                 controls

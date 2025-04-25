@@ -37,9 +37,7 @@ export function Account({
 }) {
   const [open, setOpen] = useState(false);
   const [changePassopen, setChangePassopen] = useState(false);
-console.log(userData,'datatattae');
-
-  return (
+   return (
     <div
   
       className="space-y-6 bg-[#0a192f] min-h-screen p-6 rounded-xl">

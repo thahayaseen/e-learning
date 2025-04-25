@@ -62,7 +62,7 @@ export default class Signup {
       const validation = validateUser(newUser);
       const pass = await this.userRepository.hashpass(users.password);
       newUser.password = pass;
-      console.log("users", newUser);
+ 
 
       if (!validation.success) {
         const valerro = validation.error.format();
@@ -77,7 +77,7 @@ export default class Signup {
           }
         });
 
-        console.log(errors, "error is ");
+ 
 
         throw new AppError(
           errors || "Validation failed",
@@ -85,7 +85,7 @@ export default class Signup {
         );
       }
 
-      console.log(`Checking if email exists: ${users.email}`);
+ 
 
       await this.aldredyExsist(users.email);
 
@@ -97,7 +97,7 @@ export default class Signup {
         );
       }
 
-      console.log(`User created with ID: ${uid}`);
+ 
       const token = await this.jwtTockenProvider.accsessToken({
         userid: uid,
       });
@@ -114,7 +114,7 @@ export default class Signup {
         otp: otp,
       });
 
-      console.log("User created successfully:", result);
+ 
 
       return { token, message: "otp sent successfully" };
     } catch (error: any) {
@@ -146,7 +146,7 @@ export default class Signup {
   }
   async reOtp(Id: string) {
     try {
-      console.log(`Regenerating OTP for user ID: ${Id}`);
+ 
       const user =
         (await redisUseCases.FindData(`${Id}`)) ||
         (await this.userRepository.findByid(Id));
@@ -154,7 +154,7 @@ export default class Signup {
       if (!user) {
         throw new AppError(userError.UserNotFound, HttpStatusCode.NOT_FOUND);
       }
-      console.log("user in resend is ", user);
+ 
 
       const otp = await redisUseCases.reOtp(Id);
 
@@ -195,9 +195,9 @@ export default class Signup {
 
   async verifyOtp(otp: string, Id: string) {
     try {
-      console.log(`Verifying OTP for user ID: ${Id}`);
+ 
       const token = this.jwtTockenProvider.verifyToken(Id);
-      console.log(token);
+ 
 
       if (!token) {
         throw Error(userError.Unauthorised);
@@ -207,11 +207,11 @@ export default class Signup {
         throw new AppError(EOtp.OtpExpired, HttpStatusCode.NOT_FOUND);
       }
       if (storedOtp !== otp) {
-        console.log("OTP verification failed.");
+ 
         throw new AppError(EOtp.InvalidOtp, 400);
       }
 
-      console.log("OTP verified successfully.");
+ 
       return token;
     } catch (error: any) {
       console.error("Error verifying OTP:", error.message);
@@ -220,12 +220,12 @@ export default class Signup {
   }
   async glogin(user: GoogleLoginDTO) {
     try {
-      console.log(user, "in datas");
+ 
       const myprofile = { avatar: user.picture };
-      console.log(myprofile);
+ 
 
       const useremail = await this.userRepository.findByEmail(user.email);
-      console.log(useremail,'data is when login');
+ 
       
       if (useremail?.isBlocked) {
         throw new Error("user has been blocked");
@@ -251,7 +251,7 @@ export default class Signup {
           purchasedCourses: [],
           subscription: null,
         });
-        console.log(adta);
+ 
 
         return { success: true, message: "User created successfully", token };
       }

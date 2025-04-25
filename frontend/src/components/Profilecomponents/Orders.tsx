@@ -31,9 +31,7 @@ export function Orders() {
     const loadOrders = async () => {
       setIsLoading(true);
       const data = await fetchorders(currentPage, 10);
-      console.log(data, "roddatais ");
-
-      setOrders(data.result.orders);
+       setOrders(data.result.orders);
       setTotalPages(Math.ceil(data.result.totalCount / 10));
       setIsLoading(false);
     };
@@ -151,9 +149,7 @@ export function Orders() {
                           className="hover:bg-primary hover:text-white text-white border-primary transition-colors"
                           onClick={async () => {
                             const data = await reorder(order._id);
-                            console.log(data, "data is ");
-
-                            router.push(data.url);
+                             router.push(data.url);
                           }}>
                           <Clock className="mr-1 h-4 w-4" /> Complete Payment
                         </Button>

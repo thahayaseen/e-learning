@@ -40,15 +40,15 @@ export class ChatroomRepository implements IRchatroom {
       userId: data.userid,
       mentorId: data.mentorid,
     });
-    console.log(dat);
+ 
 
     return dat;
   }
   async findByRoomid(roomid: string): Promise<IChatroom | null> {
-    console.log(roomid, "roomiid ");
+ 
 
     const dat = await Chatroom.findOne({ _id: roomid }).populate("mentorId","name _id");
-    console.log(dat, "dagd");
+ 
 
     return dat;
   }

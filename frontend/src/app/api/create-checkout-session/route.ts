@@ -7,9 +7,7 @@ export async function POST(request: Request) {
 
   try {
     // Create a checkout session
-    console.log(requestData, "data isssdd");
-
-    const session = await stripe.checkout.sessions.create({
+     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [
         {

@@ -13,18 +13,14 @@ export function useFormDraft<T>({
   expiryDays = 7,
   onLoad,
 }: DraftOptions) {
-  console.log(draftKey, expiryDays, "datas from bakend");
-
-  const [draftData, setDraftData] = useState<T | null>(null);
+   const [draftData, setDraftData] = useState<T | null>(null);
   const [draftTimestamp, setDraftTimestamp] = useState<number | null>(null);
   const [draftId, setDraftId] = useState<string>("");
   const [hasDraft, setHasDraft] = useState(false);
 
   // Load draft on initial mount
   useEffect(() => {
-    console.log("draftkey is ", draftKey);
-
-    loadDraft();
+     loadDraft();
   }, [draftKey]);
 
   // Save draft to localStorage
@@ -100,9 +96,7 @@ export function useFormDraft<T>({
   // Clear draft from localStorage
   const clearDraft = () => {
     try {
-      console.log(draftKey,'key is ');
-      
-      localStorage.removeItem(draftKey);
+       localStorage.removeItem(draftKey);
       setDraftData(null);
       setDraftTimestamp(null);
       setDraftId("");

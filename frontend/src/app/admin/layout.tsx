@@ -12,12 +12,8 @@ function SocketProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Listen for admin notifications
     if (!socket) return;
-    console.log(socket, "soketis ");
-
-    socket.on("adminNotification", (data) => {
-      console.log("got message", data);
-
-      dispatch(addNotification(data));
+     socket.on("adminNotification", (data) => {
+       dispatch(addNotification(data));
     });
 
     // Listen for direct messages

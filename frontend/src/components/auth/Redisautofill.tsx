@@ -100,9 +100,7 @@ function Protection({ children }: { children: React.ReactNode }) {
             (route) => path === route || path.startsWith(`${route}/`)
           ) ||
           studentRoutes.some((route) => {
-            console.log(route, "route is ", path.startsWith(`${route}/`));
-
-            return (
+             return (
               path === route ||
               path.startsWith(`${route}/`) ||
               (route === "/course" && path.startsWith("/course"))
@@ -125,11 +123,8 @@ function Protection({ children }: { children: React.ReactNode }) {
 
       case Roles.STUDENT:
         // Students can access student routes, dashboard, courses and common paths
-        console.log("from herere ", path, router);
-        const dat = studentRoutes.some((route) => {
-          console.log(route, "route is ", path, path.startsWith(`${route}`));
-
-          return path.startsWith("/admin")
+         const dat = studentRoutes.some((route) => {
+           return path.startsWith("/admin")
             ? false
             : path.startsWith("/mentor")
             ? false
@@ -138,9 +133,7 @@ function Protection({ children }: { children: React.ReactNode }) {
               path.startsWith(`${route}`) ||
               (route === "/course" && path.startsWith("/course"));
         });
-        console.log(dat);
-
-        return dat;
+         return dat;
 
       default:
         return false;
@@ -212,9 +205,7 @@ function Protection({ children }: { children: React.ReactNode }) {
           }
         }
       } catch (error) {
-        console.log("Auth error:", error);
-
-        // Even on error, show unrestricted routes
+         // Even on error, show unrestricted routes
         if (isAuthRoute || isUnrestrictedRoute(path)) {
           setPageState({ isLoading: false, isAccessDenied: false });
         } else {

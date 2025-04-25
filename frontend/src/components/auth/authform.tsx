@@ -21,8 +21,7 @@ const ELearningAuth: React.FC<ELearningAuthProps> = ({ places }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  console.log("qury is ", qeury.get("path"));
-  const [formData, setFormData] = useState({
+   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
@@ -43,14 +42,13 @@ const ELearningAuth: React.FC<ELearningAuthProps> = ({ places }) => {
   const routeing = places ? "/" + places : "/";
   // Toggle functions
   const toggleLogin = () => {
-    setIsLogin(!isLogin)
-    if(isLogin){
-      router.replace('/auth?path=register')
-    }else{
-      router.replace('/auth')
-
+    setIsLogin(!isLogin);
+    if (isLogin) {
+      router.replace("/auth?path=register");
+    } else {
+      router.replace("/auth");
     }
-  }
+  };
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
   const toggleConfirmPasswordVisibility = () =>
     setShowConfirmPassword(!showConfirmPassword);
@@ -148,13 +146,11 @@ const ELearningAuth: React.FC<ELearningAuthProps> = ({ places }) => {
           { email: formData.email, password: formData.password },
           dispatch
         );
-        console.log(result.data.user.role, "after logined");
-
-        if (result && result.success) {
+         if (result && result.success) {
           router.push(
-            result.data.user.role == "student"
+            result.data?.user?.role == "student"
               ? "/"
-              : "/" + result.data.user.role
+              : "/" + result?.data?.user.role
           );
         }
         return;
@@ -182,9 +178,7 @@ const ELearningAuth: React.FC<ELearningAuthProps> = ({ places }) => {
     if (session && session?.accsessToken) {
       const handleGoogleLogin = async () => {
         const result = await googleLogin(session.accsessToken, dispatch);
-        console.log(result, "from glogin");
-
-        if (result.success) {
+         if (result.success) {
           await signOut({ redirect: false });
           router.push(
             result.data.user.role == "student"
