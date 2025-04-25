@@ -42,7 +42,15 @@ const ELearningAuth: React.FC<ELearningAuthProps> = ({ places }) => {
   const { data: session } = useSession();
   const routeing = places ? "/" + places : "/";
   // Toggle functions
-  const toggleLogin = () => setIsLogin(!isLogin);
+  const toggleLogin = () => {
+    setIsLogin(!isLogin)
+    if(isLogin){
+      router.replace('/auth?path=register')
+    }else{
+      router.replace('/auth')
+
+    }
+  }
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
   const toggleConfirmPasswordVisibility = () =>
     setShowConfirmPassword(!showConfirmPassword);
