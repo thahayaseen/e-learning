@@ -112,8 +112,10 @@ function Chat() {
         setIsConnected(true);
         setError("");
       } catch (err) {
- 
-        setError("Failed to load chat history. Please try again.");
+        setError("Failed to load chat history. Please try again. You will redirect to login Page" );
+        setTimeout(() => {
+          router.push("/auth");
+        },2000);
       } finally {
         setIsLoading(false);
       }
@@ -130,7 +132,6 @@ function Chat() {
 
       // Listen for error messages
       socket.on(chatEnum.error, (errorData) => {
- 
         setError(errorData || "An error occurred");
         // Auto-dismiss error after 5 seconds
         setTimeout(() => {
