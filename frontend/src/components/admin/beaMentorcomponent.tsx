@@ -158,7 +158,7 @@ useEffect(()=>{
         setTotal(result.data.total);
         setAllData(result.data.data);
       } catch (error) {
-        console.error("Error fetching data:", error);
+ 
       } finally {
         setLoading(false);
       }
@@ -177,7 +177,7 @@ useEffect(()=>{
       const result = await getallrequst(String(urlParams));
       setAllData(result.data.data);
     } catch (error) {
-      console.error("Error updating mentor status:", error);
+ 
     }
   };
 

@@ -60,7 +60,7 @@ const MentorDashboard = () => {
       setTotalOrders(ordersResponse.data.totalOrders || 0);
       setLoading(false);
     } catch (error) {
-      console.error("Error fetching orders:", error);
+ 
       setLoading(false);
     }
   };
@@ -83,7 +83,7 @@ const MentorDashboard = () => {
 
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching dashboard data:", error);
+ 
         setLoading(false);
       }
     };
@@ -103,7 +103,7 @@ const MentorDashboard = () => {
         setStats(updatedStats);
       }
     } catch (error) {
-      console.error("Error fetching recent orders:", error);
+ 
     }
   };
 

@@ -149,7 +149,7 @@ const EditProfileDialog: React.FC<EditProfileProps> = ({
        onSave(datas);
       onOpenChange(false);
     } catch (error) {
-      console.error("Error updating profile:", error);
+ 
       // Optionally add error handling toast or message
     } finally {
       setIsSubmitting(false);

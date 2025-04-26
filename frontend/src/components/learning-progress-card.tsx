@@ -48,7 +48,7 @@ export function LearningProgressCard({
                 )}
               </div>
             </div>
-            <Progress value={overallProgress} className="h-2.5 bg-gray-100" />
+            {/* <Progress value={overallProgress} className="h-2.5 bg-gray-100" /> */}
             
             {estimatedTimeLeft && overallProgress < 100 && (
               <div className="flex items-center mt-1 text-xs text-gray-500">

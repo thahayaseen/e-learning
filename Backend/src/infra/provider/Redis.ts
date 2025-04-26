@@ -12,13 +12,14 @@ export default class PrRedis implements IRedis {
       console.error("Redis Error:", err);
     });
 
-    this.redis.connect().then(()=>{
- 
-      
-    }).catch((err)=>{
- 
-      
-    })
+    this.redis
+      .connect()
+      .then(() => {
+        console.log("redis connected success");
+      })
+      .catch((err) => {
+        console.log("Redis : ", err);
+      });
   }
   async storeOtp(
     userId: string,
@@ -33,22 +34,22 @@ export default class PrRedis implements IRedis {
     return otp || null;
   }
 
-  async saveUser(userid:string ,users: string,expirySeconds:number): Promise<{ userid: string; users: string }> {
-
+  async saveUser(
+    userid: string,
+    users: string,
+    expirySeconds: number
+  ): Promise<{ userid: string; users: string }> {
     await this.redis.setEx(`user:${userid}`, expirySeconds, users);
 
     return { userid, users };
   }
   async getBtId(uId: string): Promise<UserDTO | null> {
- 
-
     let data = await this.redis.get(`user:${uId}`);
 
     if (data) {
       const ans: User = JSON.parse(data);
- 
 
-      return ans as UserDTO
+      return ans as UserDTO;
     }
     return null;
   }
@@ -56,7 +57,7 @@ export default class PrRedis implements IRedis {
   async deleteOtp(userId: string): Promise<void> {
     await this.redis.del(`otp:${userId}`);
   }
-  async setToken(uId: string,token:string): Promise<string> {
+  async setToken(uId: string, token: string): Promise<string> {
     // const Tocken = await jwt.accsessToken({ userid: uId });
     this.redis.setEx(`Userid:${uId}`, 600, token);
     return token;

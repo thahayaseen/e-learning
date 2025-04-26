@@ -232,7 +232,7 @@ const CourseCreation = ({
         });
       }
     } catch (error:any) {
-      console.error("Error saving course:", error);
+ 
       toast.error(error.message||"Error", {
         description: "Failed to save course. Please try again.",
       });
@@ -355,7 +355,7 @@ const CourseCreation = ({
                     <Button
                       variant="outline"
                       className="border-red-300 text-red-600 hover:bg-red-50">
-                      Cancel
+                      Cancelds
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>

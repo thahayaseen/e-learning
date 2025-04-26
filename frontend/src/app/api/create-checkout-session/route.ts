@@ -32,7 +32,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ id: session.id, url: session.url });
   } catch (error) {
-    console.error("Stripe error:", error);
+ 
     // if()
     return NextResponse.json(
       {

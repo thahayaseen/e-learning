@@ -21,7 +21,7 @@ export function useLessonRepository(courseid?: string) {
        setLessons(response.data || []);
       return response.data;
     } catch (error) {
-      console.error("Error fetching lessons:", error);
+ 
       toast.error("Failed to fetch lessons");
       return [];
     } finally {
@@ -37,7 +37,7 @@ export function useLessonRepository(courseid?: string) {
        setLessons((prev) => [...prev, lessonData]);
       return newLesson;
     } catch (error) {
-      console.error("Error adding lesson:", error);
+ 
       throw error;
     } finally {
       setIsLoading(false);
@@ -61,7 +61,7 @@ export function useLessonRepository(courseid?: string) {
         );
         return updatedLesson;
       } catch (error) {
-        console.error("Error updating lesson:", error);
+ 
         throw error;
       } finally {
         setIsLoading(false);
@@ -77,7 +77,7 @@ export function useLessonRepository(courseid?: string) {
       await deleteLessonApi(courseid, lessonId);
       setLessons((prev) => prev.filter((lesson) => lesson._id !== lessonId));
     } catch (error) {
-      console.error("Error deleting lesson:", error);
+ 
       throw error;
     } finally {
       setIsLoading(false);

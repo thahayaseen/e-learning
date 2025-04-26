@@ -257,7 +257,7 @@ const CourseSidebar = ({
                       minute: "2-digit",
                     })}
                   </p>
-                  {meet.status === "confirmed" && (
+                  {meet.status === "approved" && (
                     <Button size="sm" onClick={onJoinMeeting} className="w-full">
                       Join Meeting
                     </Button>

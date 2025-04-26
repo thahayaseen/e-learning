@@ -9,7 +9,7 @@ import {
   Loader2,
   IndianRupee,
   Lock,
-  ArrowRight
+  ArrowRight,
 } from "lucide-react";
 import { getSelectedCourse, purchaseCourse } from "@/services/fetchdata";
 import { useParams, useRouter } from "next/navigation";
@@ -36,7 +36,7 @@ const CoursePurchasePage = () => {
           setCourseDetails(data.data.data);
         } catch (error) {
           toast.error("Failed to load course details");
-          console.error(error);
+ 
         } finally {
           setLoading(false);
         }
@@ -64,19 +64,19 @@ const CoursePurchasePage = () => {
         courseId: params.id,
         price: courseDetails.Price,
         courseName: courseDetails.Title,
-        planType:"standard"
+        planType: "standard",
       };
 
       if (params.id && typeof params.id == "string") {
         const session: any = await purchaseCourse(params.id, purchaseData);
-        
+
         if (!session?.success) {
           const errorData = await session.data;
           throw new Error(
             errorData?.message || "Failed to create checkout session"
           );
         }
-        
+
         if (session.orderid) {
           localStorage.setItem("orderid", session.orderid);
         }
@@ -84,20 +84,25 @@ const CoursePurchasePage = () => {
         if (!session || !session.id) {
           throw new Error("Invalid checkout session");
         }
-        
+
         if (stripePromise) {
           const { error } = await stripePromise.redirectToCheckout({
             sessionId: session.id,
           });
-          
+
           if (error) {
             throw new Error(error.message);
           }
         }
       }
     } catch (error: any) {
-      toast.error(error.message || error.data?.message || "Payment failed");
-      console.error("Payment error:", error);
+      toast.error(error.message || error.data?.message || "Payment failed",{
+        duration:1000
+      });
+      setTimeout(() => {
+        router.push("/profile");
+      }, 3000);
+ 
     } finally {
       setProcessingPayment(false);
     }
@@ -149,11 +154,13 @@ const CoursePurchasePage = () => {
                 <ul className="space-y-3">
                   {courseDetails.lessons &&
                     courseDetails.lessons.map((item: any, index: number) => (
-                      <li 
-                        key={index} 
-                        className="flex items-center text-blue-100 p-2 hover:bg-slate-800/60 rounded-lg transition-colors"
-                      >
-                        <Check className="text-emerald-500 mr-3 flex-shrink-0" size={18} />
+                      <li
+                        key={index}
+                        className="flex items-center text-blue-100 p-2 hover:bg-slate-800/60 rounded-lg transition-colors">
+                        <Check
+                          className="text-emerald-500 mr-3 flex-shrink-0"
+                          size={18}
+                        />
                         <span>{item.Lessone_name}</span>
                       </li>
                     ))}
@@ -206,10 +213,13 @@ const CoursePurchasePage = () => {
               <div className="bg-blue-950/50 rounded-lg p-4 mb-6 border border-blue-800/30">
                 <div className="flex items-center mb-2">
                   <Lock className="text-emerald-500 mr-2" size={20} />
-                  <span className="text-blue-100 font-medium">Secure Payment</span>
+                  <span className="text-blue-100 font-medium">
+                    Secure Payment
+                  </span>
                 </div>
                 <p className="text-blue-200 text-sm">
-                  Your payment is processed securely through Stripe with 256-bit SSL encryption.
+                  Your payment is processed securely through Stripe with 256-bit
+                  SSL encryption.
                 </p>
               </div>
 
@@ -232,7 +242,7 @@ const CoursePurchasePage = () => {
                   </>
                 )}
               </button>
-              
+
               <p className="text-center text-blue-400 text-sm mt-4">
                 30-day money-back guarantee
               </p>

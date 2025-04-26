@@ -65,7 +65,7 @@ const UserManagementPage = () => {
       setUsers(response.data);
     } catch (error) {
       toast.error("Failed to fetch users");
-      console.error("Error fetching users:", error);
+ 
     } finally {
       setIsLoading(false);
     }
@@ -92,7 +92,7 @@ const UserManagementPage = () => {
        toast.success(response.message || "User status updated");
     } catch (error) {
        toast.error(error.message || "Failed to update user status");
-      console.error("Error updating user status:", error);
+ 
     }
   };
 

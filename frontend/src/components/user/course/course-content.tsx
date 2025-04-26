@@ -1,28 +1,40 @@
-"use client"
-import { useState, useMemo } from "react"
-import type React from "react"
+"use client";
+import { useState, useMemo } from "react";
+import type React from "react";
 
-import { Play, FileText, BookOpen, CheckCircle2, ChevronRight } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Badge } from "@/components/ui/badge"
-import { TipCard } from "@/components/ui/tip-card"
-import { updateVideoProgress, validatequstion } from "@/services/fetchdata"
-import toast from "react-hot-toast"
-import type { Course, Task, TaskProgress } from "@/types/course"
-import { getImage } from "@/services/getImage"
+import {
+  Play,
+  FileText,
+  BookOpen,
+  CheckCircle2,
+  ChevronRight,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Badge } from "@/components/ui/badge";
+import { TipCard } from "@/components/ui/tip-card";
+import { updateVideoProgress, validatequstion } from "@/services/fetchdata";
+import toast from "react-hot-toast";
+import type { Course, Task, TaskProgress } from "@/types/course";
+import { getImage } from "@/services/getImage";
 
 interface CourseContentProps {
-  course: Course
-  selectedTask: Task | null
-  taskProgress: { [key: string]: TaskProgress }
-  setTaskProgress: (taskProgress: { [key: string]: TaskProgress }) => void
-  selectedlessonid: string
-  navigateToNextTask: () => void
-  settotalprogress: (progress: number) => void
+  course: Course;
+  selectedTask: Task | null;
+  taskProgress: { [key: string]: TaskProgress };
+  setTaskProgress: (taskProgress: { [key: string]: TaskProgress }) => void;
+  selectedlessonid: string;
+  navigateToNextTask: () => void;
+  settotalprogress: (progress: number) => void;
 }
 
 const CourseContent = ({
@@ -34,44 +46,47 @@ const CourseContent = ({
   navigateToNextTask,
   settotalprogress,
 }: CourseContentProps) => {
-  const [quizAnswers, setQuizAnswers] = useState<string>()
-  const [assignmentSubmission, setAssignmentSubmission] = useState("")
-  const [submitting, setSubmitting] = useState(false)
+  const [quizAnswers, setQuizAnswers] = useState<string>();
+  const [assignmentSubmission, setAssignmentSubmission] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   // Helper function to find task progress in the progress data
   const findTaskProgressStatus = (taskId: string) => {
     if (!taskProgress[taskId]) {
-      return null
+      return null;
     }
-    return taskProgress[taskId]
-  }
+    return taskProgress[taskId];
+  };
 
   // Helper function to find task submission data
   const findTaskSubmissionData = (taskId: string) => {
     if (!taskProgress[taskId]?.submissionData) {
-      return null
+      return null;
     }
-    return taskProgress[taskId].submissionData
-  }
+    return taskProgress[taskId].submissionData;
+  };
 
   // Video progress handler
-  const handleVideoProgress = (taskId: string, event: React.SyntheticEvent<HTMLVideoElement>) => {
-    const video = event.currentTarget
-    const progress = taskProgress[taskId]
+  const handleVideoProgress = (
+    taskId: string,
+    event: React.SyntheticEvent<HTMLVideoElement>
+  ) => {
+    const video = event.currentTarget;
+    const progress = taskProgress[taskId];
 
     // Update watched duration
     const updatedProgress = {
       ...progress,
       watchedDuration: Math.floor(video.currentTime),
       totalDuration: Math.floor(video.duration),
-    }
+    };
 
     // Mark as completed if watched more than 90%
     if (video.currentTime / video.duration > 0.9) {
-      updatedProgress.isCompleted = true
+      updatedProgress.isCompleted = true;
 
       if (!progress.isCompleted) {
-        toast.success("Video lesson completed!")
+        toast.success("Video lesson completed!");
       }
     }
 
@@ -83,37 +98,37 @@ const CourseContent = ({
       updatedProgress.isCompleted, // Whether the video is completed,
       undefined,
       undefined,
-      selectedlessonid,
+      selectedlessonid
     )
       .then((resdata) => {
         setTaskProgress((prev) => ({
           ...prev,
           [taskId]: updatedProgress,
-        }))
+        }));
       })
       .catch((error) => {
-        console.error("Error updating video progress:", error)
-      })
-  }
+        console.log("Error updating video progress:", error);
+      });
+  };
 
   // Quiz answer handler
   const handleQuizAnswer = (answer: string) => {
-    setQuizAnswers(answer)
-  }
+    setQuizAnswers(answer);
+  };
 
   // Submit quiz
   const submitQuiz = (taskId: string, courseId: string) => {
     if (!quizAnswers) {
-      toast.error("Please select an answer before submitting")
-      return
+      toast.error("Please select an answer before submitting");
+      return;
     }
 
-    setSubmitting(true)
+    setSubmitting(true);
 
     validatequstion(courseId, taskId, quizAnswers)
       .then((result) => {
         if (result && result.success) {
-          toast.success("Great job! You've answered correctly.")
+          toast.success("Great job! You've answered correctly.");
 
           // Mark as completed in local state
           setTaskProgress((prev) => ({
@@ -122,7 +137,7 @@ const CourseContent = ({
               ...prev[taskId],
               isCompleted: true,
             },
-          }))
+          }));
 
           // Update progress on the server for Quiz type
           updateVideoProgress(
@@ -132,35 +147,35 @@ const CourseContent = ({
             true, // Completed
             undefined, // No response for quiz
             100, // Score from validation or default to 100
-            selectedlessonid,
+            selectedlessonid
           ).then((data: any) => {
-            settotalprogress(data.data.OverallScore)
-          })
+            settotalprogress(data.data.OverallScore);
+          });
         } else {
-          toast.error("Incorrect answer. Please try again.")
+          toast.error("Incorrect answer. Please try again.");
         }
       })
       .catch((error: any) => {
-        console.error("Quiz submission error:", error)
-        const errorMessage = error?.message || "Failed to submit answer"
-        toast.error(errorMessage)
+        console.error("Quiz submission error:", error);
+        const errorMessage = error?.message || "Failed to submit answer";
+        toast.error(errorMessage);
       })
       .finally(() => {
-        setSubmitting(false)
-      })
-  }
+        setSubmitting(false);
+      });
+  };
 
   // Submit assignment
   const submitAssignment = (taskId: string) => {
     if (!assignmentSubmission.trim()) {
-      toast.error("Please write your solution before submitting")
-      return
+      toast.error("Please write your solution before submitting");
+      return;
     }
 
-    setSubmitting(true)
+    setSubmitting(true);
 
     // Store the submission text to avoid state dependency in the async operation
-    const submissionText = assignmentSubmission
+    const submissionText = assignmentSubmission;
 
     // Update UI immediately for better user experience
     setTaskProgress((prev) => ({
@@ -170,19 +185,27 @@ const CourseContent = ({
         isCompleted: true,
         submissionData: submissionText,
       },
-    }))
+    }));
 
     // Make API call in the background
-    updateVideoProgress(course?._id, taskId, undefined, true, submissionText, undefined, selectedlessonid)
+    updateVideoProgress(
+      course?._id,
+      taskId,
+      undefined,
+      true,
+      submissionText,
+      undefined,
+      selectedlessonid
+    )
       .then((ans) => {
-        toast.success("Assignment submitted successfully!")
+        toast.success("Assignment submitted successfully!");
 
         // Clear the input only after successful submission
-        setAssignmentSubmission("")
+        setAssignmentSubmission("");
       })
       .catch((error) => {
-        console.error("Error submitting assignment:", error)
-        toast.error("Failed to submit assignment. Please try again.")
+        console.error("Error submitting assignment:", error);
+        toast.error("Failed to submit assignment. Please try again.");
 
         // Revert the optimistic update on error
         setTaskProgress((prev) => ({
@@ -192,26 +215,26 @@ const CourseContent = ({
             isCompleted: false,
             submissionData: null,
           },
-        }))
+        }));
       })
       .finally(() => {
-        setSubmitting(false)
-      })
-  }
+        setSubmitting(false);
+      });
+  };
 
   // Shuffle array for quiz options
   const shuffleArray = (array: string[]) => {
-    const shuffled = [...array]
+    const shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1))
-      ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
-    return shuffled
-  }
+    return shuffled;
+  };
 
   const shuffledOptions = useMemo(() => {
-    return selectedTask?.Options ? shuffleArray(selectedTask.Options) : []
-  }, [selectedTask?.Options])
+    return selectedTask?.Options ? shuffleArray(selectedTask.Options) : [];
+  }, [selectedTask?.Options]);
 
   if (!selectedTask) {
     return (
@@ -220,21 +243,30 @@ const CourseContent = ({
           <div className="bg-gray-50 p-4 rounded-full inline-block mb-4">
             <BookOpen className="h-12 w-12 text-gray-400" />
           </div>
-          <p className="text-lg font-medium text-gray-700">Select a task to get started</p>
+          <p className="text-lg font-medium text-gray-700">
+            Select a task to get started
+          </p>
           <p className="text-sm text-gray-500 mt-2 max-w-md">
-            Choose a lesson from the left sidebar to view its content and begin your learning journey.
+            Choose a lesson from the left sidebar to view its content and begin
+            your learning journey.
           </p>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   // Render task content based on type
   switch (selectedTask.Type) {
     case "Video":
-      const progress = taskProgress[selectedTask._id] || findTaskProgressStatus(selectedTask._id)
+      const progress =
+        taskProgress[selectedTask._id] ||
+        findTaskProgressStatus(selectedTask._id);
 
-      const watchProgress = progress ? Math.floor((progress.watchedDuration / (progress.totalDuration || 1)) * 100) : 0
+      const watchProgress = progress
+        ? Math.floor(
+            (progress.watchedDuration / (progress.totalDuration || 1)) * 100
+          )
+        : 0;
 
       return (
         <Card className="shadow-lg border-primary/10 overflow-hidden">
@@ -245,7 +277,9 @@ const CourseContent = ({
               </div>
               Video Lesson
             </CardTitle>
-            <CardDescription className="text-gray-600">Watch and learn at your own pace</CardDescription>
+            <CardDescription className="text-gray-600">
+              Watch and learn at your own pace
+            </CardDescription>
           </CardHeader>
           <CardContent className="p-6">
             <div className="rounded-lg overflow-hidden border shadow-sm">
@@ -259,19 +293,27 @@ const CourseContent = ({
             </div>
             <div className="mt-6">
               <div className="flex justify-between items-center mb-2">
-                <Label className="text-sm font-medium text-gray-700">Watching Progress</Label>
+                <Label className="text-sm font-medium text-gray-700">
+                  Watching Progress
+                </Label>
                 {progress?.isCompleted && (
                   <span className="flex items-center text-green-600 text-sm">
                     <CheckCircle2 className="h-4 w-4 mr-1" /> Completed
                   </span>
                 )}
               </div>
-              <Progress value={progress?.isCompleted ? 100 : watchProgress} className="mt-2 h-2.5 bg-gray-100" />
+              <Progress
+                value={progress?.isCompleted ? 100 : watchProgress}
+                className="mt-2 h-2.5 bg-gray-100"
+              />
               <div className="flex justify-between text-sm text-gray-500 mt-1">
-                <span>{progress?.isCompleted ? 100 : watchProgress}% watched</span>
+                <span>
+                  {progress?.isCompleted ? 100 : watchProgress}% watched
+                </span>
                 {!progress?.isCompleted && (
                   <span>
-                    {progress?.watchedDuration || 0}s / {progress?.totalDuration || 0}s
+                    {progress?.watchedDuration || 0}s /{" "}
+                    {progress?.totalDuration || 0}s
                   </span>
                 )}
               </div>
@@ -282,9 +324,10 @@ const CourseContent = ({
                 onClick={navigateToNextTask}
                 variant="default"
                 className="ml-auto group"
-                disabled={!progress?.isCompleted}
-              >
-                {progress?.isCompleted ? "Continue to Next" : "Complete Video to Continue"}
+                disabled={!progress?.isCompleted}>
+                {progress?.isCompleted
+                  ? "Continue to Next"
+                  : "Complete Video to Continue"}
                 {progress?.isCompleted && (
                   <ChevronRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 )}
@@ -292,7 +335,7 @@ const CourseContent = ({
             </div>
           </CardContent>
         </Card>
-      )
+      );
 
     case "Quiz":
       const quizTips = [
@@ -300,7 +343,7 @@ const CourseContent = ({
         "Eliminate obviously incorrect options first",
         "Review related lesson content if you're unsure",
         "Take your time - accuracy is more important than speed",
-      ]
+      ];
 
       return (
         <Card className="shadow-lg border-blue-100 overflow-hidden">
@@ -311,11 +354,18 @@ const CourseContent = ({
               </div>
               Knowledge Check
             </CardTitle>
-            <CardDescription className="text-gray-600">Test your understanding of the material</CardDescription>
+            <CardDescription className="text-gray-600">
+              Test your understanding of the material
+            </CardDescription>
           </CardHeader>
           <CardContent className="p-6">
             <div className="mb-4">
-              <TipCard title="Quiz Tips" tips={quizTips} variant="warning" className="mb-6" />
+              <TipCard
+                title="Quiz Tips"
+                tips={quizTips}
+                variant="warning"
+                className="mb-6"
+              />
             </div>
 
             <div className="mb-8">
@@ -323,15 +373,22 @@ const CourseContent = ({
                 {selectedTask.Question || "Complete the quiz below"}
               </h3>
               {selectedTask.Question && (
-                <RadioGroup onValueChange={(value) => handleQuizAnswer(value)} className="space-y-3">
+                <RadioGroup
+                  onValueChange={(value) => handleQuizAnswer(value)}
+                  className="space-y-3">
                   {shuffledOptions &&
                     shuffledOptions.map((option: string, index: number) => (
                       <div
                         key={index}
-                        className="flex items-center space-x-2 border p-4 rounded-md hover:bg-blue-50/50 transition-colors"
-                      >
-                        <RadioGroupItem value={option} id={`option-${index}`} className="h-5 w-5 text-blue-600" />
-                        <Label htmlFor={`option-${index}`} className="flex-1 cursor-pointer text-gray-700">
+                        className="flex items-center space-x-2 border p-4 rounded-md hover:bg-blue-50/50 transition-colors">
+                        <RadioGroupItem
+                          value={option}
+                          id={`option-${index}`}
+                          className="h-5 w-5 text-blue-600"
+                        />
+                        <Label
+                          htmlFor={`option-${index}`}
+                          className="flex-1 cursor-pointer text-gray-700">
                           {option}
                         </Label>
                       </div>
@@ -344,19 +401,18 @@ const CourseContent = ({
                 onClick={() => submitQuiz(selectedTask._id, course._id)}
                 disabled={submitting || !quizAnswers}
                 variant="default"
-                className="bg-blue-600 hover:bg-blue-700"
-              >
+                className="bg-blue-600 hover:bg-blue-700">
                 {submitting ? "Submitting..." : "Submit Answer"}
               </Button>
             </div>
           </CardContent>
         </Card>
-      )
+      );
 
     case "Assignment":
       // Check if there's a previous submission
-      const previousSubmission = findTaskSubmissionData(selectedTask._id)
-      const isTaskCompleted = taskProgress[selectedTask._id]?.isCompleted
+      const previousSubmission = findTaskSubmissionData(selectedTask._id);
+      const isTaskCompleted = taskProgress[selectedTask._id]?.isCompleted;
 
       return (
         <Card className="shadow-lg border-green-100 overflow-hidden">
@@ -374,7 +430,9 @@ const CourseContent = ({
           <CardContent className="p-6">
             {/* Assignment description with enhanced styling */}
             <div className="bg-gradient-to-r from-green-50 to-white p-5 mb-6 rounded-md border shadow-sm">
-              <h3 className="text-lg font-semibold mb-2 text-gray-800">Assignment Instructions</h3>
+              <h3 className="text-lg font-semibold mb-2 text-gray-800">
+                Assignment Instructions
+              </h3>
               <p className="text-gray-700 leading-relaxed">
                 {selectedTask.Description ||
                   selectedTask.description ||
@@ -390,8 +448,7 @@ const CourseContent = ({
                   className="h-4 w-4 mr-1"
                   fill="none"
                   viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
+                  stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -406,7 +463,10 @@ const CourseContent = ({
                 <li>Apply concepts learned in previous lessons</li>
                 <li>Be specific and detailed in your solution</li>
                 <li>Review your work before submitting</li>
-                <li>Don't hesitate to use the "Chat with Mentor" feature if you need help</li>
+                <li>
+                  Don't hesitate to use the "Chat with Mentor" feature if you
+                  need help
+                </li>
               </ul>
             </div>
 
@@ -414,13 +474,19 @@ const CourseContent = ({
             {isTaskCompleted && previousSubmission && (
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-sm font-medium text-gray-700">Your Previous Submission</h4>
-                  <Badge variant="outline" className="bg-green-50 text-green-600 border-green-200">
+                  <h4 className="text-sm font-medium text-gray-700">
+                    Your Previous Submission
+                  </h4>
+                  <Badge
+                    variant="outline"
+                    className="bg-green-50 text-green-600 border-green-200">
                     <CheckCircle2 className="h-3 w-3 mr-1" /> Completed
                   </Badge>
                 </div>
                 <div className="bg-gray-50 p-4 rounded-md border border-gray-200 text-gray-700 text-sm">
-                  <pre className="whitespace-pre-wrap font-sans">{previousSubmission}</pre>
+                  <pre className="whitespace-pre-wrap font-sans">
+                    {previousSubmission}
+                  </pre>
                 </div>
               </div>
             )}
@@ -430,16 +496,17 @@ const CourseContent = ({
               <div>
                 <Label
                   htmlFor="assignment"
-                  className="text-sm font-medium text-gray-700 flex items-center justify-between"
-                >
+                  className="text-sm font-medium text-gray-700 flex items-center justify-between">
                   <span>Your Solution</span>
                   {isTaskCompleted && (
                     <Button
                       variant="ghost"
                       size="sm"
                       className="h-7 text-xs text-blue-600 hover:text-blue-700"
-                      onClick={() => previousSubmission && setAssignmentSubmission(previousSubmission)}
-                    >
+                      onClick={() =>
+                        previousSubmission &&
+                        setAssignmentSubmission(previousSubmission)
+                      }>
                       Edit Previous Submission
                     </Button>
                   )}
@@ -448,7 +515,7 @@ const CourseContent = ({
                   id="assignment"
                   value={assignmentSubmission}
                   onChange={(e) => {
-                    setAssignmentSubmission(e.target.value)
+                    setAssignmentSubmission(e.target.value);
                   }}
                   placeholder={
                     isTaskCompleted
@@ -460,21 +527,26 @@ const CourseContent = ({
               </div>
               <div className="flex justify-between items-center">
                 <div className="text-xs text-gray-500">
-                  {assignmentSubmission.length > 0 ? `${assignmentSubmission.length} characters` : "No content yet"}
+                  {assignmentSubmission.length > 0
+                    ? `${assignmentSubmission.length} characters`
+                    : "No content yet"}
                 </div>
                 <Button
                   onClick={() => submitAssignment(selectedTask._id)}
                   disabled={submitting || !assignmentSubmission.trim()}
                   variant="default"
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  {submitting ? "Submitting..." : isTaskCompleted ? "Update Submission" : "Submit Assignment"}
+                  className="bg-green-600 hover:bg-green-700">
+                  {submitting
+                    ? "Submitting..."
+                    : isTaskCompleted
+                    ? "Update Submission"
+                    : "Submit Assignment"}
                 </Button>
               </div>
             </div>
           </CardContent>
         </Card>
-      )
+      );
 
     default:
       return (
@@ -484,8 +556,8 @@ const CourseContent = ({
             <p>Content type not supported</p>
           </CardContent>
         </Card>
-      )
+      );
   }
-}
+};
 
-export default CourseContent
+export default CourseContent;

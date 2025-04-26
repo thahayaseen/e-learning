@@ -54,7 +54,7 @@ export const registerUser = async (
     
     
     // toast.error(errorMessage);
-    // console.error(error);
+ 
     return { success: false, error };
   } finally {
     dispatch(setloading(false));
@@ -83,7 +83,7 @@ export const googleLogin = async (
   } catch (error: any) {
      toast.error(error.message)
     
-    // console.error(error);
+ 
     return { success: false, error };
   } finally {
     await signOut({ redirect: false })

@@ -206,7 +206,7 @@ const TaskForm = ({
         VideoURL: finalVideoUrl || "",
       });
     } catch (error) {
-      console.error("Error uploading video:", error);
+ 
     }
   };
 

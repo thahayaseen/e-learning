@@ -16,7 +16,7 @@ export function useCategoryRepository() {
       setCategories(response.data || []);
       return response;
     } catch (error) {
-      console.error("Error fetching categories:", error);
+ 
       toast.error("Failed to fetch categories");
       return [];
     } finally {

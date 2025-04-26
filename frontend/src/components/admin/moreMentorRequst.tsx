@@ -89,7 +89,7 @@ const UserDetailsDialog: React.FC<UserDetailsDialogProps> = ({ data }) => {
         });
       })
       .catch((err) => {
-        console.error("Failed to copy:", err);
+ 
       });
   };
 

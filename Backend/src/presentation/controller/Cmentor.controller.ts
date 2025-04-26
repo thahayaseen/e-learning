@@ -15,6 +15,7 @@ import IsocketUsecase from "../../domain/interface/socket";
 import MeetingUsecase from "../../app/useCases/Meeting.usecase";
 import { Middlewares, userServisess } from "../../config/dependencies";
 import RevenueUseCase from "../../app/useCases/revenue.usecase";
+import { SystemError } from "../../app/useCases/enum/systemError";
 
 export class MentorController {
   constructor(
@@ -56,6 +57,8 @@ export class MentorController {
       const { lessonid } = req.params;
       const { Taskdata, courseId } = req.body;
       const { email } = req.user;
+      console.log(Taskdata);
+
       // Ensure required data exists
       if (!lessonid || !Taskdata || !courseId) {
         res.status(HttpStatusCode.BAD_REQUEST).json({
@@ -78,6 +81,8 @@ export class MentorController {
       });
       return;
     } catch (error) {
+      console.log(error, "error is");
+
       res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error",
@@ -141,7 +146,18 @@ export class MentorController {
       await userServisess.verify(email, id, lessonid);
       await this.MentoruseCases.DeleteLesson(lessonid);
       await this.CourseUsecase.deleteLessonfromcourse(id, lessonid);
-    } catch (error) {}
+      res.status(HttpStatusCode.OK).json({
+        success: true,
+        message: "deleted success",
+      });
+      return 
+    } catch (error) {
+      res.status(HttpStatusCode.BAD_REQUEST).json({
+        success: false,
+        message:
+          error instanceof Error ? error.message : SystemError.SystemError,
+      });
+    }
   }
   async updataLesson(req: AuthServices, res: Response): Promise<void> {
     try {
@@ -240,7 +256,7 @@ export class MentorController {
         courseid,
         false
       );
- 
+
       if (!user || !user._id || !course || course.data || !course.Mentor_id) {
         throw new Error("user not fount");
       }

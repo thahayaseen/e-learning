@@ -120,7 +120,7 @@ function BeMentorFill() {
       setProfileImagePreview(null);
       setIdProofPreview(null);
     } catch (error) {
-      console.error("Error submitting form:", error);
+ 
       toast.error("Failed to submit form. Please try again.");
     } finally {
       setIsSubmitting(false);

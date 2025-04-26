@@ -45,7 +45,7 @@ export function useFormDraft<T>({
 
       return true;
     } catch (error) {
-      console.error("Error saving draft:", error);
+ 
       return false;
     }
   };
@@ -88,7 +88,7 @@ export function useFormDraft<T>({
 
       return parsedDraft.data;
     } catch (error) {
-      console.error("Error loading draft:", error);
+ 
       return null;
     }
   };
@@ -103,7 +103,7 @@ export function useFormDraft<T>({
       setHasDraft(false);
       return true;
     } catch (error) {
-      console.error("Error clearing draft:", error);
+ 
       return false;
     }
   };

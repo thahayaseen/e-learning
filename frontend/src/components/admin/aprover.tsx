@@ -47,7 +47,7 @@ const AdminCourseManagement: React.FC = () => {
        setTotal(response.total);
       setCourses(response.data);
     } catch (error) {
-      console.error("Failed to fetch courses:", error);
+ 
       // Optionally dispatch an error action or show a toast notification
     } finally {
       dispatch(setloading(false));
@@ -74,7 +74,7 @@ const AdminCourseManagement: React.FC = () => {
           )
         );
       } catch (error) {
-        console.error("Failed to update course status:", error);
+ 
         // Optionally show error notification
       }
     },
@@ -90,7 +90,7 @@ const AdminCourseManagement: React.FC = () => {
       setSelectedCourse(courseWithLessons);
       setOpenCourse(true);
     } catch (error) {
-      console.error("Failed to fetch course lessons:", error);
+ 
       // Optionally show error notification
     }
   }, []);

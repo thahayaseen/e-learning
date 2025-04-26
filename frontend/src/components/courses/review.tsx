@@ -74,7 +74,7 @@ const CourseRatingComponent = ({ courseid }: { courseid: string }) => {
         const result = await getallreviews(courseid);
         setReviews(result.data || []);
       } catch (error) {
-        console.error("Failed to fetch reviews:", error);
+ 
       }
     };
     fetchReviews();
@@ -114,7 +114,7 @@ const CourseRatingComponent = ({ courseid }: { courseid: string }) => {
         setSuccessMessage(false);
       }, 3000);
     } catch (error) {
-      console.error("Failed to submit review:", error);
+ 
     }
   };
   const state = useSelector((states: storeType) => states.User.user);

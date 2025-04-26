@@ -17,24 +17,24 @@ export const addCategory = async ({ Category, Description }: ICategory) => {
     });
     return datas;
   } catch (error: any) {
-     toast.error(error.message);
+    toast.error(error.message);
 
     return false;
   }
 };
-export const allCategorys = async (qury="") => {
+export const allCategorys = async (qury = "") => {
   try {
     const data = await axios.get("/mentor/categorys" + qury);
-     return data;
+    return data;
   } catch (error) {
-     return error;
+    return error;
   }
 };
 export const addCourse = async (data) => {
   try {
     return await axios.post("/mentor/addcourse", { data });
   } catch (error: any) {
-     throw new Error(error.message);
+    throw new Error(error.message);
   }
 };
 export const getlessons = async (lessonid: string) => {
@@ -66,16 +66,16 @@ export const getcourse = async ({
     if (priceRange) queryParams.append("priceRange", priceRange);
     if (sortBy) queryParams.append("sortBy", sortBy);
 
-     const data = await axios.get("/mentor/courses?" + queryParams);
-     return data.data;
+    const data = await axios.get("/mentor/courses?" + queryParams);
+    return data.data;
   } catch (error: any) {
-     return error.response?.data || "unable to Fetch data ";
+    return error.response?.data || "unable to Fetch data ";
   }
 };
 export const getunaprovedCourse = async (page: number, typeofList: string) => {
   try {
     const data = await axios.get("/getcourse/" + page + "/" + typeofList);
-     return data.data;
+    return data.data;
   } catch (error: any) {
     return error.response.data;
   }
@@ -83,7 +83,7 @@ export const getunaprovedCourse = async (page: number, typeofList: string) => {
 export const actionCourse = async (id: string, action: boolean) => {
   try {
     const data = await axios.post("/mentor/action/" + id, { action });
-     return data.data;
+    return data.data;
   } catch (error) {
     return error.response.data;
   }
@@ -112,7 +112,7 @@ export const getAllcourseUser = async (
   // Add pagination parameters
   queryParams.append("page", page.toString());
   queryParams.append("limit", limit.toString());
-   // if(publicr){
+  // if(publicr){
   //   queryParams.append('publicRoute','true')
   // }
   // Add filter parameters
@@ -136,14 +136,14 @@ export const getAllcourseUser = async (
     queryParams.append("sort", sort.field || "UpdatedAt");
     queryParams.append("order", sort.order || "desc");
   }
-   // Construct the URL
+  // Construct the URL
   const url = `/allcourses?${queryParams.toString()}`;
 
   try {
     const response = await axios.get(url);
-     return response.data;
+    return response.data;
   } catch (error) {
-    console.error("Error fetching courses:", error);
+ 
     // throw error;
     toast.error(
       error instanceof Error ? error.message : "Unable to fetch error"
@@ -153,19 +153,15 @@ export const getAllcourseUser = async (
 export const getSelectedCourse = async (id: string) => {
   try {
     const data = await axios.get("/course/" + id);
-     return data;
+    return data;
   } catch (error) {
     throw new Error(error.message);
   }
 };
 export const purchaseCourse = async (courseId: string, data: any) => {
-  try {
-     return await axios.post("/purchase/" + courseId, {
-      data,
-    });
-  } catch (error) {
-     throw new Error(error.message);
-  }
+  return await axios.post("/purchase/" + courseId, {
+    data,
+  });
 };
 export const updateCourseApi = (
   courseId: string,
@@ -181,7 +177,7 @@ export const deleteLessonApi = async (courseId: string, lessonId: string) => {
 export const deleteCourseApi = async (courseid: string) => {
   try {
     await axios.post("/mentor/course/delete", { courseid });
-     return;
+    return;
   } catch (error: any) {
     throw new Error(error.response.data.message);
   }
@@ -219,23 +215,23 @@ export const edtCategory = async (id: string, data: Partial<ICategory>) => {
   }
 };
 export const actionCategory = async (id: string, type: boolean) => {
-   const response = await axios.put("/actionCategory/" + id, { type });
+  const response = await axios.put("/actionCategory/" + id, { type });
   return response;
 };
 export const startChat = async (courseid: string) => {
   const id: any = await axios.post("/startchat", { courseid });
-   return id.roomid;
+  return id.roomid;
 };
 export const getallchat = async (roomid: string) => {
   const data = await axios.get("/getchat/" + roomid);
-   return data;
+  return data;
 };
 export const getChatrooms = async (page: number = 1) => {
   const data = await axios.get("/mentor/getchats?page=" + page);
-   return data;
+  return data;
 };
 export const requestmeeting = async (a, b, c) => {
-   return await axios.post("/requestmeet", {
+  return await axios.post("/requestmeet", {
     mentorId: a,
     scheduledTime: b,
     courseId: c,
@@ -305,7 +301,7 @@ export const updateVideoProgress = async (
     // Default to "Quiz" if no other indicators are present
     payload.taskType = "Quiz";
   }
-   return await axios.put(`/progress/update-video`, payload);
+  return await axios.put(`/progress/update-video`, payload);
 };
 export const markLessonCompleted = async (
   courseId: string,
@@ -335,16 +331,16 @@ export const savelessonchanges = async (
 };
 export const beaMentor = async (data) => {
   const datass = await axios.post("/b-a-mentor", data);
-   return;
+  return;
 };
 export const getallrequst = async (url?: string) => {
-   return await axios.get("/getall-mentor-requst?" + url);
+  return await axios.get("/getall-mentor-requst?" + url);
 };
 export const actionBementor = async (action: string, dataid: string) => {
   await axios.put("/action-be-mentor/" + dataid, { action });
 };
 export const updateData = async (data) => {
-   await axios.put("/update-profile", data);
+  await axios.put("/update-profile", data);
 };
 export const changepassword = async ({
   oldPassoword,
@@ -392,20 +388,20 @@ export const revenueMentor = async () => {
   return await axios.get("/mentor/getrevenue");
 };
 export const getMeetings = async (url: string) => {
-   return await axios.get("/mentor/meets?" + url);
+  return await axios.get("/mentor/meets?" + url);
 };
 export const changeStatusMeet = async (status: string, meetid: string) => {
   return await axios.put("/mentor/meetstatus/" + meetid + "?status=" + status);
 };
 export const updateMeetingTime = async (meetid: string, date: Date) => {
-   await axios.put("/updatetime/" + meetid, { UpdateTime: date });
+  await axios.put("/updatetime/" + meetid, { UpdateTime: date });
 };
 export const getAllcertificate = async (
   page: number,
   limit: number,
   search?: string
 ) => {
-   const url = new URLSearchParams();
+  const url = new URLSearchParams();
 
   url.append("page", String(page));
   url.append("limit", String(limit));

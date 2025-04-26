@@ -23,6 +23,7 @@ router.get(
   Middlewares.roleChecker(Roles.MENTOR),
   courseController.getCourses.bind(courseController)
 );
+
 router.post(
   "/lessons",
   Middlewares.jwtVerify,

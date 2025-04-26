@@ -32,7 +32,7 @@ import { formatDate } from "@/lib/utils";
 import { useLessonRepository } from "@/hooks/use-lesson-repository";
 import { useCategoryRepository } from "@/hooks/use-category-repository";
 import AddLessonModal from "@/components/courses/addlesson";
-import EditLessonDialog from "@/components/courses/editCourse";
+import EditLessonDialog from "@/components/courses/editcourse/editCourse";
 import type { ICourses, ILesson } from "@/services/interface/CourseDto";
 import Image from "next/image";
 
@@ -151,7 +151,7 @@ export default function CourseEditDialog({
       toast.success("Image uploaded successfully");
     } catch (error) {
       toast.error("Failed to upload image");
-      console.error("Image upload error:", error);
+ 
     } finally {
       setIsImageUploading(false);
     }
@@ -190,7 +190,7 @@ export default function CourseEditDialog({
         });
       } else {
         
-        console.error("Unexpected error:", error);
+ 
         toast.error("An unexpected error occurred");
       }
     } finally {
@@ -401,7 +401,7 @@ export default function CourseEditDialog({
                     {lessons.length > 0 ? (
                       lessons.map((lesson, index) => (
                         <div
-                          key={lesson._id}
+                          key={index}
                           className="p-3 hover:bg-gray-800 flex items-center justify-between text-white">
                           <div className="flex items-center gap-2">
                             <div className="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium">

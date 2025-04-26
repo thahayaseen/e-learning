@@ -99,7 +99,7 @@ export function Continue({
     try {
       router.push(`/course/view/${id}`);
     } catch (error) {
-      console.error("Navigation error:", error);
+ 
       // Optional: Add error handling toast or notification
     }
   };

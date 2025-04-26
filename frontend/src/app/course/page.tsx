@@ -132,7 +132,7 @@ const CourseList: React.FC = () => {
         urlParams.sort && setSortBy(urlParams.sort);
         urlParams.page && setCurrentPage(Number.parseInt(urlParams.page) || 1);
       } catch (error) {
-        console.error("Error fetching initial data:", error);
+ 
       }
     };
     fetchInitialData();
@@ -202,7 +202,7 @@ const CourseList: React.FC = () => {
         setTotalPages(response.totalPages);
         setTotalCourses(response.total);
       } catch (error) {
-        console.error("Error fetching courses:", error);
+ 
         setCourses([]);
         setTotalPages(0);
         setTotalCourses(0);

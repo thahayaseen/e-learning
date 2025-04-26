@@ -22,7 +22,7 @@ const ELearningPlatform = () => {
         await dispatch(Varify());
       }
       const datas = await getAllcourseUser({ page: 1, limit: 4 }, true);
-       setCouse(datas.courses);
+      setCouse(datas.courses);
     };
     varify();
   }, [dispatch, state.isAuthenticated]);
@@ -53,7 +53,7 @@ const ELearningPlatform = () => {
                 category={course.Title}
                 orderCount={100}
                 id={course._id}
-                price={course.Price}
+                price={String(course.Price)}
                 smallDiscroption={course.Description}
                 url={`${getImage(course.image)}`}
                 key={index}

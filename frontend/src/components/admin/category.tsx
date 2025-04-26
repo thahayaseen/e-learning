@@ -43,7 +43,7 @@ const fetchCategoriesWithParams = async (page, limit, search) => {
 
     return response;
   } catch (error) {
-    console.error("Error fetching categories:", error);
+ 
     throw error;
   }
 };
@@ -99,7 +99,7 @@ const AdminPanel = () => {
         setTotalPages(4);
       } catch (error) {
         toast.error("Failed to fetch categories");
-        console.error(error);
+ 
       } finally {
         setIsLoading(false);
       }
@@ -127,7 +127,7 @@ const AdminPanel = () => {
       toast.success(type ? "Category unlisted" : "Category listed");
     } catch (error) {
       toast.error("Operation failed");
-      console.error(error);
+ 
     }
   };
 
@@ -196,7 +196,7 @@ const AdminPanel = () => {
       }
     } catch (error) {
       toast.error("Failed to add category");
-      console.error(error);
+ 
     }
   };
 

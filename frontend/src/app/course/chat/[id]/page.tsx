@@ -112,7 +112,7 @@ function Chat() {
         setIsConnected(true);
         setError("");
       } catch (err) {
-        console.error("Failed to load chat history:", err);
+ 
         setError("Failed to load chat history. Please try again.");
       } finally {
         setIsLoading(false);
@@ -130,7 +130,7 @@ function Chat() {
 
       // Listen for error messages
       socket.on(chatEnum.error, (errorData) => {
-        console.error("Socket error:", errorData);
+ 
         setError(errorData || "An error occurred");
         // Auto-dismiss error after 5 seconds
         setTimeout(() => {

@@ -20,7 +20,7 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
-    console.error("Request error:", error);
+ 
     return Promise.reject(error);
   }
 );
@@ -33,6 +33,8 @@ api.interceptors.response.use(
   (error) => {
      const errorMsg = error?.response?.data?.message || error.message;
      // You can show toast here if you're using a UI lib
+     console.log("error is ");
+     
     throw new Error(errorMsg); // Keeps it consistent with async/await usage
   }
 );

@@ -59,7 +59,7 @@ export function useCourseRepository() {
           response.data.filter((c) => c.Approved_by_admin === "pending").length
         );
       } catch (error) {
-        console.error("Error fetching courses:", error);
+ 
         toast.error("Failed to fetch courses");
       } finally {
         setIsLoading(false);
@@ -116,7 +116,7 @@ export function useCourseRepository() {
 
       return updatedCourse;
     } catch (error) {
-      console.error("Error updating course:", error);
+ 
       toast.error(
         error instanceof Error ? error.message : "cannot update Course",
         {
@@ -144,7 +144,7 @@ export function useCourseRepository() {
         )
       );
     } catch (error) {
-      console.error("Error deleting course:", error);
+ 
       throw error;
     } finally {
       setIsLoading(false);

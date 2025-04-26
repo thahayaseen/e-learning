@@ -123,7 +123,7 @@ const MessageAdminDashboard = () => {
         setIsLoading(false);
       }
     } catch (error) {
-      console.error("Error fetching chatrooms:", error);
+ 
       if (isMounted.current) {
         setIsLoading(false);
       }
@@ -138,7 +138,7 @@ const MessageAdminDashboard = () => {
         setMessages(data.data);
       }
     } catch (error) {
-      console.error("Error fetching messages:", error);
+ 
     }
   };
 

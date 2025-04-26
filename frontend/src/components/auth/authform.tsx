@@ -167,7 +167,7 @@ const ELearningAuth: React.FC<ELearningAuthProps> = ({ places }) => {
         }
       }
     } catch (error) {
-      console.error("Authentication error:", error);
+ 
     } finally {
       setIsSubmitting(false);
     }

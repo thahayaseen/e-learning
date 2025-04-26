@@ -74,7 +74,7 @@ export default function CertificateDisplay({
         }
       } catch (err: any) {
         setError(err.message);
-        console.error("Certificate fetch error:", err);
+ 
       } finally {
         setIsLoading(false);
       }
@@ -102,7 +102,7 @@ export default function CertificateDisplay({
       link.href = dataUrl;
       link.click();
     } catch (error) {
-      console.error("Certificate download failed:", error);
+ 
       setError("Failed to generate certificate");
     }
   };

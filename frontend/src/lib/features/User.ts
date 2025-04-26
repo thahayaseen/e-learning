@@ -15,14 +15,14 @@ export const Varify = createAsyncThunk(
   "auth/varifytocken",
   async (_, { rejectWithValue }) => {
     try {
-       const reponse = await axios.get("/autherisation", {
+      const reponse = await axios.get("/autherisation", {
         withCredentials: true,
       });
-       return reponse;
+      return reponse;
     } catch (error: any) {
       // toast.error( error.response.data.message)
-       axios.post("/logout");
-       return rejectWithValue(
+      await axios.post("/logout");
+      return rejectWithValue(
         error instanceof Error
           ? error.message
           : error?.response?.data?.message || "Unexpexted Error"
@@ -42,16 +42,15 @@ const slices = createSlice({
   reducers: {
     setUser: (state, action) => {
       state.isAuthenticated = true;
-       state.user = action.payload;
+      state.user = action.payload;
     },
     logout: (state) => {
       state.isAuthenticated = false;
       state.user = null;
-
-     },
+    },
     setloading: (state, payload) => {
       state.loading = payload.payload;
-     },
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -65,7 +64,7 @@ const slices = createSlice({
       .addCase(Varify.fulfilled, (state, action) => {
         state.isAuthenticated = true;
         state.loading = false;
-         const { name, email, role } = action.payload.user;
+        const { name, email, role } = action.payload.user;
         state.user = { name, email, role };
 
         // state.user = action.payload.message; // Ensure `message` is the correct user object

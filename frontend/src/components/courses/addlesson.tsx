@@ -15,26 +15,47 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Plus, Video, FileText, HelpCircle, Trash2, Upload, Check, X } from 'lucide-react';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  BookOpen,
+  Plus,
+  Video,
+  FileText,
+  HelpCircle,
+  Trash2,
+  Upload,
+  Check,
+  X,
+} from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import type { ICourses, ILesson, ITask, IQuizTask, IAssignmentTask, IVideoTask } from "@/services/interface/CourseDto";
+import type {
+  ICourses,
+  ILesson,
+  ITask,
+  IQuizTask,
+  IAssignmentTask,
+  IVideoTask,
+} from "@/services/interface/CourseDto";
+import { toast } from "sonner";
 
 interface AddLessonModalProps {
   isOpen: boolean;
   onClose: () => void;
   course: ICourses | null;
-  onSave: (newLesson: Omit<ILesson, "_id">, tasks: (IQuizTask | IAssignmentTask | IVideoTask)[]) => Promise<void>;
+  onSave: (
+    newLesson: Omit<ILesson, "_id">,
+    tasks: (IQuizTask | IAssignmentTask | IVideoTask)[]
+  ) => Promise<void>;
 }
-
+import useS3bucket from "@/hooks/addtos3";
 const AddLessonModal = ({
   isOpen,
   onClose,
@@ -46,25 +67,29 @@ const AddLessonModal = ({
     Content: "",
     Task: [],
   });
-  
-  const [tasks, setTasks] = useState<(IQuizTask | IAssignmentTask | IVideoTask)[]>([]);
+
+  const [tasks, setTasks] = useState<
+    (IQuizTask | IAssignmentTask | IVideoTask)[]
+  >([]);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("details");
-  const [taskType, setTaskType] = useState<"quiz" | "assignment" | "video">("assignment");
-  
+  const [taskType, setTaskType] = useState<"quiz" | "assignment" | "video">(
+    "assignment"
+  );
+
   // Quiz task state
   const [quizQuestion, setQuizQuestion] = useState("");
   const [quizOptions, setQuizOptions] = useState(["", "", "", ""]);
   const [quizAnswer, setQuizAnswer] = useState("");
-  
+
   // Assignment task state
   const [assignmentDescription, setAssignmentDescription] = useState("");
-  
+
   // Video task state
   const [videoURL, setVideoURL] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-
+  const { uploadingVideo, uploadtos3 } = useS3bucket();
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -82,45 +107,46 @@ const AddLessonModal = ({
 
   const handleAddTask = () => {
     // Create a temporary ID for the task
-    const tempId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
+    const tempId = `temp-${Date.now()}-${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
+
     if (taskType === "quiz") {
-      if (!quizQuestion || quizOptions.some(opt => !opt) || !quizAnswer) return;
-      
+      if (!quizQuestion || quizOptions.some((opt) => !opt) || !quizAnswer)
+        return;
+
       const quizTask: IQuizTask = {
         Type: "Quiz",
         Lesson_id: tempId, // This will be replaced with the actual lesson ID when saved
         Question: quizQuestion,
         Options: [...quizOptions],
-        Answer: quizAnswer
+        Answer: quizAnswer,
       };
-      
+
       setTasks([...tasks, quizTask]);
       setQuizQuestion("");
       setQuizOptions(["", "", "", ""]);
       setQuizAnswer("");
-    } 
-    else if (taskType === "assignment") {
+    } else if (taskType === "assignment") {
       if (!assignmentDescription) return;
-      
+
       const assignmentTask: IAssignmentTask = {
         Type: "Assignment",
         Lesson_id: tempId,
-        Description: assignmentDescription
+        Description: assignmentDescription,
       };
-      
+
       setTasks([...tasks, assignmentTask]);
       setAssignmentDescription("");
-    } 
-    else if (taskType === "video") {
+    } else if (taskType === "video") {
       if (!videoURL) return;
-      
+
       const videoTask: IVideoTask = {
         Type: "Video",
         Lesson_id: tempId,
-        VideoURL: videoURL
+        VideoURL: videoURL,
       };
-      
+
       setTasks([...tasks, videoTask]);
       setVideoURL("");
     }
@@ -135,18 +161,21 @@ const AddLessonModal = ({
   const simulateS3Upload = (file: File) => {
     setIsUploading(true);
     setUploadProgress(0);
-    
+
     // Simulate upload progress
     const interval = setInterval(() => {
-      setUploadProgress(prev => {
+      setUploadProgress((prev) => {
         const newProgress = prev + Math.floor(Math.random() * 20);
         if (newProgress >= 100) {
           clearInterval(interval);
           setIsUploading(false);
-          
+
           // Simulate S3 URL generation
-          const fakeS3Url = `https://your-bucket.s3.amazonaws.com/videos/${file.name.replace(/\s+/g, '-')}`;
-          setVideoURL(fakeS3Url);
+          const fakeS3Url = `https://your-bucket.s3.amazonaws.com/videos/${file.name.replace(
+            /\s+/g,
+            "-"
+          )}`;
+          setVideoURL(fakeS3Url.split("?")[0]);
           return 100;
         }
         return newProgress;
@@ -154,18 +183,19 @@ const AddLessonModal = ({
     }, 500);
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
+
     // Check if it's a video file
-    if (!file.type.startsWith('video/')) {
-      alert('Please upload a video file');
+    if (!file.type.startsWith("video/")) {
+      toast.success("Please upload a video file");
       return;
     }
-    
+    const dat = await uploadtos3(file, "video");
     // Simulate S3 upload
-    simulateS3Upload(file);
+    setVideoURL(dat);
+    // simulateS3Upload(file);
   };
 
   const handleSave = async () => {
@@ -174,14 +204,14 @@ const AddLessonModal = ({
     setIsLoading(true);
     try {
       // Create task IDs array for the lesson
-      const taskIds = tasks.map(task => task.Lesson_id);
-      
+      const taskIds = tasks.map((task) => task.Lesson_id);
+
       // Update the lesson with task IDs
       const lessonToSave = {
         ...newLesson,
-        Task: tasks
+        Task: tasks,
       };
-      
+
       await onSave(lessonToSave, tasks);
 
       // Reset form
@@ -195,7 +225,6 @@ const AddLessonModal = ({
 
       onClose();
     } catch (error) {
-      console.error("Error saving lesson:", error);
     } finally {
       setIsLoading(false);
     }
@@ -209,9 +238,7 @@ const AddLessonModal = ({
             <BookOpen size={18} />
             Add New Lesson
             {course && (
-              <Badge className="ml-2 bg-blue-700 text-xs">
-                {course.Title}
-              </Badge>
+              <Badge className="ml-2 bg-blue-700 text-xs">{course.Title}</Badge>
             )}
           </DialogTitle>
           <DialogDescription className="text-blue-300">
@@ -273,33 +300,36 @@ const AddLessonModal = ({
                 <Button
                   type="button"
                   variant={taskType === "quiz" ? "default" : "outline"}
-                  className={taskType === "quiz" 
-                    ? "bg-blue-600" 
-                    : "bg-blue-800 border-blue-700 text-blue-200"}
-                  onClick={() => setTaskType("quiz")}
-                >
+                  className={
+                    taskType === "quiz"
+                      ? "bg-blue-600"
+                      : "bg-blue-800 border-blue-700 text-blue-200"
+                  }
+                  onClick={() => setTaskType("quiz")}>
                   <HelpCircle size={16} className="mr-2" />
                   Quiz Question
                 </Button>
                 <Button
                   type="button"
                   variant={taskType === "assignment" ? "default" : "outline"}
-                  className={taskType === "assignment" 
-                    ? "bg-blue-600" 
-                    : "bg-blue-800 border-blue-700 text-blue-200"}
-                  onClick={() => setTaskType("assignment")}
-                >
+                  className={
+                    taskType === "assignment"
+                      ? "bg-blue-600"
+                      : "bg-blue-800 border-blue-700 text-blue-200"
+                  }
+                  onClick={() => setTaskType("assignment")}>
                   <FileText size={16} className="mr-2" />
                   Assignment
                 </Button>
                 <Button
                   type="button"
                   variant={taskType === "video" ? "default" : "outline"}
-                  className={taskType === "video" 
-                    ? "bg-blue-600" 
-                    : "bg-blue-800 border-blue-700 text-blue-200"}
-                  onClick={() => setTaskType("video")}
-                >
+                  className={
+                    taskType === "video"
+                      ? "bg-blue-600"
+                      : "bg-blue-800 border-blue-700 text-blue-200"
+                  }
+                  onClick={() => setTaskType("video")}>
                   <Video size={16} className="mr-2" />
                   Video
                 </Button>
@@ -316,7 +346,7 @@ const AddLessonModal = ({
                     <HelpCircle size={18} className="mr-2" />
                     Add Quiz Question
                   </h3>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="question" className="text-white">
                       Question <span className="text-red-400">*</span>
@@ -329,7 +359,7 @@ const AddLessonModal = ({
                       className="bg-blue-700 border-blue-600 text-white"
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label className="text-white">
                       Options <span className="text-red-400">*</span>
@@ -342,15 +372,19 @@ const AddLessonModal = ({
                           </div>
                           <Input
                             value={option}
-                            onChange={(e) => handleQuizOptionChange(index, e.target.value)}
-                            placeholder={`Option ${String.fromCharCode(65 + index)}`}
+                            onChange={(e) =>
+                              handleQuizOptionChange(index, e.target.value)
+                            }
+                            placeholder={`Option ${String.fromCharCode(
+                              65 + index
+                            )}`}
                             className="bg-blue-700 border-blue-600 text-white"
                           />
                         </div>
                       ))}
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="answer" className="text-white">
                       Correct Answer <span className="text-red-400">*</span>
@@ -361,12 +395,17 @@ const AddLessonModal = ({
                       </SelectTrigger>
                       <SelectContent className="bg-blue-700 border-blue-600 text-white">
                         {quizOptions.map((option, index) => (
-                          <SelectItem 
-                            key={index} 
-                            value={option || `Option ${String.fromCharCode(65 + index)}`}
-                            disabled={!option}
-                          >
-                            {option || `Option ${String.fromCharCode(65 + index)} (empty)`}
+                          <SelectItem
+                            key={index}
+                            value={
+                              option ||
+                              `Option ${String.fromCharCode(65 + index)}`
+                            }
+                            disabled={!option}>
+                            {option ||
+                              `Option ${String.fromCharCode(
+                                65 + index
+                              )} (empty)`}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -381,10 +420,11 @@ const AddLessonModal = ({
                     <FileText size={18} className="mr-2" />
                     Add Assignment
                   </h3>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="description" className="text-white">
-                      Assignment Description <span className="text-red-400">*</span>
+                      Assignment Description{" "}
+                      <span className="text-red-400">*</span>
                     </Label>
                     <Textarea
                       id="description"
@@ -404,7 +444,7 @@ const AddLessonModal = ({
                     <Video size={18} className="mr-2" />
                     Add Video Content
                   </h3>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="videoUrl" className="text-white">
                       Video URL <span className="text-red-400">*</span>
@@ -415,11 +455,11 @@ const AddLessonModal = ({
                         value={videoURL}
                         onChange={(e) => setVideoURL(e.target.value)}
                         placeholder="Enter S3 video URL or upload a video"
-                        className="bg-blue-700 border-blue-600 text-white"
+                        className="bg-blue-700 border-blue-600 text-white max-w-[500px]"
                       />
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label className="text-white">Upload Video to S3</Label>
                     <div className="flex flex-col gap-2">
@@ -428,8 +468,7 @@ const AddLessonModal = ({
                           type="button"
                           variant="outline"
                           className="bg-blue-700 border-blue-600 text-white relative overflow-hidden"
-                          disabled={isUploading}
-                        >
+                          disabled={uploadingVideo}>
                           <Upload size={16} className="mr-2" />
                           <span>Select Video File</span>
                           <input
@@ -437,29 +476,24 @@ const AddLessonModal = ({
                             accept="video/*"
                             className="absolute inset-0 opacity-0 cursor-pointer"
                             onChange={handleFileUpload}
-                            disabled={isUploading}
+                            disabled={uploadingVideo}
                           />
                         </Button>
-                        {isUploading && (
-                          <span className="text-blue-300 text-sm">
-                            Uploading: {uploadProgress}%
-                          </span>
-                        )}
+                     
                       </div>
-                      
-                      {isUploading && (
+
+                      {uploadingVideo && (
                         <div className="w-full bg-blue-950 rounded-full h-2.5">
-                          <div 
-                            className="bg-blue-500 h-2.5 rounded-full" 
-                            style={{ width: `${uploadProgress}%` }}
-                          ></div>
+                          <div
+                            className="bg-blue-500 h-2.5 rounded-full"
+                            style={{ width: `${uploadProgress}%` }}></div>
                         </div>
                       )}
-                      
+
                       {videoURL && (
                         <div className="flex items-center gap-2 text-sm text-blue-300">
                           <Check size={16} className="text-green-400" />
-                          Video ready: {videoURL.split('/').pop()}
+                          Video ready: {videoURL.slice(0,30)}...
                         </div>
                       )}
                     </div>
@@ -473,14 +507,21 @@ const AddLessonModal = ({
                   className="w-full bg-blue-600 hover:bg-blue-500"
                   onClick={handleAddTask}
                   disabled={
-                    (taskType === "quiz" && (!quizQuestion || quizOptions.some(opt => !opt) || !quizAnswer)) ||
+                    (taskType === "quiz" &&
+                      (!quizQuestion ||
+                        quizOptions.some((opt) => !opt) ||
+                        !quizAnswer)) ||
                     (taskType === "assignment" && !assignmentDescription) ||
                     (taskType === "video" && !videoURL) ||
-                    isUploading
-                  }
-                >
+                    uploadingVideo
+                  }>
                   <Plus size={16} className="mr-2" />
-                  Add {taskType === "quiz" ? "Quiz Question" : taskType === "assignment" ? "Assignment" : "Video"}
+                  Add{" "}
+                  {taskType === "quiz"
+                    ? "Quiz Question"
+                    : taskType === "assignment"
+                    ? "Assignment"
+                    : "Video"}
                 </Button>
               </div>
             </div>
@@ -488,7 +529,7 @@ const AddLessonModal = ({
             {/* Task List */}
             <div className="space-y-3">
               <h3 className="text-lg font-medium text-white">Added Tasks</h3>
-              
+
               {tasks.length > 0 ? (
                 <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
                   {tasks.map((task, index) => (
@@ -521,22 +562,33 @@ const AddLessonModal = ({
                           variant="ghost"
                           size="sm"
                           className="h-8 w-8 p-0 text-blue-300 hover:text-red-300 hover:bg-blue-700"
-                          onClick={() => handleRemoveTask(index)}
-                        >
+                          onClick={() => handleRemoveTask(index)}>
                           <Trash2 size={16} />
                         </Button>
                       </CardHeader>
                       <CardContent className="py-2">
                         {task.Type === "Quiz" && (
                           <div className="text-sm text-blue-200">
-                            <p className="font-medium">{(task as IQuizTask).Question}</p>
+                            <p className="font-medium">
+                              {(task as IQuizTask).Question}
+                            </p>
                             <div className="mt-1 pl-2 border-l-2 border-blue-700">
                               {(task as IQuizTask).Options.map((option, i) => (
-                                <div key={i} className="flex items-center gap-1">
-                                  <span className="text-xs">{String.fromCharCode(65 + i)}:</span>
-                                  <span className={option === (task as IQuizTask).Answer ? "text-green-400" : ""}>
+                                <div
+                                  key={i}
+                                  className="flex items-center gap-1">
+                                  <span className="text-xs">
+                                    {String.fromCharCode(65 + i)}:
+                                  </span>
+                                  <span
+                                    className={
+                                      option === (task as IQuizTask).Answer
+                                        ? "text-green-400"
+                                        : ""
+                                    }>
                                     {option}
-                                    {option === (task as IQuizTask).Answer && " ✓"}
+                                    {option === (task as IQuizTask).Answer &&
+                                      " ✓"}
                                   </span>
                                 </div>
                               ))}
@@ -552,7 +604,7 @@ const AddLessonModal = ({
                           <div className="text-sm text-blue-200 flex items-center gap-2">
                             <Video size={14} />
                             <span className="truncate max-w-[250px]">
-                              {(task as IVideoTask).VideoURL.split('/').pop()}
+                              {(task as IVideoTask).VideoURL.split("/").pop()}
                             </span>
                           </div>
                         )}
