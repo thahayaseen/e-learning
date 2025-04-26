@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import CourseBuyPage from "@/components/courses/buyCourse";
 import { getSelectedCourse } from "@/services/fetchdata";
+import Footer from "@/components/header/footer";
 
 interface CourseData {
   _id: string;
@@ -115,6 +116,8 @@ export default function CoursePage() {
           </div>
         </div>
       )}
+      <Footer />
+
     </div>
   );
 }
