@@ -48,6 +48,7 @@ import PaginationComponent from "@/components/default/pagination";
 import { Debouncing } from "@/services/debauncing";
 import { useRouter } from "next/navigation";
 import { getImage } from "@/services/getImage";
+import Footer from "@/components/header/footer";
 // import { getImage } from "../api/upload/route";
 
 // Types and Interfaces
@@ -466,6 +467,8 @@ const CourseList: React.FC = () => {
           </div>
         </motion.div>
       </div>
+      <Footer />
+
     </div>
   );
 };

@@ -15,6 +15,7 @@ import { getSelectedCourse, purchaseCourse } from "@/services/fetchdata";
 import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { loadStripe } from "@stripe/stripe-js";
+import { Footer } from "react-day-picker";
 
 // Initialize Stripe with your publishable key
 const stripePromise = await loadStripe(
@@ -36,7 +37,6 @@ const CoursePurchasePage = () => {
           setCourseDetails(data.data.data);
         } catch (error) {
           toast.error("Failed to load course details");
- 
         } finally {
           setLoading(false);
         }
@@ -96,13 +96,12 @@ const CoursePurchasePage = () => {
         }
       }
     } catch (error: any) {
-      toast.error(error.message || error.data?.message || "Payment failed",{
-        duration:1000
+      toast.error(error.message || error.data?.message || "Payment failed", {
+        duration: 1000,
       });
       setTimeout(() => {
         router.push("/profile");
       }, 3000);
- 
     } finally {
       setProcessingPayment(false);
     }
@@ -250,6 +249,7 @@ const CoursePurchasePage = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

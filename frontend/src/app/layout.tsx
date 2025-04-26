@@ -7,7 +7,6 @@ import SesstionProvider from "./SessionProvider";
 import Protection from "@/components/auth/Redisautofill";
 import { Suspense } from "react";
 import Loading from "@/components/loading";
-import Footer from "@/components/header/footer";
 // import Protaction from '@/components/auth/Redisautofill'
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,14 +39,7 @@ export default function RootLayout({
           <RProviders>
             <Protection>
               <Toaster position="top-right" />
-              <Suspense fallback={<Loading />}>
-                {
-                  <>
-                    {children}
-                    <Footer />
-                  </>
-                }
-              </Suspense>
+              <Suspense  fallback={<Loading />}>{children}</Suspense>
             </Protection>
           </RProviders>
         </SesstionProvider>
