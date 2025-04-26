@@ -35,7 +35,7 @@ const MessageAdminDashboard = () => {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-   // Track if the component is mounted
+  // Track if the component is mounted
   const isMounted = useRef(true);
   const currentChatIdRef = useRef<string | null>(null);
 
@@ -123,7 +123,6 @@ const MessageAdminDashboard = () => {
         setIsLoading(false);
       }
     } catch (error) {
- 
       if (isMounted.current) {
         setIsLoading(false);
       }
@@ -137,9 +136,7 @@ const MessageAdminDashboard = () => {
       if (isMounted.current && currentChatIdRef.current === chatroomId) {
         setMessages(data.data);
       }
-    } catch (error) {
- 
-    }
+    } catch (error) {}
   };
 
   // Handle new incoming messages
@@ -194,7 +191,7 @@ const MessageAdminDashboard = () => {
   // Close the current chat
   const closeChat = useCallback(() => {
     // Leave the room if socket exists
-     socket.emit("leave-room", {
+    socket.emit("leave-room", {
       roomId: currentChatIdRef.current,
       from: "dfadfsd",
     });
@@ -427,7 +424,7 @@ const MessageAdminDashboard = () => {
                       <ArrowLeft size={20} />
                     </Button>
                     <Avatar className="h-10 w-10 mr-3 bg-slate-600 border border-slate-500">
-                      {selectedChat.userId.profile?.avatar ? (
+                      {getImage(selectedChat.userId.profile?.avatar) ? (
                         <AvatarImage
                           src={
                             selectedChat.userId.profile.avatar ||
