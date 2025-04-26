@@ -424,10 +424,10 @@ const MessageAdminDashboard = () => {
                       <ArrowLeft size={20} />
                     </Button>
                     <Avatar className="h-10 w-10 mr-3 bg-slate-600 border border-slate-500">
-                      {getImage(selectedChat.userId.profile?.avatar) ? (
+                      {selectedChat.userId.profile?.avatar ? (
                         <AvatarImage
                           src={
-                            selectedChat.userId.profile.avatar ||
+                            getImage(selectedChat.userId.profile.avatar) ||
                             "/placeholder.svg"
                           }
                           alt={selectedChat.userId.name}

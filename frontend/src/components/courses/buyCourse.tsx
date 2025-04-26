@@ -291,14 +291,7 @@ const CourseBuyPage = ({ course, aldredypurchased }) => {
               30-day money-back guarantee
             </div>
           </CardContent>
-          <CardFooter className="bg-gray-100 px-6 py-4 text-center border-t border-gray-200">
-            <div className="w-full flex items-center justify-center space-x-2">
-              <Gift className="w-4 h-4 text-indigo-600" />
-              <span className="text-sm font-medium text-gray-700">
-                Gift this course
-              </span>
-            </div>
-          </CardFooter>
+         
         </Card>
       </div>
     </div>

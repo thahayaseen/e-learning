@@ -64,7 +64,6 @@ const ELearningPlatform = () => {
       </section>
 
       {/* Footer */}
-      <Footer />
     </div>
   );
 };
