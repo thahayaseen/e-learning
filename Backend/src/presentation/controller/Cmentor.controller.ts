@@ -16,6 +16,7 @@ import MeetingUsecase from "../../app/useCases/Meeting.usecase";
 import { Middlewares, userServisess } from "../../config/dependencies";
 import RevenueUseCase from "../../app/useCases/revenue.usecase";
 import { SystemError } from "../../app/useCases/enum/systemError";
+import { ILesson } from "../../infra/database/models/lessone";
 
 export class MentorController {
   constructor(
@@ -44,7 +45,7 @@ export class MentorController {
   async applayAction(req: AuthServices, res: Response) {
     const id = req.params.id;
     const action = req.body.action;
-    await this.MentoruseCases.actionCourse(id, action);
+    await this.CourseUsecase.actionCourse(id, action);
     res.status(200).json({
       success: true,
       message: "Action completed",
@@ -125,7 +126,7 @@ export class MentorController {
       const { course } = await userServisess.verify(email, courseid);
       const different =
         new Date().getDate() - new Date(course.CreatedAt).getDate();
-      await this.MentoruseCases.updataCourse(courseid, data);
+      await this.CourseUsecase.updataCourse(courseid, data);
       res.status(HttpStatusCode.OK).json({
         success: true,
         message: "updated Successfull",
@@ -144,13 +145,13 @@ export class MentorController {
       const { id } = req.params;
       const lessonid = req.body.lessonId;
       await userServisess.verify(email, id, lessonid);
-      await this.MentoruseCases.DeleteLesson(lessonid);
+      await this.CourseUsecase.DeleteLesson(lessonid);
       await this.CourseUsecase.deleteLessonfromcourse(id, lessonid);
       res.status(HttpStatusCode.OK).json({
         success: true,
         message: "deleted success",
       });
-      return 
+      return;
     } catch (error) {
       res.status(HttpStatusCode.BAD_REQUEST).json({
         success: false,
@@ -185,6 +186,18 @@ export class MentorController {
       const { email, role } = req.user;
       const { data, courseId } = req.body;
       await userServisess.verify(email, courseId);
+      const getCourse = await this.CourseUsecase.getSelectedCourse(
+        courseId,
+        false
+      );
+      console.log(getCourse.lessons, "test tje cpirse data", data);
+      getCourse.lessons.forEach((datas: any) => {
+        console.log(datas.Lessone_name,data.Lessone_name,'ress is',datas.Lessone_name == data.Lessone_name);
+        
+        if (datas.Lessone_name == data.Lessone_name) {
+          throw new Error("Lesson aldredy exsist");
+        }
+      });
       const lessonId = await this.CourseUsecase.addlessons([data]);
       await this.CourseUsecase.addLessoninCourse(courseId, String(lessonId));
       res.status(HttpStatusCode.OK).json({
@@ -206,7 +219,7 @@ export class MentorController {
       const { course } = await userServisess.verify(email, courseid);
       course.lessons.forEach(async (id: string) => {
         if (id) {
-          await this.MentoruseCases.DeleteLesson(id);
+          await this.CourseUsecase.DeleteLesson(id);
         }
       });
       await this.CourseUsecase.deleteCourse(courseid);
@@ -323,7 +336,7 @@ export class MentorController {
     try {
       const { _id, role } = req.user;
       const { page, limit } = req.query;
-      const data = await this.MentoruseCases.getOrderBymentor(
+      const data = await this.CourseUsecase.getOrderBymentor(
         _id,
         Number(page),
         Number(limit)

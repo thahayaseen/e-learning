@@ -385,21 +385,11 @@ export class RepositoryCourses implements ICoursesRepository {
   }
   async UpdataCourse(courseid: string, data: any): Promise<void> {
  
-    const updated: any = {};
-    for (let i in data) {
-      const value = data[i];
-      if (typeof value === "string") {
-        if (value.trim() !== "") {
-          updated[i] = value;
-        }
-      } else if (value !== null && value !== undefined) {
-        updated[i] = value;
-      }
-    }
+ 
 
  
 
-    const res = await Courses.updateOne({ _id: courseid }, updated);
+    const res = await Courses.updateOne({ _id: courseid }, data);
  
 
     return;

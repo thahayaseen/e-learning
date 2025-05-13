@@ -206,14 +206,16 @@ const AddLessonModal = ({
       // Create task IDs array for the lesson
       const taskIds = tasks.map((task) => task.Lesson_id);
 
-      // Update the lesson with task IDs
+    if(tasks.length==0){
+      throw new Error('Minimum 1 required')
+    }
       const lessonToSave = {
         ...newLesson,
         Task: tasks,
       };
 
+      console.log(lessonToSave,'lesson to save is ') 
       await onSave(lessonToSave, tasks);
-
       // Reset form
       setNewLesson({
         Lessone_name: "",
@@ -223,8 +225,11 @@ const AddLessonModal = ({
       setTasks([]);
       setActiveTab("details");
 
-      onClose();
+      // onClose();
     } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to create lesson"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -479,7 +484,6 @@ const AddLessonModal = ({
                             disabled={uploadingVideo}
                           />
                         </Button>
-                     
                       </div>
 
                       {uploadingVideo && (
@@ -493,7 +497,7 @@ const AddLessonModal = ({
                       {videoURL && (
                         <div className="flex items-center gap-2 text-sm text-blue-300">
                           <Check size={16} className="text-green-400" />
-                          Video ready: {videoURL.slice(0,30)}...
+                          Video ready: {videoURL.slice(0, 30)}...
                         </div>
                       )}
                     </div>

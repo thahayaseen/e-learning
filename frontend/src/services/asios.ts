@@ -28,13 +28,11 @@ api.interceptors.request.use(
 // Response interceptor
 api.interceptors.response.use(
   (response) => {
-     return response.data; // Simplify response usage
+     return response.data; 
   },
   (error) => {
      const errorMsg = error?.response?.data?.message || error.message;
-     // You can show toast here if you're using a UI lib
-     console.log("error is ");
-     
+
     throw new Error(errorMsg); // Keeps it consistent with async/await usage
   }
 );

@@ -13,30 +13,9 @@ import {
 import { IReview } from "../../infra/database/models/reiview";
 import { IQuizTask, ITask } from "../../infra/database/models/tasks";
 import { IPaginationResult } from "../../infra/repositories/courses.repository";
-import { CourseDTO } from "../dtos/coursesDto";
 import { orderDto } from "../dtos/orderDto";
 import { ICertificaterepository } from "../../domain/repository/Icertificate.repository";
 import { CertificateDTO } from "../dtos/Certificate";
-import { Course } from "../../domain/entities/course.entitis";
-const fn = (data: ICourses) => {
-  return new Course(
-    String(data._id),
-    data.Title,
-    data.Mentor_id,
-    data.Description,
-    data.CreatedAt,
-    String(data.Category),
-    Number(data.Price),
-    data.Approved_by_admin,
-    data.Students_enrolled,
-    data.UpdatedAt,
-    data.image,
-    data.lessons,
-    data.Content,
-    String(data.Offer_id),
-    data.unlist
-  );
-};
 export class CourseUsecase implements ICourseUseCase {
   constructor(
     private userRepo: IUserReposetory,
@@ -44,7 +23,6 @@ export class CourseUsecase implements ICourseUseCase {
     private ReviewRepo: IReviewRepo,
     private CertificateRepo: ICertificaterepository
   ) {}
- 
   async getAllCourse(
     page: number,
     limit: number,
@@ -81,16 +59,14 @@ export class CourseUsecase implements ICourseUseCase {
     try {
       await this.CourseRepo.AddStudentInCourse(courseId, userId);
       await this.userRepo.addCourseInstudent(userId, courseId);
-      const courses = await this.CourseRepo.FindSelectedCourse(courseId);
-
+      await this.CourseRepo.FindSelectedCourse(courseId);
       await this.createProgress(courseId, userId);
-
       return;
     } catch (error: any) {
       throw new Error(error.message);
     }
   }
-  async getByCoursids(
+  async getByCoursidByUserid(
     CourseId: string[],
     userid: string,
     page?: number,
@@ -104,19 +80,15 @@ export class CourseUsecase implements ICourseUseCase {
     );
   }
   async createCourse(datas: Omit<ICourses, "_id">) {
- 
-
     return await this.CourseRepo.createCourse(datas);
   }
   async addlessons(datas: ILesson[]): Promise<any> {
- 
     const datiii = await Promise.all(
       datas.map(async (dat: any) => {
         if (!dat.Task) {
           dat.Task = [];
         }
         const tasks = await this.CourseRepo.createTask(dat.Task);
- 
 
         dat.Task["Lesson_id"] = tasks._id;
         const ans = await this.CourseRepo.createLesson({
@@ -124,16 +96,11 @@ export class CourseUsecase implements ICourseUseCase {
           Content: dat.Content,
           Task: tasks,
         });
- 
 
- 
-
- 
         return ans._id;
       })
     );
 
- 
     datas = datiii;
     return datiii;
   }
@@ -141,15 +108,11 @@ export class CourseUsecase implements ICourseUseCase {
     data: ITask,
     lessonId: string
   ): Promise<ILesson | null> {
- 
-
     const idis = await this.CourseRepo.createTask([data]);
- 
 
     const addtoLesosn = await this.CourseRepo.updateLesson(lessonId, {
       utask: idis,
     });
- 
 
     return addtoLesosn;
   }
@@ -157,15 +120,13 @@ export class CourseUsecase implements ICourseUseCase {
     lessonid: string,
     data: Omit<ILesson, "Task">
   ): Promise<ILesson | null> {
- 
-
     const datas = await this.CourseRepo.updateLesson(lessonid, data);
     return datas;
   }
   async updateTaskinRepo(data: ITask, taskId: string): Promise<ITask | null> {
     return await this.CourseRepo.UpdateTask(taskId, data);
   }
-  async getLesson(lessonid: string): Promise<ILesson | null> {
+  async getLessonByid(lessonid: string): Promise<ILesson | null> {
     return this.CourseRepo.FindLessonByid(lessonid);
   }
   async addLessoninCourse(courseId: string, lessonid: string): Promise<void> {
@@ -173,10 +134,8 @@ export class CourseUsecase implements ICourseUseCase {
       $push: { lessons: lessonid },
     } as any);
   }
-
   async deleteCourse(courseid: string): Promise<void> {
     await this.CourseRepo.deleteCourse(courseid);
- 
 
     return;
   }
@@ -196,11 +155,8 @@ export class CourseUsecase implements ICourseUseCase {
     coursesCount: number;
     completedCourse: number;
   }> {
- 
-
     // Fetch all progress data for the user
     const progressData = await this.CourseRepo.getAllprogressByuserid(userid);
- 
 
     let totalProgress = 0;
     let coursesCount = 0;
@@ -282,10 +238,7 @@ export class CourseUsecase implements ICourseUseCase {
   async createProgress(courseid: string, userid: string) {
     // Fetch the course with populated lessons and tasks
     try {
- 
-
       const course = await this.CourseRepo.FindSelectedCourse(courseid);
- 
 
       if (!course) {
         throw new Error("Course not found");
@@ -301,8 +254,6 @@ export class CourseUsecase implements ICourseUseCase {
 
         // Iterate through each task in the lesson
         lesson.Task.forEach((task: any) => {
- 
-
           let taskProgressItem: ITaskProgress | any = {};
           if (task.Type == "Video") {
             taskProgressItem = {
@@ -332,10 +283,6 @@ export class CourseUsecase implements ICourseUseCase {
               Status: "Not Started",
             };
           }
- 
-
-          // Add the task progress to the array
-          // if (taskProgressItem && taskProgressItem.keys.length !== 0) {
           taskProgress.push(taskProgressItem);
           // }
         });
@@ -351,7 +298,6 @@ export class CourseUsecase implements ICourseUseCase {
         // Add the lesson progress to the array
         lessonProgress.push(lessonProgressItem);
       });
- 
 
       await this.CourseRepo.createProgress(userid, courseid, lessonProgress);
 
@@ -389,12 +335,10 @@ export class CourseUsecase implements ICourseUseCase {
       result.OverallScore == 100
     );
     if (result.OverallScore == 100) {
- 
       let sertificate = await this.CertificateRepo.GetCertificateByCourseid(
         result.Student_id._id,
         result.Course_id._id
       );
- 
 
       if (!sertificate) {
         sertificate = await this.CertificateRepo.createCertificate(
@@ -406,7 +350,7 @@ export class CourseUsecase implements ICourseUseCase {
           new Date()
         );
       }
- 
+
       result.certificateId = sertificate?._id;
     }
 
@@ -469,13 +413,11 @@ export class CourseUsecase implements ICourseUseCase {
     return await this.CourseRepo.getOneorder(userid, orderid);
   }
   async certificate(userid: string, courseid: string): Promise<any> {
- 
-
     const ddd = await this.CertificateRepo.GetCertificateByCourseid(
       userid,
       courseid
     );
- 
+
     return ddd;
   }
   async getAllCertificate(
@@ -493,10 +435,117 @@ export class CourseUsecase implements ICourseUseCase {
   }
   async actionCourse(coureseId: string, action: boolean): Promise<void> {
     await this.CourseRepo.UpdataCourse(String(coureseId), { unlist: action });
+    return;
   }
   async getCourseByName(name: string, Mentor_id: string) {
     return await this.CourseRepo.getByname(name, Mentor_id);
   }
-}
+  async getallCourses(id: string, filter: any): Promise<any> {
+    const { page, limit, search, status, priceRange, sortBy } = filter;
+    const skip = (page - 1) * limit;
+    const match: any = { Mentor_id: id };
+    let sort: any = {};
+    if (sortBy !== "all" && sortBy) {
+      if (sortBy == "price-high") {
+        sort.Price = -1;
+      }
+      if (sortBy == "price-low") {
+        sort.Price = 1;
+      }
+      if (sortBy == "oldest") {
+        sort.CreatedAt = 1;
+      }
+      if (sortBy == "newest") {
+        sort.CreatedAt = -1;
+      }
+    }
 
-// interface I
+    if (status !== "all" && status) {
+      match["Approved_by_admin"] = status;
+    }
+    if (search) {
+      match["$or"] = [
+        { Title: { $regex: new RegExp(search, "i") } },
+        { "Category.Category": { $regex: new RegExp("^" + search, "i") } },
+      ];
+    }
+    const pipline = [
+      {
+        $lookup: {
+          from: "categories",
+          localField: "Category",
+          foreignField: "_id",
+          as: "Category",
+        },
+      },
+      {
+        $unwind: "$Category",
+      },
+      { $match: match },
+      { $sort: sort },
+
+      {
+        $lookup: {
+          from: "users",
+          let: { mentorId: "$Mentor_id" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$_id", "$$mentorId"] } } },
+            { $project: { _id: 0, name: 1 } },
+          ],
+          as: "Mentor_id",
+        },
+      },
+      {
+        $unwind: "$Mentor_id",
+      },
+      {
+        $facet: {
+          total: [{ $count: "count" }],
+          data: [{ $skip: skip }, { $limit: Number(limit) }],
+        },
+      },
+    ];
+    const data = await this.CourseRepo.getCourse(id, pipline);
+
+    return data;
+  }
+  async getLesson(id: string) {
+    const data = await this.CourseRepo.getLessons(id);
+
+    return data?.lessons;
+  }
+  async updataCourse(courseId: string, data: any) {
+    const updated: any = {};
+    for (let i in data) {
+      const value = data[i];
+      if (typeof value === "string") {
+        if (value.trim() !== "") {
+          updated[i] = value;
+        }
+      } else if (value !== null && value !== undefined) {
+        updated[i] = value;
+      }
+    }
+    if (updated["Title"]) {
+      // this.
+    }
+    await this.CourseRepo.UpdataCourse(courseId, updated);
+  }
+
+  async DeleteLesson(lesosnid: string): Promise<any> {
+    const categoryis = await this.CourseRepo.FindLessonByid(lesosnid);
+
+    categoryis?.Task?.forEach(async (data) => {
+      await this.CourseRepo.deleteTask(data);
+    });
+
+    await this.CourseRepo.DeleteLessonByid(lesosnid);
+  }
+  async getOrderBymentor(
+    mentorid: string,
+    page: number,
+    limit: number
+  ): Promise<any> {
+    return await this.CourseRepo.getOrdersByMentorId(mentorid, page, limit);
+  }
+}

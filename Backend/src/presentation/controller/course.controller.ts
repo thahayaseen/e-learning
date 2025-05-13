@@ -33,14 +33,12 @@ export class courseControllerClass {
       if (!courseid) {
         return;
       }
- 
 
       const meetid = await this.MeetingUsecase.getMeetByuserid(_id, courseid);
- 
 
       const user = await this.userUseCase.UseProfileByemail(req.user.email);
       const isvalid = user?.purchasedCourses?.includes(courseid);
- 
+
       if (isvalid == undefined) return;
 
       const reslt = await this.CourseUseCase.getSelectedCourse(
@@ -48,11 +46,10 @@ export class courseControllerClass {
         isvalid,
         _id
       );
- 
+
       if (!reslt.progress) {
         delete reslt.progress;
       }
- 
 
       res.status(HttpStatusCode.OK).json({
         success: true,
@@ -87,7 +84,6 @@ export class courseControllerClass {
 
       if (token) {
         userData = await this.LoginUsecase.protectByjwt(token);
- 
       }
 
       // Build filter object
@@ -136,7 +132,6 @@ export class courseControllerClass {
       ) {
         filter.fromUser = true;
       }
- 
 
       // Get
       //  courses with pagination, filtering and sorting
@@ -167,8 +162,6 @@ export class courseControllerClass {
       const { taskid } = req.params;
       const { answer } = req.body;
       const data = await this.CourseUseCase.getTaskByid(taskid);
- 
- 
 
       if (data && "Answer" in data && data.Answer == answer) {
         res.status(HttpStatusCode.OK).json({
@@ -226,18 +219,16 @@ export class courseControllerClass {
     try {
       const { page, limit } = req.query;
       const { _id, role } = req.user;
- 
+
       if (!_id || !page || !limit) {
         throw new Error("Please send valid data");
       }
- 
 
       const result = await this.userUseCase.AllOrders(
         role == Roles.ADMIN ? "all" : _id,
         Number(page),
         Number(limit)
       );
- 
 
       res.status(HttpStatusCode.OK).json({
         success: true,
@@ -246,8 +237,6 @@ export class courseControllerClass {
       });
     } catch (error) {
       if (error instanceof Error) {
- 
-
         res.status(HttpStatusCode.BAD_REQUEST).json({
           success: false,
           message: error.message || "Unable to fetch ",
@@ -262,13 +251,11 @@ export class courseControllerClass {
       if (!_id || !courseId) {
         throw new Error("Please shere valid information");
       }
- 
 
       const result = await this.CourseUseCase.certificate(_id, courseId);
       if (!result) {
         throw new Error("please Compleate course");
       }
- 
 
       res.status(HttpStatusCode.OK).json({
         success: true,
@@ -287,21 +274,16 @@ export class courseControllerClass {
   }
   async createCourses(req: AuthServices, res: Response) {
     try {
- 
-
       const Coursdata = req.body.data;
- 
- 
+
       const userid = await this.MentoruseCases.findUserid(req.user.email);
- 
 
       Coursdata["Mentor_id"] = String(userid?._id);
- 
+
       const aldredy = await this.CourseUseCase.getCourseByName(
         Coursdata.Title,
         String(userid?._id)
       );
- 
 
       if (aldredy.length !== 0) {
         res.status(HttpStatusCode.CONFLICT).json({
@@ -315,12 +297,10 @@ export class courseControllerClass {
       if (Coursdata) {
         const validation = CourseSchema.safeParse(Coursdata);
         if (!validation.success) {
- 
           res
             .status(HttpStatusCode.BAD_REQUEST)
             .json({ success: false, error: validation.error.formErrors });
         }
- 
 
         const ids = await this.CourseUseCase.addlessons(Coursdata.lessons);
         Coursdata.lessons = ids;
@@ -333,7 +313,6 @@ export class courseControllerClass {
       });
       return;
     } catch (error) {
- 
       res.status(HttpStatusCode.INTERNAL_SERVER_ERROR);
       return;
     }
@@ -346,8 +325,8 @@ export class courseControllerClass {
         .json({ success: false, message: userError.Unauthorised });
       return;
     }
-    let data = await this.MentoruseCases.getallCourses(userid._id, req.query);
- 
+    let data = await this.CourseUseCase.getallCourses(userid._id, req.query);
+
     data = data[0];
     data.total = data?.total[0]?.count || data.total;
     res.status(HttpStatusCode.OK).json({
@@ -358,10 +337,7 @@ export class courseControllerClass {
     return;
   }
   async controlergetLesson(req: AuthServices, res: Response) {
- 
-
-    const datas = await this.MentoruseCases.getLesson(req.body.lessonid);
- 
+    const datas = await this.CourseUseCase.getLesson(req.body.lessonid);
 
     res.status(HttpStatusCode.OK).json({
       success: true,
@@ -374,7 +350,6 @@ export class courseControllerClass {
     try {
       const id = req.user._id;
       const { page, limit, search } = req.query;
- 
 
       const data = await this.CourseUseCase.getAllCertificate(
         id,
@@ -382,7 +357,6 @@ export class courseControllerClass {
         Number(limit),
         search
       );
- 
 
       res.status(HttpStatusCode.OK).json({
         success: false,

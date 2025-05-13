@@ -95,7 +95,8 @@ export default function CourseEditDialog({
   const [isEditLessonOpen, setIsEditLessonOpen] = useState(false);
   const [selectedLesson, setSelectedLesson] = useState<ILesson | null>(null);
 
-  const { lessons, fetchLessons, addLesson, updateLesson } = useLessonRepository(course._id);
+  const { lessons, fetchLessons, addLesson, updateLesson } =
+    useLessonRepository(course._id);
   const { categories, fetchCategories } = useCategoryRepository();
 
   // Fetch lessons and categories when dialog opens
@@ -137,10 +138,12 @@ export default function CourseEditDialog({
     }
   };
 
-  const handleChangeCourseImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeCourseImage = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
+
     try {
       setIsImageUploading(true);
       const url = await uploadtos3(file, "image");
@@ -151,7 +154,6 @@ export default function CourseEditDialog({
       toast.success("Image uploaded successfully");
     } catch (error) {
       toast.error("Failed to upload image");
- 
     } finally {
       setIsImageUploading(false);
     }
@@ -170,11 +172,10 @@ export default function CourseEditDialog({
       // Call API to update course
       setIsLoading(true);
       if (course.Approved_by_admin !== "approved") {
-         onUpdate(course._id, courseData)
-       
+        onUpdate(course._id, courseData);
       }
     } catch (error) {
-       if (error instanceof z.ZodError) {
+      if (error instanceof z.ZodError) {
         // Convert Zod errors to a more usable format
         const errors: Record<string, string> = {};
         error.errors.forEach((err) => {
@@ -189,8 +190,6 @@ export default function CourseEditDialog({
           description: `Please check the ${firstError.path[0]} field`,
         });
       } else {
-        
- 
         toast.error("An unexpected error occurred");
       }
     } finally {
@@ -211,10 +210,14 @@ export default function CourseEditDialog({
         ...courseData,
         unlist: !courseData.unlist,
       };
-      
+
       setCourseData(updatedData);
       await unlistCourse(course._id);
-      toast.success(updatedData.unlist ? "Course unlisted successfully" : "Course listed successfully");
+      toast.success(
+        updatedData.unlist
+          ? "Course unlisted successfully"
+          : "Course listed successfully"
+      );
     } catch (error) {
       toast.error("Failed to update course visibility");
     } finally {
@@ -303,10 +306,9 @@ export default function CourseEditDialog({
                       <div className="text-gray-400">No image selected</div>
                     )}
                     {course.Approved_by_admin !== "approved" && (
-                      <div 
+                      <div
                         className="absolute inset-0 bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer"
-                        onClick={() => courseImageRef.current?.click()}
-                      >
+                        onClick={() => courseImageRef.current?.click()}>
                         <Upload size={32} className="text-white mb-2" />
                         <span className="text-white text-sm">
                           {isImageUploading ? "Uploading..." : "Change Image"}
@@ -505,9 +507,9 @@ export default function CourseEditDialog({
                     type="button"
                     variant="outline"
                     className={`border flex items-center gap-2 ${
-                      courseData.unlist 
-                        ? 'text-white border-emerald-600 hover:bg-emerald-800' 
-                        : 'text-white border-gray-600 hover:bg-gray-700'
+                      courseData.unlist
+                        ? "text-white border-emerald-600 hover:bg-emerald-800"
+                        : "text-white border-gray-600 hover:bg-gray-700"
                     }`}
                     onClick={handleToggleCourseVisibility}
                     disabled={isLoading}>
@@ -561,7 +563,14 @@ export default function CourseEditDialog({
               // Refresh lessons
               fetchLessons(course._id);
             } catch (error) {
-              toast.error("Failed to create lesson");
+              console.log(error, "error is");
+
+            
+              throw new Error(
+                error instanceof Error
+                  ? error.message
+                  : "Faild to create Lesson"
+              );
             }
           }}
         />
@@ -587,7 +596,7 @@ export default function CourseEditDialog({
           }}
           courses={[course]}
           setCourses={() => {}}
-          viewOnly={course.Approved_by_admin === "approved" }
+          viewOnly={course.Approved_by_admin === "approved"}
         />
       )}
     </>

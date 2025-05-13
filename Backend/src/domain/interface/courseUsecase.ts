@@ -29,7 +29,7 @@ export interface ICourseUseCase {
   ): Promise<orderDto>;
   purchaseCourse(userId: string, courseId: string): Promise<void>;
   createOrder(course: orderDto): Promise<orderDto>;
-  getByCoursids(
+  getByCoursidByUserid(
     CourseIds: string[],
     userid: string,
     page?: number,
@@ -104,4 +104,6 @@ export interface ICourseUseCase {
     search: any
   ): Promise<{ data: CertificateDTO[]; total: number }>;
   actionCourse(coureseId: string, action: boolean): Promise<void>;
+  // actionCourse(coureseId: string, action: boolean): Promise<void> 
+  getallCourses(id: string, filter: any): Promise<any> 
 }
