@@ -514,7 +514,7 @@ export class CourseUsecase implements ICourseUseCase {
 
     return data?.lessons;
   }
-  async updataCourse(courseId: string, data: any) {
+  async updataCourse(courseId: string, data: any, mentorId: string) {
     const updated: any = {};
     for (let i in data) {
       const value = data[i];
@@ -527,7 +527,13 @@ export class CourseUsecase implements ICourseUseCase {
       }
     }
     if (updated["Title"]) {
-      // this.
+      console.log("yessss", data);
+      const aldredy = await this.getCourseByName(updated["Title"], mentorId);
+      console.log(aldredy, "a;fre");
+
+      if (aldredy.length !== 0) {
+        throw new Error("The couse with same name aldredy exsist");
+      }
     }
     await this.CourseRepo.UpdataCourse(courseId, updated);
   }

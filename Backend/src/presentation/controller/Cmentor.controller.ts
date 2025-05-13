@@ -124,9 +124,8 @@ export class MentorController {
         delete data.lessons;
       }
       const { course } = await userServisess.verify(email, courseid);
-      const different =
-        new Date().getDate() - new Date(course.CreatedAt).getDate();
-      await this.CourseUsecase.updataCourse(courseid, data);
+
+      await this.CourseUsecase.updataCourse(courseid, data, _id);
       res.status(HttpStatusCode.OK).json({
         success: true,
         message: "updated Successfull",
@@ -192,8 +191,13 @@ export class MentorController {
       );
       console.log(getCourse.lessons, "test tje cpirse data", data);
       getCourse.lessons.forEach((datas: any) => {
-        console.log(datas.Lessone_name,data.Lessone_name,'ress is',datas.Lessone_name == data.Lessone_name);
-        
+        console.log(
+          datas.Lessone_name,
+          data.Lessone_name,
+          "ress is",
+          datas.Lessone_name == data.Lessone_name
+        );
+
         if (datas.Lessone_name == data.Lessone_name) {
           throw new Error("Lesson aldredy exsist");
         }
