@@ -94,7 +94,7 @@ const CourseCreation = ({
 
   // Check for draft when component mounts or when dialog opens
   useEffect(() => {
-     if (open && hasDraft) {
+    if (open && hasDraft) {
       setDraftDialogOpen(true);
     }
   }, [open, hasDraft]);
@@ -198,12 +198,14 @@ const CourseCreation = ({
         ...courseData,
         image: finalImageUrl,
       };
-
+      if (finalCourseData.lessons[0].Task.length == 0) {
+        throw new Error("cannot add couse without task");
+      }
       // Send data to API
       const result = await addCourse(finalCourseData);
-       if (result.success) {
+      if (result.success) {
         // Clear the draft after successful submission
-         clearDraft();
+        clearDraft();
 
         toast.success("Success", {
           description: "Course saved successfully!",
@@ -217,12 +219,13 @@ const CourseCreation = ({
           lessons: [],
           image: "",
         });
-        setActiveTab('basic')
-        setImageFile(null)
+        setActiveTab("basic");
+        setImageFile(null);
         setImagePreview("");
+        console.log(result.results, "data is");
         // Update courses list if setCourses function is provided
         if (setCourses && result.results) {
-          setCourses((prev: any) => [...prev, result.results]);
+          setCourses((prev: any[]) => [result.results, ...prev.slice(0, -1)]);
         }
 
         onOpenChange(false); // Close dialog
@@ -231,9 +234,8 @@ const CourseCreation = ({
           description: result.message || "Failed to save course",
         });
       }
-    } catch (error:any) {
- 
-      toast.error(error.message||"Error", {
+    } catch (error: any) {
+      toast.error(error.message || "Error", {
         description: "Failed to save course. Please try again.",
       });
     }

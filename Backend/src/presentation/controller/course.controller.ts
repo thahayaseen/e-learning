@@ -305,7 +305,7 @@ export class courseControllerClass {
         const ids = await this.CourseUseCase.addlessons(Coursdata.lessons);
         Coursdata.lessons = ids;
 
-        results = await this.CourseUseCase.createCourse(Coursdata);
+        results = await this.CourseUseCase.createCourseUseCase(Coursdata);
       }
       res.status(HttpStatusCode.CREATED).json({
         success: true,

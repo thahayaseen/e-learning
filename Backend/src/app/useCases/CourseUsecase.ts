@@ -79,7 +79,7 @@ export class CourseUsecase implements ICourseUseCase {
       limit
     );
   }
-  async createCourse(datas: Omit<ICourses, "_id">) {
+  async createCourseUseCase(datas: Omit<ICourses, "_id">) {
     return await this.CourseRepo.createCourse(datas);
   }
   async addlessons(datas: ILesson[]): Promise<any> {

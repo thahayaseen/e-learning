@@ -37,9 +37,9 @@ export class RepositoryCourses implements ICoursesRepository {
   private MENTOR_REVENUE_PERCENTAGE = 90;
   private ADMIN_REVENUE_PERCENTAGE = 10;
   async createCourse(data: Omit<ICourses, "_id">): Promise<ICourses> {
-    const datas = await Courses.create(data);
+    const datas = await Courses.create(data)
 
-    return datas;
+    return datas.populate('Category',"Category -_id")
   }
   async createTask(tasks: ITask[]): Promise<any> {
  

@@ -36,7 +36,7 @@ export interface ICourseUseCase {
     limit?: number
   ): Promise<ICourses[]>;
   addlessons(data: ILesson[]): Promise<any>;
-  createCourse(datas: Omit<ICourses, "_id">): Promise<any>;
+  createCourseUseCase(datas: Omit<ICourses, "_id">): Promise<any>;
   createTaskandaddtoLesson(
     data: ITask,
     lessonId: string
