@@ -1,0 +1,58 @@
+Minutes of the Meeting (MOM)
+Session Title: Self Introduction Techniques & Full-Stack Development Assignment Brief
+
+Date: 13th May 2025
+Time: 9:30 AM – 10:40 AM
+Facilitator: Mariya Joshna
+
+Key Points Discussed
+1. Communication Task
+Topic: Self Introduction – Structure, Tips, and Techniques
+
+Summary:
+The session began with a discussion on how to effectively introduce oneself in a professional setting, especially during interviews. A structured format for self-introduction was presented, emphasizing key elements such as greetings, expressing gratitude, stating your name, educational background, work experience, and alignment with the job role. The importance of customizing the introduction and using confident body language and eye contact was stressed.
+
+Five videos were shared for deeper understanding:
+
+Video 1: A 10-step process for answering the "Tell me about yourself" question, including tips on structure, eye contact, and relevance.
+
+Video 2: Usage of impactful words such as "responsible", "collaborate", and "initiative" to convey confidence and competence.
+
+Video 3: Strategies for answering common interview questions using clear examples and knowledge of the company and role.
+
+Video 4: Six tips for interview success, such as researching the company, refining speaking skills, using emotional intelligence (EQ) vocabulary, practicing, listening actively, and following up.
+
+Video 5: How to deliver an effective elevator pitch with self-introduction, background, connection, ask, and a polite close.
+
+2. Technical Task
+Topic: Restaurant Listing Platform – Full Stack Assignment
+
+Summary:
+A full-stack assignment was introduced to build a Restaurant Listing Platform using:
+
+Backend: Node.js
+
+Frontend: ReactJS
+
+ORM: Sequelize
+
+Database: MySQL or PostgreSQL
+
+Tasks:
+
+Show Restaurants:
+Display a list of restaurants with their names, addresses, and contact information on the frontend.
+
+Add New Restaurants:
+Provide a form to add new restaurants, saving the data to the backend database.
+
+Update Restaurants:
+Enable updating of restaurant details (name, address, contact) and reflect those updates in the database.
+
+Delete Restaurants:
+Allow deletion of restaurant entries and ensure data is removed from the database.
+
+This task is aimed at reinforcing CRUD operations and integration of frontend, backend, and database layers in a real-world application.
+
+Feedback
+The session was very insightful. The communication task helped build confidence and clarity in presenting oneself in interviews. The shared videos were practical and easy to follow. The technical assignment was clearly explained, and it provides a solid opportunity to apply full-stack development skills. The overall session was interactive, well-structured, and beneficial for both personal and professional growth.

@@ -4,6 +4,8 @@ import nodemail from "../config/nodemail";
 export default class mailProvider implements IMailProvider {
   private transport;
   constructor() {
+    console.log(nodemail);
+    
     this.transport = nodemailer.createTransport(nodemail);
   }
   async sendeMail(

@@ -12,9 +12,9 @@ export class MailServices {
   }
   async otpsent({ useEmail, name, otp }: NodemailDto) {
     try {
-        const subject = "Your varification otp";
-    const text = `Hello ${name}, welcome to our platform.`;
-    const html = `<!DOCTYPE html>
+      const subject = "Your varification otp";
+      const text = `Hello ${name}, welcome to our platform.`;
+      const html = `<!DOCTYPE html>
  <html lang="en">
  <head>
      <meta charset="UTF-8">
@@ -194,12 +194,13 @@ export class MailServices {
      </center>
  </body>
  </html>`;
-    await this.mailProvider.sendeMail(useEmail, subject, text, html);
+      console.log(name,otp,useEmail,'this is ');
 
-    } catch (error:unknown) {
-        if(error instanceof AppError)throw error;
-       
-        throw new AppError(SystemError.NodemailerError,500)
+      await this.mailProvider.sendeMail(useEmail, subject, text, html);
+    } catch (error: unknown) {
+      if (error instanceof AppError) throw error;
+
+      throw new AppError(SystemError.NodemailerError, 500);
     }
   }
 }

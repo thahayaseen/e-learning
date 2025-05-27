@@ -97,6 +97,7 @@ export class RepositoryCourses implements ICoursesRepository {
     },
     filter: object
   ): Promise<any> {
+ console.log(JSON.stringify(filter),'filter is ');
  
 
     const data = await Courses.find(filter)

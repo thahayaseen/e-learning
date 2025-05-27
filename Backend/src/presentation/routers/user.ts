@@ -62,7 +62,7 @@ router.put(
   adminControler.blockUser.bind(adminControler)
 );
 router.get(
-  "/getcourse/:page/:type",
+  "/getcourse/:type",
   Middlewares.jwtVerify,
   Middlewares.roleChecker(Roles.ADMIN),
 
@@ -194,6 +194,13 @@ router.put(
   Middlewares.roleChecker(Roles.ADMIN),
 
   adminControler.actionToRequst.bind(adminControler)
+);
+router.put(
+  "/action-course/:id",
+  Middlewares.jwtVerify,
+  Middlewares.roleChecker(Roles.ADMIN),
+
+  adminControler.Approve_RejectCourse.bind(adminControler)
 );
 router.put(
   "/update-profile",

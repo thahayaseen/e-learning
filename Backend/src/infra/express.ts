@@ -15,11 +15,9 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use(
   cors({
-    origin: [
-      "https://e-learning-git-main-thahayaseens-projects.vercel.app",
-      "http://localhost:3000",
+    origin:
       "https://e-learning-phi-five.vercel.app",
-    ],
+    
     methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
     credentials: true,
   })

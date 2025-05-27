@@ -7,4 +7,5 @@ export interface IAdmin {
   changeCategory(id: string, data: ICategory): Promise<void>;
   actionCourse(id: string, type: boolean): Promise<void>;
   getCategoryNameUsecase(name: string): Promise<ICategory | null>;
+  MainAcTion(id: string, action: boolean): any;
 }

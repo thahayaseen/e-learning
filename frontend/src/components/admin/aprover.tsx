@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { Check, X, Eye, Loader2, FileX } from "lucide-react";
+import { Check, X, Eye, Loader2, FileX, Search } from "lucide-react";
 
 import {
   Card,
@@ -26,6 +26,8 @@ import AdminCourseLessonTaskView from "./course";
 import { ICourses } from "@/services/interface/CourseDto";
 import PaginationComponent from "../default/pagination";
 import { getImage } from "@/services/getImage";
+import { Input } from "../ui/input";
+import { Debouncing } from "@/services/debauncing";
 
 const AdminCourseManagement: React.FC = () => {
   const [page, setPage] = useState(1);
@@ -37,33 +39,39 @@ const AdminCourseManagement: React.FC = () => {
   const dispatch = useDispatch();
   const [courses, setCourses] = useState<ICourses[]>([]);
   const [openCourse, setOpenCourse] = useState(false);
+  const [searchQuery, SetsearchQuery] = useState("");
   const [selectedCourse, setSelectedCourse] = useState<ICourses | null>(null);
-
+  const [isSearching, SetisSearching] = useState(false);
   // Memoized fetch function to reduce unnecessary re-renders
   const fetchCourses = useCallback(async () => {
     try {
-      dispatch(setloading(true));
-      const response = await getunaprovedCourse(page, typeOfList);
-       setTotal(response.total);
+      SetisSearching(true);
+      const response = await getunaprovedCourse(page, typeOfList, searchQuery);
+      setTotal(response.total);
       setCourses(response.data);
     } catch (error) {
- 
-      // Optionally dispatch an error action or show a toast notification
+    
     } finally {
-      dispatch(setloading(false));
+      SetisSearching(false);
     }
-  }, [page, typeOfList, dispatch]);
+  }, [page, typeOfList, dispatch, searchQuery]);
+  const handleSearchChange = (e) => {
+    console.log(e, "data is ");
 
+    SetsearchQuery(e.target.value);
+   
+  };
   useEffect(() => {
     fetchCourses();
-  }, [fetchCourses]);
+  }, [fetchCourses,searchQuery]);
+
 
   // Memoized course action handler
   const handleCourseAction = useCallback(
     async (courseId: string, action: boolean) => {
       try {
-         await actionCourse(courseId, action);
-         setCourses((prevCourses) =>
+        await actionCourse(courseId, action);
+        setCourses((prevCourses) =>
           prevCourses.map((course) =>
             course._id === courseId
               ? {
@@ -74,7 +82,6 @@ const AdminCourseManagement: React.FC = () => {
           )
         );
       } catch (error) {
- 
         // Optionally show error notification
       }
     },
@@ -84,13 +91,14 @@ const AdminCourseManagement: React.FC = () => {
   // Memoized course view handler
   const handleCourseView = useCallback(async (course: ICourses) => {
     try {
+      console.log('here');
+      
       const data = await getlessons(course._id);
       const courseWithLessons = { ...course, lessons: data.data };
 
       setSelectedCourse(courseWithLessons);
       setOpenCourse(true);
     } catch (error) {
- 
       // Optionally show error notification
     }
   }, []);
@@ -127,6 +135,22 @@ const AdminCourseManagement: React.FC = () => {
           <CardDescription>
             Review and manage course submissions
           </CardDescription>
+          <div className="relative w-full max-w-sm text-primary-foreground">
+            <Input
+              type="text"
+              placeholder="Search courses..."
+              value={searchQuery}
+              onChange={handleSearchChange}
+              className="pr-10"
+            />
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+              {isSearching ? (
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              ) : (
+                <Search className="h-4 w-4 text-muted-foreground" />
+              )}
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <Tabs

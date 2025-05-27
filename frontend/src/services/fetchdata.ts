@@ -39,7 +39,7 @@ export const addCourse = async (data) => {
 };
 export const getlessons = async (lessonid: string) => {
   try {
-    return await axios.post("/mentor/lessons", { lessonid });
+    return await axios.get("/mentor/lessons/"+lessonid);
   } catch (error: any) {
     return error.response.data;
   }
@@ -72,9 +72,9 @@ export const getcourse = async ({
     return error.response?.data || "unable to Fetch data ";
   }
 };
-export const getunaprovedCourse = async (page: number, typeofList: string) => {
+export const getunaprovedCourse = async (page: number, typeofList: string,filter?:string) => {
   try {
-    const data = await axios.get("/getcourse/" + page + "/" + typeofList);
+    const data = await axios.get("/getcourse/" + typeofList+'?page='+page+(filter?'&filter='+filter:''));
     return data.data;
   } catch (error: any) {
     return error.response.data;
@@ -82,7 +82,7 @@ export const getunaprovedCourse = async (page: number, typeofList: string) => {
 };
 export const actionCourse = async (id: string, action: boolean) => {
   try {
-    const data = await axios.post("/mentor/action/" + id, { action });
+    const data = await axios.put("/action-course/" + id, { action });
     return data.data;
   } catch (error) {
     return error.response.data;

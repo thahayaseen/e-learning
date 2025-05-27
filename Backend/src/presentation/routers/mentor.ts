@@ -24,10 +24,10 @@ router.get(
   courseController.getCourses.bind(courseController)
 );
 
-router.post(
-  "/lessons",
+router.get(
+  "/lessons/:lessonid",
   Middlewares.jwtVerify,
-  Middlewares.roleChecker(Roles.MENTOR),
+  Middlewares.roleChecker([Roles.MENTOR,Roles.ADMIN]),
   courseController.controlergetLesson.bind(courseController)
 );
 router.post(

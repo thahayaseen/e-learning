@@ -1,5 +1,4 @@
-
-import {  Response } from "express";
+import { Response } from "express";
 import { Roles, userError } from "../../app/useCases/enum/User";
 import { AuthServices } from "./user.controller";
 import { SystemError } from "../../app/useCases/enum/systemError";
@@ -16,7 +15,6 @@ export default class Admincontroler {
   ) {}
   async blockUser(req: AuthServices, res: Response) {
     try {
- 
       if (String(req.user._id) == String(req.body.userid)) {
         throw new Error("Cannot self Block");
       }
@@ -54,8 +52,6 @@ export default class Admincontroler {
           filter,
         });
 
- 
-
         res.status(HttpStatusCode.OK).json({
           success: true,
           message: "data fetched success",
@@ -71,15 +67,8 @@ export default class Admincontroler {
   }
   async createCategorys(req: AuthServices, res: Response) {
     try {
- 
-      // if (req.user.role !== Roles.ADMIN) {
-      //   res.status(HttpStatusCode.BAD_REQUEST);
-      //   return;
-      // }
-
       const { name, description } = req.body;
       const datass = await this.adminUsecase.getCategoryNameUsecase(name);
- 
 
       if (datass) {
         throw new Error("Category aldredy exsist");
@@ -102,21 +91,13 @@ export default class Admincontroler {
   async editCategory(req: AuthServices, res: Response) {
     try {
       const { email, role } = req.user;
-      // if (role !== Roles.ADMIN) {
-      //   res.status(HttpStatusCode.BAD_REQUEST);
-      //   return;
-      // }
       const { categoryid } = req.params;
       const { data } = req.body;
- 
 
       if (data && data.Category) {
- 
-
         const result = await this.adminUsecase.getCategoryNameUsecase(
           data.Category
         );
- 
 
         if (result) {
           throw new Error(`This Category Aldredy exsist's`);
@@ -139,14 +120,6 @@ export default class Admincontroler {
   async actionCategory(req: AuthServices, res: Response) {
     try {
       const { categoryid } = req.params;
-      // if (req.user.role !== Roles.ADMIN) {
-      //   res.status(HttpStatusCode.UNAUTHORIZED).json({
-      //     success: false,
-      //     message: userError.Unauthorised,
-      //   });
-      //   return;
-      // }
- 
 
       await this.adminUsecase.actionCourse(categoryid, req.body.type);
       res.status(HttpStatusCode.OK).json({
@@ -160,23 +133,19 @@ export default class Admincontroler {
       });
     }
   }
+
   async getCourseunaproved(req: AuthServices, res: Response) {
     try {
-      // if (req.user.role !== Roles.ADMIN) {
-      //   res.status(HttpStatusCode.UNAUTHORIZED).json({
-      //     success: false,
-      //     message: userError.Unauthorised,
-      //   });
-      //   return;
-      // }
-      const { page, type } = req.params;
- 
+      const { type } = req.params;
+      const { page, filter } = req.query;
+      console.log(filter);
 
       const data = await this.adminUsecase.unaprovedgetCourses(
         Number(page),
-        type
+        type,
+        filter
       );
- 
+
       if (!data) {
         throw new Error("not fount");
       }
@@ -194,15 +163,8 @@ export default class Admincontroler {
   }
   async getAllmentorrequst(req: AuthServices, res: Response) {
     try {
-      const { _id, role } = req.user;
- 
-
-      // if (role !== Roles.ADMIN) {
-      //   throw new Error("Only admin have access to this api");
-      // }
       const { page } = req.query || 1;
       const filter = req.query;
- 
 
       const data = await this.userUsecase.getAllrequst(Number(page), filter);
       res.status(HttpStatusCode.OK).json({
@@ -227,10 +189,9 @@ export default class Admincontroler {
       }
       const { dataid } = req.params;
       const { action } = req.body;
- 
 
       const data = await this.userUsecase.updateRequst(dataid, action);
- 
+
       if (action == "accepted") {
         await this.userUsecase.changeUserRoleUsecase(data.userid, "mentor");
       }
@@ -246,6 +207,26 @@ export default class Admincontroler {
         message: error.message || SystemError.SystemError,
       });
       return;
+    }
+  }
+  async Approve_RejectCourse(req: AuthServices, res: Response) {
+    try {
+      const { id } = req.params;
+      const { action } = req.body;
+      if (!id || action == undefined) {
+        throw new Error("need more credencial");
+      }
+      console.log(action,'action is');
+      
+      await this.adminUsecase.MainAcTion(id, action);
+      res.status(HttpStatusCode.OK).json({
+        success:true
+      })
+    } catch (error) {
+      res.status(HttpStatusCode.BAD_REQUEST).json({
+        success:false,
+
+      })
     }
   }
 }

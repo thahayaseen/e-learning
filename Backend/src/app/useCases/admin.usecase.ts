@@ -65,7 +65,6 @@ export default class Admin implements IAdmin {
   }
   async Blockuser(id: string, type: boolean) {
     try {
-
       await this.UserRepository.Blockuser(id, type);
       return;
       return;
@@ -89,16 +88,19 @@ export default class Admin implements IAdmin {
       new AppError(SystemError.DatabaseError, HttpStatusCode.BAD_REQUEST);
     }
   }
-  async unaprovedgetCourses(page: number, typeofList: string) {
-    let filter;
+  async unaprovedgetCourses(page: number, typeofList: string, filters?: any) {
+    let filter: any = {};
     if (typeofList != "all") {
       filter = { Approved_by_admin: typeofList };
+    } else if (filters) {
+      filter["$or"] = [{ Title: { $regex: filters, $options: "i" } }];
     } else {
       filter = {};
     }
+    console.log(filter);
+
     const limit = 6;
     const skip = (page - 1) * limit;
- 
 
     return await this.CourseRepo.getUnaproved({ limit, skip }, filter);
   }
@@ -106,13 +108,23 @@ export default class Admin implements IAdmin {
     await this.CategoryRepo.editCategoy(id, data);
     return;
   }
-  async actionCourse(id: string, type: boolean): Promise<void> {
+
+  async actionCourse(
+    id: string,
+    type: boolean,
+    Maction: boolean = false
+  ): Promise<void> {
     const courses = await this.CourseRepo.getCourseByCategory(id);
     courses.forEach(async (data) => {
       await this.CourseRepo.UpdataCourse(String(data._id), { unlist: type });
     });
     await this.CategoryRepo.action(id, type);
     return;
+  }
+  async MainAcTion(id: string, action: boolean) {
+    await this.CourseRepo.UpdataCourse(id, {
+      Approved_by_admin: action ? "approved" : "rejected",
+    });
   }
 }
 export type IAdminUsecase = InstanceType<typeof Admin>;

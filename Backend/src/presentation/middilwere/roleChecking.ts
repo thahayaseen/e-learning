@@ -15,15 +15,14 @@ export class AllMiddleware {
     private CourseUsecase: CourseUsecase
   ) {}
   // 👇 Middleware factory function
-  roleChecker(requiredRole: Roles) {
+  roleChecker(requiredRole: Roles[] | Roles) {
     return (req: Request, res: Response, next: NextFunction) => {
       try {
-        const { role } = (req as any).user; // Adjust typing if needed
+        const { role } = (req as any).user;
 
- 
- 
-
-        if (!role || role !== requiredRole) {
+        if (Array.isArray(requiredRole)) {
+          requiredRole.includes(role);
+        } else if (!role || role !== requiredRole) {
           throw new Error("Don't have access");
         }
 
@@ -42,19 +41,15 @@ export class AllMiddleware {
 
   jwtVerify = async (req: AuthServices, res: Response, next: NextFunction) => {
     try {
- 
       let token = req.headers.authorization?.split(" ")[1];
       let userData = null;
 
       if (token) {
         userData = await this.LoginUsecase.protectByjwt(token);
- 
       }
 
       if (!userData) {
- 
         const refreshToken = req.cookies.refresh;
- 
 
         if (!refreshToken) {
           res.status(401).json({ success: false, message: "Unauthorized" });
@@ -114,5 +109,4 @@ export class AllMiddleware {
       return;
     }
   };
-
 }

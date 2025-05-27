@@ -337,7 +337,7 @@ export class courseControllerClass {
     return;
   }
   async controlergetLesson(req: AuthServices, res: Response) {
-    const datas = await this.CourseUseCase.getLesson(req.body.lessonid);
+    const datas = await this.CourseUseCase.getLesson(req.params.lessonid);
 
     res.status(HttpStatusCode.OK).json({
       success: true,
