@@ -13,6 +13,8 @@ import { ICourses } from "@/services/interface/CourseDto";
 import { getImage } from "@/services/getImage";
 
 const ELearningPlatform = () => {
+console.log('urls is',process.env.NEXT_PUBLIC_S3Route);
+
   const dispatch = useDispatch<AppDispatch>();
   const [courses, setCouse] = useState<ICourses[]>([]);
   const state = useSelector((state: storeType) => state.User);

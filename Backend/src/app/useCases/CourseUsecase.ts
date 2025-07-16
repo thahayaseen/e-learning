@@ -38,7 +38,7 @@ export class CourseUsecase implements ICourseUseCase {
     id: string,
     isValid: boolean,
     userid?: string
-  ): Promise<{ data: ICourses; progress: IProgressCollection } | ICourses> {
+  ): Promise<{ data: ICourses; progress?: IProgressCollection } | ICourses> {
     try {
       let progress = null;
 
@@ -46,10 +46,12 @@ export class CourseUsecase implements ICourseUseCase {
       if (!data) {
         throw new Error("cannot find the course");
       }
-      if (userid && data) {
+      if (userid && data&&isValid) {
+        console.log('yes here');
+        
         const resu = await this.CourseRepo.getSelectedcourseprogress(
-          id,
-          userid
+          userid,id
+          
         );
         if (!resu) {
           throw new Error("Cannot find progress");
@@ -59,7 +61,7 @@ export class CourseUsecase implements ICourseUseCase {
           progress: resu,
         };
       }
-      return data;
+      return {data:data};
     } catch (error) {
       throw new Error(
         error instanceof Error ? error.message : "An error while taking course"

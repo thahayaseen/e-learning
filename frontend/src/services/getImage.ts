@@ -1,6 +1,8 @@
 import { generateSignedUrl } from "./S3.init";
 
 export const getImage = (id) => {
+  console.log(process.env.NEXT_PUBLIC_S3Route,'root');
+  
     if (
     id.split(".")[1]?.startsWith("google") ||
     id.split(".")[1]?.startsWith("s3")

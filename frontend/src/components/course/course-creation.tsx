@@ -160,9 +160,9 @@ const CourseCreation = ({
     try {
       // Validate required fields
       if (
-        !courseData.Title ||
-        !courseData.Description ||
-        !courseData.Category
+        !courseData.Title.trim() ||
+        !courseData.Description.trim() ||
+        !courseData.Category.trim()||courseData.Price<=0
       ) {
         toast.error("Validation Error", {
           description:

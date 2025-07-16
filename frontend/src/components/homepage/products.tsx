@@ -34,6 +34,7 @@ function Products({
   rating = 4.5,
 }: ProductDetails) {
   const isBestSeller = orderCount > 50;
+console.log(url,'urls is',process.env.NEXT_PUBLIC_S3Route);
 
   return (
     <Card className="overflow-hidden bg-gray-800 border-gray-700 transition-all duration-300 hover:-translate-y-2 hover:shadow-lg hover:shadow-indigo-500/20 group">

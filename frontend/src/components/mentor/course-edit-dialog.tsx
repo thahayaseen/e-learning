@@ -71,9 +71,14 @@ export default function CourseEditDialog({
     Price: course.Price,
     Category: course.Category._id,
     Content: course.Content,
-    image: `${getImage(course.image)}`,
+    image: course.image, // Store only the image name
     unlist: course.unlist || false,
   });
+  
+  // Store the full URL for display purposes
+  const [imageDisplayUrl, setImageDisplayUrl] = useState<string>(
+    `${getImage(course.image)}`
+  );
 
   useEffect(() => {
     setCourseData({
@@ -82,9 +87,10 @@ export default function CourseEditDialog({
       Price: course.Price,
       Category: course.Category._id,
       Content: course.Content,
-      image: `${getImage(course.image)}`,
+      image: course.image, // Store only the image name
       unlist: course.unlist || false,
     });
+    setImageDisplayUrl(`${getImage(course.image)}`);
   }, [course]);
 
   const { uploading, uploadtos3 } = useUploadS3();
@@ -114,7 +120,6 @@ export default function CourseEditDialog({
   ) => {
     const { name, value } = e.target;
 
-    // Clear the error for this field when the user makes changes
     if (formErrors[name]) {
       setFormErrors({
         ...formErrors,
@@ -146,11 +151,18 @@ export default function CourseEditDialog({
 
     try {
       setIsImageUploading(true);
-      const url = await uploadtos3(file, "image");
+      const imageName = await uploadtos3(file, "image");
+      console.log(imageName, 'this is the image name');
+      
+      // Update courseData with only the image name
       setCourseData({
         ...courseData,
-        image: url,
+        image: imageName,
       });
+      
+      // Update display URL with full path for immediate preview
+      setImageDisplayUrl(`${process.env.NEXT_PUBLIC_S3Route}${imageName}`);
+      
       toast.success("Image uploaded successfully");
     } catch (error) {
       toast.error("Failed to upload image");
@@ -172,7 +184,9 @@ export default function CourseEditDialog({
       // Call API to update course
       setIsLoading(true);
       if (course.Approved_by_admin !== "approved") {
-        onUpdate(course._id, courseData);
+        // Pass courseData with only the image name, not the full URL
+        await onUpdate(course._id, courseData);
+        toast.success("Course updated successfully");
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -283,9 +297,9 @@ export default function CourseEditDialog({
                     </p>
                   )}
                 </div>
+                
                 <div className="space-y-2">
                   <Label className="text-white">Course Image</Label>
-                    {/* <input type="text" value={courseData.image}></input> */}
                   <div className="relative rounded-md overflow-hidden border border-gray-700 h-48 flex items-center justify-center bg-gray-800">
                     <input
                       type="file"
@@ -295,9 +309,9 @@ export default function CourseEditDialog({
                       hidden
                       disabled={course.Approved_by_admin === "approved"}
                     />
-                    {courseData.image ? (
+                    {imageDisplayUrl ? (
                       <Image
-                        src={courseData.image}
+                        src={imageDisplayUrl}
                         className="object-contain w-full h-full"
                         width={400}
                         height={300}
@@ -316,6 +330,11 @@ export default function CourseEditDialog({
                         </span>
                       </div>
                     )}
+                  </div>
+                  {/* Debug info - remove in production */}
+                  <div className="text-xs text-gray-500">
+                    <p>Image name: {courseData.image}</p>
+                    <p>Display URL: {imageDisplayUrl}</p>
                   </div>
                 </div>
 
@@ -565,12 +584,10 @@ export default function CourseEditDialog({
               fetchLessons(course._id);
             } catch (error) {
               console.log(error, "error is");
-
-            
               throw new Error(
                 error instanceof Error
                   ? error.message
-                  : "Faild to create Lesson"
+                  : "Failed to create Lesson"
               );
             }
           }}

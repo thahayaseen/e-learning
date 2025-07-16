@@ -12,12 +12,12 @@ const nextConfig: NextConfig = {
         hostname: 'thahtib-al-juhd.s3.ap-south-2.amazonaws.com',
       },
     ],
-    // domains: [
-    //   "localhost",
-    //   "lh3.googleusercontent.com",
-    //   "exi-elarning.s3.ap-south-1.amazonaws.com",
-    //   "thahtib-al-juhd.s3.ap-south-2.amazonaws.com"
-    // ], // Allow images from localhost
+    domains: [
+      "localhost",
+      "lh3.googleusercontent.com",
+      "exi-elarning.s3.ap-south-1.amazonaws.com",
+      "thahtib-al-juhd.s3.ap-south-2.amazonaws.com"
+    ], // Allow images from localhost
     
   },
 };
