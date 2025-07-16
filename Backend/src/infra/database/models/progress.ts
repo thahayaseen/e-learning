@@ -1,4 +1,6 @@
-import mongoose, { Schema, Document, ObjectId } from "mongoose";
+import mongoose, { Schema, Document, ObjectId, Types } from "mongoose";
+import { IUserModel } from "./User";
+import { ICourses } from "./course";
 
 export interface ITaskProgress {
   Task_id: string;
@@ -19,12 +21,13 @@ export interface ILessonProgress {
 }
 
 export interface IProgressCollection {
-  Student_id: string;
-  Course_id: string;
+  Student_id: IUserModel;
+  Course_id: ICourses;
   lesson_progress: ILessonProgress[];
   UpdatedAt?: Date;
   CreatedAt?: Date;
   OverallScore?: number; // Overall score for the course
+  certificateId?:string
 }
 
 interface IProgressCollectionSchema extends IProgressCollection, Document {}

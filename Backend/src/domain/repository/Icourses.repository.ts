@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Types, UpdateQuery } from "mongoose";
 import { CourseDTO } from "../../app/dtos/coursesDto";
 import { orderDto } from "../../app/dtos/orderDto";
 import { ICourses } from "../../infra/database/models/course";
@@ -17,7 +17,7 @@ import { CourseInterface } from "../entities/returndata";
 export interface ICoursesRepository {
   createCourse(data: Omit<ICourses, "_id">): Promise<ICourses>;
   createTask(tasks: any): Promise<any>;
-  createLesson(lessondata: any): Promise<any>;
+  createLesson(lessondata: Partial<ILesson>): Promise<ILesson>;
   
   addTaskinsidelessone(lessonId: string, taskId: string): Promise<any>;
   getCourse(id: string, pipline: object[]): Promise<any>;
@@ -34,16 +34,16 @@ export interface ICoursesRepository {
     page: number,
     limit: number,
     sort: { field?: string; order?: "asc" | "desc" },
-    filter: ICourseFilter
+    filter: ICourseFilter|object
   ): Promise<IPaginationResult<any>>;
   getSingleCourse(id: string, isValid: boolean): Promise<ICourses | null>;
   AddStudentInCourse(courseId: string, userId: string): Promise<void>;
-  UpdataCourse(courseid: string, data: Partial<CourseDTO>): Promise<void>;
-  FindSelectedCourse(id: string): Promise<CourseDTO | null>;
+  UpdataCourse(courseid: string, data: UpdateQuery< CourseDTO>): Promise<void>;
+  FindSelectedCourse(id: string): Promise<ICourses | null>;
   updateLesson(lessonId: string, data: any): Promise<ILesson | null>;
-  DeleteLessonByid(id: string): Promise<any>;
+  DeleteLessonByid(id: Types.ObjectId): Promise<any>;
   DeleteLessonFromCourse(courseId: string, lessonId: string): Promise<void>;
-  FindLessonByid(id: string): Promise<ILesson | null>;
+  FindLessonByid(id: Types.ObjectId): Promise<ILesson | null>;
   UpdateTask(taskId: string, data: ITask): Promise<ITask | null>;
   FindTask(id: string): Promise<ITask | IQuizTask | null>;
   FindTaskFromlesson(lessonId: string, TaskId: string): Promise<void>;
@@ -56,7 +56,7 @@ export interface ICoursesRepository {
   getCourseBymentorRepository(user: string): Promise<ICourses[]>;
   deleteCourse(courseId: string): Promise<void>;
   DeleteTaskFromLesson(lessonid: string, taskid: string): Promise<void>;
-  deleteTask(id: string): Promise<void>;
+  deleteTask(id: Types.ObjectId): Promise<void>;
   createProgress(
     studentId: string,
     courseId: string,

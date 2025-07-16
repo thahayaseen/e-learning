@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 
-import { handleError } from "../../utils/handleerror";
+import { HandleErrointerface, handleError } from "../../utils/handleerror";
 
 import axios from "axios";
 import { Roles, userError } from "../../app/useCases/enum/User";
@@ -56,8 +56,8 @@ export default class UserController {
         sameSite: "none",
       });
       return;
-    } catch (error: any) {
-      handleError(res, error, error.statusCode);
+    } catch (error  ) {
+      handleError(res, error, (error as HandleErrointerface).statusCode);
     }
   }
 
@@ -65,8 +65,8 @@ export default class UserController {
     try {
       const otp = await this.signUpUser.reOtp(req.user.userid);
       res.status(HttpStatusCode.OK).json(otp);
-    } catch (error: any) {
-      handleError(res, error, error.statusCode);
+    } catch (error) {
+      handleError(res, error,  (error as HandleErrointerface).statusCode);
     }
   }
 
@@ -74,8 +74,8 @@ export default class UserController {
     try {
       await this.signUpUser.SavetoDb(req.body.userid);
       res.status(HttpStatusCode.OK).json({ success: true });
-    } catch (error: any) {
-      handleError(res, error, error.statusCode || HttpStatusCode.UNAUTHORIZED);
+    } catch (error) {
+      handleError(res, error,  (error as HandleErrointerface).statusCode || HttpStatusCode.UNAUTHORIZED);
     }
   }
 
@@ -107,8 +107,8 @@ export default class UserController {
           user: data.user,
         });
       return;
-    } catch (error: any) {
-      handleError(res, error, error.statusCode || HttpStatusCode.UNAUTHORIZED);
+    } catch (error) {
+      handleError(res, error,  (error as HandleErrointerface).statusCode || HttpStatusCode.UNAUTHORIZED);
     }
   }
   async otpverify(req: Request, res: Response, next: NextFunction) {
@@ -125,8 +125,8 @@ export default class UserController {
 
         next();
       }
-    } catch (error: any) {
-      handleError(res, error, error.statusCode || HttpStatusCode.UNAUTHORIZED);
+    } catch (error) {
+      handleError(res, error,  (error as HandleErrointerface).statusCode || HttpStatusCode.UNAUTHORIZED);
     }
   }
   async verifyForgotpassword(req: Request, res: Response) {
@@ -136,8 +136,8 @@ export default class UserController {
 
         res.status(HttpStatusCode.OK).json({ success: true, tocken: tocken });
       }
-    } catch (error: any) {
-      handleError(res, error, error.statusCode || HttpStatusCode.UNAUTHORIZED);
+    } catch (error) {
+      handleError(res, error,  (error as HandleErrointerface).statusCode || HttpStatusCode.UNAUTHORIZED);
     }
   }
 
@@ -145,8 +145,8 @@ export default class UserController {
     try {
       const token = await this.LoginUsecase.forgetpass(req.body.email);
       res.status(HttpStatusCode.OK).json({ success: true, token });
-    } catch (error: any) {
-      handleError(res, error, error.statusCode || HttpStatusCode.UNAUTHORIZED);
+    } catch (error) {
+      handleError(res, error,  (error as HandleErrointerface).statusCode || HttpStatusCode.UNAUTHORIZED);
     }
   }
 

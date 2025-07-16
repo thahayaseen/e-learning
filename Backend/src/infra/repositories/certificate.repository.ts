@@ -5,9 +5,9 @@ import Certificate from "../database/models/certificate";
 
 class CertificateRepo implements ICertificaterepository {
   async createCertificate(
-    student_id: string,
+    student_id: Types.ObjectId,
     student_name: string,
-    course_id: string,
+    course_id: Types.ObjectId,
     course_name: string,
     category: string,
     completed_date: Date
@@ -82,8 +82,8 @@ class CertificateRepo implements ICertificaterepository {
   }
 
   async GetCertificateByCourseid(
-    studentid: string,
-    courseid: string
+    studentid: Types.ObjectId,
+    courseid: Types.ObjectId
   ): Promise<CertificateDTO|null> {
   return  await Certificate.findOne({
       student_id: studentid,

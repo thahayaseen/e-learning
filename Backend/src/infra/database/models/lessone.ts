@@ -1,11 +1,12 @@
-  import mongoose, { Schema, Document, ObjectId } from "mongoose";
+  import mongoose, { Document,  Schema,  Types } from "mongoose";
+import { ITask } from "./tasks";
 
 export interface ILesson extends Document {
-  Lessone_name: String | null;
+  Lessone_name: Types.ObjectId|String | null;
   Content: String | null;
-  Task: string[] | null;
-  Course_id: ObjectId;
-  _id: ObjectId;
+  Task: ITask[] ;
+  Course_id: Types.ObjectId;
+  _id: Types.ObjectId;
 }
 
 const LessonSchema: Schema = new Schema({

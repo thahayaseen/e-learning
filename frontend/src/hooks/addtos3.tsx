@@ -33,8 +33,12 @@ function useUploadS3() {
       if (!uploadedUrl.ok) {
         throw new Error("Failed to upload file");
       }
+      console.log(uploadUrl,'urls');
+      
       const fileUrl = uploadUrl.split("?")[0];
-       return fileUrl.split("/")[3]
+      console.log(fileUrl);
+      
+       return fileUrl.split("/")[4]
     } catch (error) {
        toast.error(
         error instanceof Error

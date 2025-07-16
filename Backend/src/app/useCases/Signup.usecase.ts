@@ -11,6 +11,7 @@ import { HttpStatusCode } from "./enum/Status";
 import IUserReposetory from "../../domain/repository/IUser.repository";
 
 import { IJwtService } from "../../domain/Provider/Ijwt";
+import { HandleErrointerface } from "../../utils/handleerror";
 
 // import redis from "../../config/redis";
 
@@ -117,14 +118,14 @@ export default class Signup {
  
 
       return { token, message: "otp sent successfully" };
-    } catch (error: any) {
-      console.error("Error in createUser:", error.message);
+    } catch (error) {
+
 
       if (error instanceof AppError) throw error;
 
       throw new AppError(
-        error.message || "Internal Server Error",
-        error.statusCode || HttpStatusCode.INTERNAL_SERVER_ERROR
+        error instanceof Error ?error.message: "Internal Server Error",
+         (error as HandleErrointerface).statusCode || HttpStatusCode.INTERNAL_SERVER_ERROR
       );
     }
   }
@@ -137,10 +138,10 @@ export default class Signup {
           HttpStatusCode.BAD_REQUEST
         );
       }
-    } catch (error: any) {
+    } catch (error) {
       throw new AppError(
-        error.message,
-        error.statusCode || HttpStatusCode.INTERNAL_SERVER_ERROR
+        error instanceof Error?error.message:'error while chekd user aldredy exsist',
+         (error as HandleErrointerface).statusCode || HttpStatusCode.INTERNAL_SERVER_ERROR
       );
     }
   }
@@ -166,9 +167,9 @@ export default class Signup {
       });
 
       return { success: true, message: "otp set successfully" };
-    } catch (error: any) {
-      console.error("Error regenerating OTP:", error.message);
-      throw new AppError(error.message, error.statusCode);
+    } catch (error) {
+      // console.error("Error regenerating OTP:", error.message);
+      throw new AppError(error instanceof Error?error.message:'Error while resent otp',  (error as HandleErrointerface).statusCode);
     }
   }
 
@@ -184,11 +185,11 @@ export default class Signup {
 
       data.verified = true;
       await this.userRepository.create(data);
-    } catch (error: any) {
-      console.error("Error saving user to DB:", error.message);
+    } catch (error) {
+      // console.error("Error saving user to DB:", error.message);
       throw new AppError(
-        error.message || "Failed to save user to database.",
-        error.statusCode || HttpStatusCode.INTERNAL_SERVER_ERROR
+      error instanceof Error?  error.message: "Failed to save user to database.",
+         (error as HandleErrointerface).statusCode || HttpStatusCode.INTERNAL_SERVER_ERROR
       );
     }
   }
@@ -213,9 +214,9 @@ export default class Signup {
 
  
       return token;
-    } catch (error: any) {
-      console.error("Error verifying OTP:", error.message);
-      throw new AppError(error.message, error.statusCode);
+    } catch (error) {
+      // console.error("Error verifying OTP:", error.message);
+      throw new AppError(error instanceof Error?error.message:'error while varify otp',  (error as HandleErrointerface).statusCode);
     }
   }
   async glogin(user: GoogleLoginDTO) {

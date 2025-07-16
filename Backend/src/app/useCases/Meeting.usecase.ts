@@ -4,7 +4,8 @@ import { IRmetting } from "../../domain/repository/Imeeting.repository";
 import IUserReposetory from "../../domain/repository/IUser.repository";
 import { MeetingDto } from "../dtos/MeetingDto";
 import { userError } from "./enum/User";
-import { Types } from "mongoose";
+import { FilterQuery, Types } from "mongoose";
+import { IUserModel } from "../../infra/database/models/User";
 
 class MeetingUsecase implements IMeetusecase {
   constructor(
@@ -17,10 +18,10 @@ class MeetingUsecase implements IMeetusecase {
     mentorId: string,
     page: number,
     limit: number,
-    filter: any,
-    sortBy?: any
+    filter: FilterQuery<IUserModel>,
+    sortBy?: FilterQuery<IUserModel>
   ): Promise<{ total: number; data: MeetingDto[] }> {
-    const match: any = {
+    const match: FilterQuery<IUserModel> = {
       mentorId: new Types.ObjectId(mentorId),
     };
 

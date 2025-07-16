@@ -17,6 +17,8 @@ import { Middlewares, userServisess } from "../../config/dependencies";
 import RevenueUseCase from "../../app/useCases/revenue.usecase";
 import { SystemError } from "../../app/useCases/enum/systemError";
 import { ILesson } from "../../infra/database/models/lessone";
+import { ICourses } from "../../infra/database/models/course";
+import { IProgressCollection } from "../../infra/database/models/progress";
 
 export class MentorController {
   constructor(
@@ -188,7 +190,7 @@ export class MentorController {
       const getCourse = await this.CourseUsecase.getSelectedCourse(
         courseId,
         false
-      );
+      )as ICourses
       console.log(getCourse.lessons, "test tje cpirse data", data);
       getCourse.lessons.forEach((datas: any) => {
         console.log(
@@ -221,9 +223,10 @@ export class MentorController {
       const { courseid } = req.body;
       const { email } = req.user;
       const { course } = await userServisess.verify(email, courseid);
-      course.lessons.forEach(async (id: string) => {
-        if (id) {
-          await this.CourseUsecase.DeleteLesson(id);
+      course.lessons.forEach(async (lessons: ILesson) => {
+        if (lessons._id) {
+         
+          await this.CourseUsecase.DeleteLesson(new Types.ObjectId(String(lessons._id)));
         }
       });
       await this.CourseUsecase.deleteCourse(courseid);
@@ -272,9 +275,9 @@ export class MentorController {
       const course = await this.CourseUsecase.getSelectedCourse(
         courseid,
         false
-      );
+      ) as  ICourses
 
-      if (!user || !user._id || !course || course.data || !course.Mentor_id) {
+      if (!user || !user._id || !course  || !course.Mentor_id) {
         throw new Error("user not fount");
       }
       let roomid;

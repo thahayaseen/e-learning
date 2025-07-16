@@ -1,5 +1,8 @@
 import { UserUsecase } from "../useCases/User.usecase";
 import { CourseUsecase } from "../useCases/CourseUsecase";
+import { IUserModel } from "../../infra/database/models/User";
+import { ICourses } from "../../infra/database/models/course";
+import { ILesson } from "../../infra/database/models/lessone";
 interface PipelineData {
   search?: string;
   filter?: string;
@@ -27,7 +30,7 @@ export class userServises {
       throw new Error("User not found");
     }
 
-    const course = await this.courseUsecase.getSelectedCourse(courseId, false);
+    const course = await this.courseUsecase.getSelectedCourse(courseId, false) as ICourses
     if (!course) {
       throw new Error("Course not found");
     }
@@ -41,8 +44,8 @@ export class userServises {
     }
 
     const lessonIndex = course.lessons.findIndex(
-      (data: any) => String(data._id) === lessonid
-    );
+      (data: ILesson) => String(data._id) === lessonid
+    ) 
 
     if (lessonid && islesson && lessonIndex === -1) {
       throw new Error("You don't have permission for this lesson");
@@ -57,7 +60,7 @@ export class userServises {
       }
 
       const lesson = await this.courseUsecase.getLessonByid(lessonid);
-      if (!lesson || !lesson.Task?.includes(taskId)) {
+      if (!lesson ||(lesson.Task&& !lesson.Task.includes(taskId as never))) {
         throw new Error("Unauthorized Task");
       }
     }

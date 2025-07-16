@@ -1,20 +1,21 @@
-import mongoose, { Schema, Document, ObjectId } from "mongoose";
+import mongoose, { Schema, Document, Types } from "mongoose";
+import { ILesson } from "./lessone";
 
 export interface ICourses extends Document {
-  _id: ObjectId;
+  _id: Types.ObjectId;
   Title: string | null;
-  Mentor_id: ObjectId | any | null;
+  Mentor_id: Types.ObjectId | any | null;
   Description: string | null;
   CreatedAt: Date | null;
-  Category: ObjectId | null;
+  Category: Types.ObjectId | null;
   Price: number | null;
   Approved_by_admin: "pending" | "rejected" | "approved";
-  Students_enrolled: ObjectId[] | null;
+  Students_enrolled: Types.ObjectId[] | null;
   UpdatedAt: Date | null;
   image: string;
-  lessons: string[];
+  lessons: ILesson[];
   Content: string | null;
-  Offer_id: ObjectId | null;
+  Offer_id: Types.ObjectId | null;
   unlist: boolean;
 }
 

@@ -18,10 +18,11 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   try {
     const { fileName, fileType } = await req.json(); // Get file name & type from request
+console.log(fileName,'nameis');
 
     const params = {
       Bucket: process.env.AWS_BUCKET_NAME!,
-      Key: fileName,
+      Key: `exi/${fileName}`,
       ContentType: fileType,
     };
 

@@ -1,7 +1,7 @@
 export interface orderDto {
   _id?: string;
   userId: string;
-  courseId: any;
+  courseId: string;
   paymentId: string;
   amount: number;
   currency: "inr" | "usd";

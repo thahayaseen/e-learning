@@ -8,6 +8,7 @@ import { userError } from "./enum/User";
 import IUserReposetory from "../../domain/repository/IUser.repository";
 import { ILogin } from "../../domain/interface/Ilogin";
 import { IJwtService } from "../../domain/Provider/Ijwt";
+import { HandleErrointerface } from "../../utils/handleerror";
 
 class AppError extends Error {
   constructor(message: string, private statuscode: number) {
@@ -61,9 +62,9 @@ export default class Login implements ILogin {
         user: { name: data.name, email: data.email, role: data.role },
         datas: JSON.stringify(token),
       };
-    } catch (error: any) {
+    } catch (error) {
  
-      throw new AppError(error.message, error.statusCode);
+      throw new AppError(error instanceof Error?error.message:"an error while login",  (error as HandleErrointerface).statusCode);
     }
   }
   async forgetpass(email: string) {
@@ -82,9 +83,9 @@ export default class Login implements ILogin {
         otp,
       });
       return { token };
-    } catch (error: any) {
+    } catch (error) {
  
-      throw new AppError(error.message, 404);
+      throw new AppError(error instanceof Error?error.message:'Error while forgot password', 404);
     }
   }
   async forgotTocken(userid: string) {
@@ -98,16 +99,14 @@ export default class Login implements ILogin {
  
 
       return;
-    } catch (error: any) {
-      throw new Error(error.message);
+    } catch (error) {
+      throw new Error(error instanceof Error?error.message:'Error while change password');
     }
   }
   async protectByjwt(tocken: string): Promise<JwtPayload | null> {
-    try {
+ 
       return this.jwtTockenProvider.verifyToken(tocken);
-    } catch (error: any) {
-      throw new Error(error.message);
-    }
+    
   }
   async generatToken(data: JwtPayload) {
     return this.jwtTockenProvider.accsessToken(data);

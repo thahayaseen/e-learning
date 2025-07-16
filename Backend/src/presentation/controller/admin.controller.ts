@@ -137,23 +137,27 @@ export default class Admincontroler {
   async getCourseunaproved(req: AuthServices, res: Response) {
     try {
       const { type } = req.params;
-      const { page, filter } = req.query;
+      let { page, filter } = req.query;
       console.log(filter);
-
-      const data = await this.adminUsecase.unaprovedgetCourses(
-        Number(page),
-        type,
-        filter
-      );
-
-      if (!data) {
-        throw new Error("not fount");
+      if (!filter) {
+        filter = {};
       }
-      res.status(HttpStatusCode.OK).json({
-        success: true,
-        message: "data fetched",
-        data,
-      });
+      if (typeof filter == "object") {
+        const data = await this.adminUsecase.unaprovedgetCourses(
+          Number(page),
+          type,
+          filter
+        );
+
+        if (!data) {
+          throw new Error("not fount");
+        }
+        res.status(HttpStatusCode.OK).json({
+          success: true,
+          message: "data fetched",
+          data,
+        });
+      }
       return;
     } catch (error: any) {
       res.status(HttpStatusCode.BAD_REQUEST).json({
@@ -216,17 +220,16 @@ export default class Admincontroler {
       if (!id || action == undefined) {
         throw new Error("need more credencial");
       }
-      console.log(action,'action is');
-      
+      console.log(action, "action is");
+
       await this.adminUsecase.MainAcTion(id, action);
       res.status(HttpStatusCode.OK).json({
-        success:true
-      })
+        success: true,
+      });
     } catch (error) {
       res.status(HttpStatusCode.BAD_REQUEST).json({
-        success:false,
-
-      })
+        success: false,
+      });
     }
   }
 }

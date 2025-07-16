@@ -285,6 +285,7 @@ export default function CourseEditDialog({
                 </div>
                 <div className="space-y-2">
                   <Label className="text-white">Course Image</Label>
+                    <input type="text" value={courseData.image}></input>
                   <div className="relative rounded-md overflow-hidden border border-gray-700 h-48 flex items-center justify-center bg-gray-800">
                     <input
                       type="file"

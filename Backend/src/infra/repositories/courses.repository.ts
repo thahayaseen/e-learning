@@ -1,4 +1,4 @@
-import mongoose, { Types } from "mongoose";
+import mongoose, { FilterQuery, Types } from "mongoose";
 import { CourseDTO } from "../../app/dtos/coursesDto";
 import { orderDto } from "../../app/dtos/orderDto";
 import { ICoursesRepository } from "../../domain/repository/Icourses.repository";
@@ -52,7 +52,7 @@ export class RepositoryCourses implements ICoursesRepository {
 
     return ids;
   }
-  async createLesson(lessondata: any): Promise<any> {
+  async createLesson(lessondata: Partial<ILesson>): Promise<ILesson> {
     const dat = await Lesson.create(lessondata);
 
     return dat;
@@ -122,7 +122,7 @@ export class RepositoryCourses implements ICoursesRepository {
       field: "UpdatedAt",
       order: "desc",
     },
-    filter: any = {}
+    filter: FilterQuery<ICourses> = {}
   ): Promise<IPaginationResult<any>> {
     // Base match filter for approved courses
     const matchFilter: any = {
@@ -415,7 +415,7 @@ export class RepositoryCourses implements ICoursesRepository {
     return await Lesson.findByIdAndUpdate(lessonId, qury, { new: true });
   }
 
-  async DeleteLessonByid(id: string): Promise<any> {
+  async DeleteLessonByid(id: Types.ObjectId): Promise<any> {
     return await Lesson.deleteOne({ _id: id });
   }
   async DeleteLessonFromCourse(
@@ -438,7 +438,7 @@ export class RepositoryCourses implements ICoursesRepository {
     );
     return;
   }
-  async FindLessonByid(id: string): Promise<ILesson | null> {
+  async FindLessonByid(id: Types.ObjectId): Promise<ILesson | null> {
     return await Lesson.findById(id);
   }
   // task managing
@@ -474,7 +474,7 @@ export class RepositoryCourses implements ICoursesRepository {
     });
     return;
   }
-  async deleteTask(id: string): Promise<void> {
+  async deleteTask(id: Types.ObjectId): Promise<void> {
     await Task.deleteOne({ _id: id });
 
     return;
@@ -817,7 +817,7 @@ export class RepositoryCourses implements ICoursesRepository {
         },
       });
 
-    return res;
+    return res as IProgressCollection;
   }
   async createProgressForuser(progressData: IProgressCollection) {
     await ProgressCollection.create(progressData);
