@@ -261,6 +261,7 @@ export class RepositoryCourses implements ICoursesRepository {
   async getSingleCourse(id: string, isValid: boolean): Promise<any | null> {
     try {
  
+ console.log('isValid is ',isValid);
  
       let lessonPopulate: any = {};
       if (isValid) {
@@ -279,10 +280,14 @@ export class RepositoryCourses implements ICoursesRepository {
                   as: "Task",
                 },
               },
+              {$project:{__v:0,"Task.__v":0}}
             ],
-          },
+          }
+
         };
       } else if (!isValid) {
+        console.log('from here');
+        
         lessonPopulate = {
           $lookup: {
             from: "lessons",
@@ -311,7 +316,9 @@ export class RepositoryCourses implements ICoursesRepository {
                   Lessone_name: 1,
                   "Task._id": 1,
                   "Task.Type": 1,
+                  "Task.__v":0,
                   Content:1,
+                  __v:0
                 },
               },
             ],
@@ -365,6 +372,7 @@ export class RepositoryCourses implements ICoursesRepository {
         },
         { $unwind: "$Category" },
         lessonPopulate,
+        {$project:{__v:0}}
       ];
  
 
@@ -529,6 +537,7 @@ export class RepositoryCourses implements ICoursesRepository {
               $project: {
                 _id: 0,
                 OverallScore: 1,
+                __v:0
               },
             },
           ],
@@ -571,11 +580,13 @@ export class RepositoryCourses implements ICoursesRepository {
     return await ProgressCollection.findOne({
       Student_id: studentId,
       Course_id: courseId,
-    })
+    },{__v:0})
       .populate({
         path: "lesson_progress.Lesson_id",
+        select:'-__v',
         populate: {
           path: "Task",
+          select: '-__v'
         },
       })
       .exec();

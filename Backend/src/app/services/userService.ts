@@ -30,20 +30,21 @@ export class userServises {
       throw new Error("User not found");
     }
 
-    const course = await this.courseUsecase.getSelectedCourse(courseId, false) as ICourses
+    const course = await this.courseUsecase.getSelectedCourse(courseId, false) 
     if (!course) {
       throw new Error("Course not found");
     }
+console.log(course.data.Mentor_id.mentorId,'courseis ',user._id);
 
-    if (String(course.Mentor_id.mentorId) !== String(user._id)) {
+    if (String(course.data.Mentor_id.mentorId) !== String(user._id)) {
       throw new Error("You don't have permission");
     }
 
-    if (course.Approved_by_admin === "approved" && isCourseDelete) {
+    if (course.data.Approved_by_admin === "approved" && isCourseDelete) {
       throw new Error("Cannot update approved Course");
     }
 
-    const lessonIndex = course.lessons.findIndex(
+    const lessonIndex = course.data.lessons.findIndex(
       (data: ILesson) => String(data._id) === lessonid
     ) 
 

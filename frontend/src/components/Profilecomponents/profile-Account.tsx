@@ -26,7 +26,7 @@ import UserDetailsDialog from "../admin/moreMentorRequst";
 import EditProfileDialog from "../editUser";
 import ChangePassword from "./changePassword";
 
-export function Account({
+export function   Account({
   userData,
   Beamentor,
   onSave,

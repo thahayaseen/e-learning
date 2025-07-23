@@ -186,11 +186,13 @@ export class MentorController {
     try {
       const { email, role } = req.user;
       const { data, courseId } = req.body;
+      console.log('here',data,courseId);
       await userServisess.verify(email, courseId);
-      const getCourse = await this.CourseUsecase.getSelectedCourse(
+      
+      const {data :getCourse} = await this.CourseUsecase.getSelectedCourse(
         courseId,
         false
-      )as ICourses
+      )
       console.log(getCourse.lessons, "test tje cpirse data", data);
       getCourse.lessons.forEach((datas: any) => {
         console.log(
@@ -223,7 +225,7 @@ export class MentorController {
       const { courseid } = req.body;
       const { email } = req.user;
       const { course } = await userServisess.verify(email, courseid);
-      course.lessons.forEach(async (lessons: ILesson) => {
+      course.data.lessons.forEach(async (lessons: ILesson) => {
         if (lessons._id) {
          
           await this.CourseUsecase.DeleteLesson(new Types.ObjectId(String(lessons._id)));
@@ -272,10 +274,10 @@ export class MentorController {
       const { email } = req.user;
       const { courseid } = req.body;
       const user = await this.userUsecase.UseProfileByemail(email);
-      const course = await this.CourseUsecase.getSelectedCourse(
+      const {data:course} = await this.CourseUsecase.getSelectedCourse(
         courseid,
         false
-      ) as  ICourses
+      ) 
 
       if (!user || !user._id || !course  || !course.Mentor_id) {
         throw new Error("user not fount");
@@ -476,7 +478,7 @@ export class MentorController {
         undefined,
         false
       );
-      await this.CourseUsecase.actionCourse(String(courseid), !course.unlist);
+      await this.CourseUsecase.actionCourse(String(courseid), !course.data.unlist);
       res.status(HttpStatusCode.OK).json({
         success: true,
         message: "updated",

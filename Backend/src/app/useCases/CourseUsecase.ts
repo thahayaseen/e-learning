@@ -19,6 +19,7 @@ import {
 import { orderDto } from "../dtos/orderDto";
 import { ICertificaterepository } from "../../domain/repository/Icertificate.repository";
 import { CertificateDTO } from "../dtos/Certificate";
+import { ICategory } from "../../infra/database/models/Category";
 export class CourseUsecase implements ICourseUseCase {
   constructor(
     private userRepo: IUserReposetory,
@@ -38,7 +39,7 @@ export class CourseUsecase implements ICourseUseCase {
     id: string,
     isValid: boolean,
     userid?: string
-  ): Promise<{ data: ICourses; progress?: IProgressCollection } | ICourses> {
+  ): Promise<{ data: ICourses; progress?: IProgressCollection } > {
     try {
       let progress = null;
 
@@ -99,13 +100,13 @@ export class CourseUsecase implements ICourseUseCase {
   }
   async addlessons(datas: ILesson[]): Promise<Types.ObjectId[]> {
     const datiii = await Promise.all(
-      datas.map(async (dat: any) => {
+      datas.map(async (dat) => {
         if (!dat.Task) {
           dat.Task = [];
         }
         const tasks = await this.CourseRepo.createTask(dat.Task);
 
-        dat.Task["Lesson_id"] = tasks._id;
+        // dat.Task["Lesson_id"] = tasks._id;
         const ans = await this.CourseRepo.createLesson({
           Lessone_name: dat.Lessone_name,
           Content: dat.Content,
@@ -272,7 +273,7 @@ export class CourseUsecase implements ICourseUseCase {
 
         // Iterate through each task in the lesson
         lesson.Task.forEach((task) => {
-          let taskProgressItem: ITaskProgress | any = {};
+          let taskProgressItem: ITaskProgress |object = {};
           if (task.Type == "Video") {
             taskProgressItem = {
               Task_id: String(task._id), // Task ID
@@ -301,7 +302,7 @@ export class CourseUsecase implements ICourseUseCase {
               Status: "Not Started",
             };
           }
-          taskProgress.push(taskProgressItem);
+          taskProgress.push(taskProgressItem as ITaskProgress);
           // }
         });
 
@@ -366,7 +367,7 @@ export class CourseUsecase implements ICourseUseCase {
           result.Student_id.name,
           result.Course_id._id,
           String(result.Course_id.Title),
-          (result.Course_id.Category as any ).Category,
+          (result.Course_id.Category as any).Category as string ,
           new Date()
         );
       }
@@ -460,7 +461,7 @@ export class CourseUsecase implements ICourseUseCase {
   async getCourseByName(name: string, Mentor_id: string) {
     return await this.CourseRepo.getByname(name, Mentor_id);
   }
-  async getallCourses(id: string, filter: any): Promise<any> {
+  async getallCourses(id: string, filter: FilterQuery<ICourses>): Promise<any> {
     const { page, limit, search, status, priceRange, sortBy } = filter;
     const skip = (page - 1) * limit;
     const match:FilterQuery<ICourses> = { Mentor_id: id };

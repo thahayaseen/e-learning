@@ -201,9 +201,9 @@ export default function CertificateDisplay({
                     <h2 className="text-3xl font-serif font-bold text-amber-900 mb-1">
                       Certificate of Achievement
                     </h2>
-                    <p className="text-sm text-amber-700">
+                    {/* <p className="text-sm text-amber-700">
                       Certificate ID: {displayId}
-                    </p>
+                    </p> */}
                   </div>
 
                   {/* Main content */}

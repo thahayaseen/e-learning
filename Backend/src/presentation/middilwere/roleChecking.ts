@@ -100,6 +100,8 @@ export class AllMiddleware {
       }
 
       req.user = userData;
+      console.log('nextt');
+      
       next();
     } catch (error) {
       console.error("JWT Verification Error:", error);
