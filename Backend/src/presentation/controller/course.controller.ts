@@ -34,7 +34,7 @@ export class courseControllerClass {
         return;
       }
 
-      const meetid = await this.MeetingUsecase.getMeetByuserid(_id, courseid);
+      const meetid = await this.MeetingUsecase.getMeetByuserid(_id, courseid) as any
 
       const user = await this.userUseCase.UseProfileByemail(req.user.email);
       const isvalid = user?.purchasedCourses?.includes(courseid);
@@ -50,6 +50,9 @@ export class courseControllerClass {
       if (!reslt.progress) {
         delete reslt.progress;
       }
+      
+      
+
 
       res.status(HttpStatusCode.OK).json({
         success: true,

@@ -10,7 +10,7 @@ class RepositoryMeeting implements IRmetting {
   ): Promise<MeetingDto | null> {
  
 
-    return await Meeting.findOne({ userId: userid, courseId: courseid });
+    return await Meeting.findOne({ userId: userid, courseId: courseid },{__v:0});
   }
   async createMeeting(data: MeetingDto): Promise<void> {
     await Meeting.create(data);

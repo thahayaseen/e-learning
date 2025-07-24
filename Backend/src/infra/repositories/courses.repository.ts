@@ -37,13 +37,11 @@ export class RepositoryCourses implements ICoursesRepository {
   private MENTOR_REVENUE_PERCENTAGE = 90;
   private ADMIN_REVENUE_PERCENTAGE = 10;
   async createCourse(data: Omit<ICourses, "_id">): Promise<ICourses> {
-    const datas = await Courses.create(data)
+    const datas = await Courses.create(data);
 
-    return datas.populate('Category',"Category -_id")
+    return datas.populate("Category", "Category -_id");
   }
   async createTask(tasks: ITask[]): Promise<any> {
- 
-
     const datas = await Task.create(tasks);
 
     const ids = datas.map((data) => {
@@ -65,7 +63,6 @@ export class RepositoryCourses implements ICoursesRepository {
     );
   }
   async getCourse(id: string, pipline: any[]): Promise<any> {
- 
     const data = await Courses.aggregate(pipline);
 
     return data;
@@ -74,7 +71,6 @@ export class RepositoryCourses implements ICoursesRepository {
     return await Courses.findById(courseid).populate("Mentor_id", "-_id name");
   }
   async getLessons(id: string): Promise<any | null> {
- 
     return await Courses.findOne({ _id: id }).populate({
       path: "lessons",
       populate: {
@@ -97,8 +93,7 @@ export class RepositoryCourses implements ICoursesRepository {
     },
     filter: object
   ): Promise<any> {
- console.log(JSON.stringify(filter),'filter is ');
- 
+    console.log(JSON.stringify(filter), "filter is ");
 
     const data = await Courses.find(filter)
       .skip(skip || 0)
@@ -151,7 +146,6 @@ export class RepositoryCourses implements ICoursesRepository {
     if (filter.category) {
       matchFilter.Category = new Types.ObjectId(filter.category);
     }
- 
 
     // Add mentor filter
     if (filter.mentor) {
@@ -169,7 +163,6 @@ export class RepositoryCourses implements ICoursesRepository {
     // Calculate skip for pagination
     const skip = (page - 1) * limit;
 
-
     const sortField = sort.field || "UpdatedAt";
     const sortOrder = sort.order === "asc" ? 1 : -1;
 
@@ -179,7 +172,6 @@ export class RepositoryCourses implements ICoursesRepository {
         [sortField]: sortOrder as 1 | -1,
       },
     };
- 
 
     const pipeline = [
       { $match: matchFilter },
@@ -238,10 +230,8 @@ export class RepositoryCourses implements ICoursesRepository {
     ];
 
     const results = await Courses.aggregate(pipeline);
- 
 
     const courses = results[0].paginatedResults;
- 
 
     const total = results[0].totalCount[0]?.count || 0;
     const totalPages = Math.ceil(total / limit);
@@ -260,10 +250,10 @@ export class RepositoryCourses implements ICoursesRepository {
 
   async getSingleCourse(id: string, isValid: boolean): Promise<any | null> {
     try {
- 
- 
       let lessonPopulate: any = {};
       if (isValid) {
+        console.log("in heree");
+
         lessonPopulate = {
           $lookup: {
             from: "lessons",
@@ -279,10 +269,13 @@ export class RepositoryCourses implements ICoursesRepository {
                   as: "Task",
                 },
               },
+              { $project: { __v: 0, "Task.__v": 0 } },
             ],
           },
         };
       } else if (!isValid) {
+        console.log("for here");
+
         lessonPopulate = {
           $lookup: {
             from: "lessons",
@@ -293,9 +286,9 @@ export class RepositoryCourses implements ICoursesRepository {
               {
                 $project: {
                   Lessone_name: 1,
-                  Content:1,
+                  Content: 1,
                   Task: 1,
-
+                  // __v: 0,
                 },
               },
               {
@@ -311,7 +304,9 @@ export class RepositoryCourses implements ICoursesRepository {
                   Lessone_name: 1,
                   "Task._id": 1,
                   "Task.Type": 1,
-                  Content:1,
+                  // "Task.__v": 0,
+                  Content: 1,
+                  // __v: 0,
                 },
               },
             ],
@@ -364,12 +359,13 @@ export class RepositoryCourses implements ICoursesRepository {
           },
         },
         { $unwind: "$Category" },
+
         lessonPopulate,
+        { $project: { __v: 0 } },
       ];
- 
+      console.log(pipline);
 
       const query = await Courses.aggregate(pipline);
- 
 
       return query[0];
     } catch (error) {
@@ -385,13 +381,7 @@ export class RepositoryCourses implements ICoursesRepository {
     return;
   }
   async UpdataCourse(courseid: string, data: any): Promise<void> {
- 
- 
-
- 
-
     const res = await Courses.updateOne({ _id: courseid }, data);
- 
 
     return;
   }
@@ -445,7 +435,6 @@ export class RepositoryCourses implements ICoursesRepository {
   async UpdateTask(taskId: string, data: ITask): Promise<ITask | null> {
     const existingTask = await Task.findById(taskId);
     if (!existingTask) {
- 
       throw new Error("Task not found!");
     }
 
@@ -461,7 +450,6 @@ export class RepositoryCourses implements ICoursesRepository {
     } else if (existingTask.Type === "Video") {
       return await VideoTask.findByIdAndUpdate(taskId, data, { new: true });
     } else {
- 
       throw new Error("Invalid task type!");
     }
   }
@@ -488,7 +476,6 @@ export class RepositoryCourses implements ICoursesRepository {
     limit: number = 10
   ): Promise<any> {
     const skip = (page - 1) * limit;
- 
 
     const anss = await Courses.aggregate<ICourses>([
       {
@@ -553,7 +540,6 @@ export class RepositoryCourses implements ICoursesRepository {
         },
       },
     ]);
- 
 
     return anss[0];
   }
@@ -611,8 +597,6 @@ export class RepositoryCourses implements ICoursesRepository {
       .lean();
   }
   async createOrder(orderdata: orderDto): Promise<any> {
- 
-
     return await new OrderSchemas(orderdata).save();
   }
   async updataOrder(
@@ -620,8 +604,6 @@ export class RepositoryCourses implements ICoursesRepository {
     updatedata: Partial<orderDto>,
     session?: mongoose.ClientSession
   ): Promise<orderDto | null> {
- 
-
     return await OrderSchemas.findByIdAndUpdate(orderid, updatedata, {
       new: true,
       session,
@@ -787,8 +769,6 @@ export class RepositoryCourses implements ICoursesRepository {
       // Calculate task completion percentage
       const taskCompletionPercentage = (completedTasks / totalTasks) * 100;
 
- 
-
       progress.OverallScore =
         progress.OverallScore == 100
           ? progress.OverallScore
@@ -852,9 +832,7 @@ export class RepositoryCourses implements ICoursesRepository {
     }
   }
   async getOneorder(userid: string, orderid: string): Promise<any> {
- 
     const data = await OrderSchemas.findOne({ _id: orderid, userId: userid });
- 
 
     return data;
   }
@@ -865,13 +843,11 @@ export class RepositoryCourses implements ICoursesRepository {
   ): Promise<any> {
     try {
       const skip = (page - 1) * limit;
- 
 
       // Find all courses by this mentor
       const mentorCourses = await Courses.find({ Mentor_id: mentorId }).select(
         "_id"
       );
- 
 
       const courseIds = mentorCourses.map((course) => course._id);
 
@@ -884,7 +860,6 @@ export class RepositoryCourses implements ICoursesRepository {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);
- 
 
       const total = await OrderSchemas.countDocuments({
         courseId: { $in: courseIds },
@@ -917,8 +892,6 @@ export class RepositoryCourses implements ICoursesRepository {
     filter = {}
   ): Promise<any> {
     try {
- 
-
       const skip = (page - 1) * limit;
       const query = { ...filter };
       const orders = await OrderSchemas.find(query)
@@ -933,7 +906,6 @@ export class RepositoryCourses implements ICoursesRepository {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);
- 
 
       const total = await OrderSchemas.countDocuments(query);
       return {
@@ -1098,6 +1070,5 @@ export class RepositoryCourses implements ICoursesRepository {
       return months[monthIndex];
     }
   }
-
 }
 // Helper function to get month name
