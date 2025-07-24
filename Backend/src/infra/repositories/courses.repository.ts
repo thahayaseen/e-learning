@@ -1,4 +1,4 @@
-import mongoose, { FilterQuery, Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { CourseDTO } from "../../app/dtos/coursesDto";
 import { orderDto } from "../../app/dtos/orderDto";
 import { ICoursesRepository } from "../../domain/repository/Icourses.repository";
@@ -52,7 +52,7 @@ export class RepositoryCourses implements ICoursesRepository {
 
     return ids;
   }
-  async createLesson(lessondata: Partial<ILesson>): Promise<ILesson> {
+  async createLesson(lessondata: any): Promise<any> {
     const dat = await Lesson.create(lessondata);
 
     return dat;
@@ -122,7 +122,7 @@ export class RepositoryCourses implements ICoursesRepository {
       field: "UpdatedAt",
       order: "desc",
     },
-    filter: FilterQuery<ICourses> = {}
+    filter: any = {}
   ): Promise<IPaginationResult<any>> {
     // Base match filter for approved courses
     const matchFilter: any = {
@@ -261,7 +261,6 @@ export class RepositoryCourses implements ICoursesRepository {
   async getSingleCourse(id: string, isValid: boolean): Promise<any | null> {
     try {
  
- console.log('isValid is ',isValid);
  
       let lessonPopulate: any = {};
       if (isValid) {
@@ -280,14 +279,10 @@ export class RepositoryCourses implements ICoursesRepository {
                   as: "Task",
                 },
               },
-              {$project:{__v:0,"Task.__v":0}}
             ],
-          }
-
+          },
         };
       } else if (!isValid) {
-        console.log('from here');
-        
         lessonPopulate = {
           $lookup: {
             from: "lessons",
@@ -316,9 +311,7 @@ export class RepositoryCourses implements ICoursesRepository {
                   Lessone_name: 1,
                   "Task._id": 1,
                   "Task.Type": 1,
-                  "Task.__v":0,
                   Content:1,
-                  __v:0
                 },
               },
             ],
@@ -372,7 +365,6 @@ export class RepositoryCourses implements ICoursesRepository {
         },
         { $unwind: "$Category" },
         lessonPopulate,
-        {$project:{__v:0}}
       ];
  
 
@@ -423,7 +415,7 @@ export class RepositoryCourses implements ICoursesRepository {
     return await Lesson.findByIdAndUpdate(lessonId, qury, { new: true });
   }
 
-  async DeleteLessonByid(id: Types.ObjectId): Promise<any> {
+  async DeleteLessonByid(id: string): Promise<any> {
     return await Lesson.deleteOne({ _id: id });
   }
   async DeleteLessonFromCourse(
@@ -446,7 +438,7 @@ export class RepositoryCourses implements ICoursesRepository {
     );
     return;
   }
-  async FindLessonByid(id: Types.ObjectId): Promise<ILesson | null> {
+  async FindLessonByid(id: string): Promise<ILesson | null> {
     return await Lesson.findById(id);
   }
   // task managing
@@ -482,7 +474,7 @@ export class RepositoryCourses implements ICoursesRepository {
     });
     return;
   }
-  async deleteTask(id: Types.ObjectId): Promise<void> {
+  async deleteTask(id: string): Promise<void> {
     await Task.deleteOne({ _id: id });
 
     return;
@@ -537,7 +529,6 @@ export class RepositoryCourses implements ICoursesRepository {
               $project: {
                 _id: 0,
                 OverallScore: 1,
-                __v:0
               },
             },
           ],
@@ -580,13 +571,11 @@ export class RepositoryCourses implements ICoursesRepository {
     return await ProgressCollection.findOne({
       Student_id: studentId,
       Course_id: courseId,
-    },{__v:0})
+    })
       .populate({
         path: "lesson_progress.Lesson_id",
-        select:'-__v',
         populate: {
           path: "Task",
-          select: '-__v'
         },
       })
       .exec();
@@ -828,7 +817,7 @@ export class RepositoryCourses implements ICoursesRepository {
         },
       });
 
-    return res as IProgressCollection;
+    return res;
   }
   async createProgressForuser(progressData: IProgressCollection) {
     await ProgressCollection.create(progressData);

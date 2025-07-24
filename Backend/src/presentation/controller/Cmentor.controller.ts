@@ -17,8 +17,6 @@ import { Middlewares, userServisess } from "../../config/dependencies";
 import RevenueUseCase from "../../app/useCases/revenue.usecase";
 import { SystemError } from "../../app/useCases/enum/systemError";
 import { ILesson } from "../../infra/database/models/lessone";
-import { ICourses } from "../../infra/database/models/course";
-import { IProgressCollection } from "../../infra/database/models/progress";
 
 export class MentorController {
   constructor(
@@ -186,13 +184,11 @@ export class MentorController {
     try {
       const { email, role } = req.user;
       const { data, courseId } = req.body;
-      console.log('here',data,courseId);
       await userServisess.verify(email, courseId);
-      
-      const {data :getCourse} = await this.CourseUsecase.getSelectedCourse(
+      const getCourse = await this.CourseUsecase.getSelectedCourse(
         courseId,
         false
-      )
+      );
       console.log(getCourse.lessons, "test tje cpirse data", data);
       getCourse.lessons.forEach((datas: any) => {
         console.log(
@@ -225,10 +221,9 @@ export class MentorController {
       const { courseid } = req.body;
       const { email } = req.user;
       const { course } = await userServisess.verify(email, courseid);
-      course.data.lessons.forEach(async (lessons: ILesson) => {
-        if (lessons._id) {
-         
-          await this.CourseUsecase.DeleteLesson(new Types.ObjectId(String(lessons._id)));
+      course.lessons.forEach(async (id: string) => {
+        if (id) {
+          await this.CourseUsecase.DeleteLesson(id);
         }
       });
       await this.CourseUsecase.deleteCourse(courseid);
@@ -274,12 +269,12 @@ export class MentorController {
       const { email } = req.user;
       const { courseid } = req.body;
       const user = await this.userUsecase.UseProfileByemail(email);
-      const {data:course} = await this.CourseUsecase.getSelectedCourse(
+      const course = await this.CourseUsecase.getSelectedCourse(
         courseid,
         false
-      ) 
+      );
 
-      if (!user || !user._id || !course  || !course.Mentor_id) {
+      if (!user || !user._id || !course || course.data || !course.Mentor_id) {
         throw new Error("user not fount");
       }
       let roomid;
@@ -478,7 +473,7 @@ export class MentorController {
         undefined,
         false
       );
-      await this.CourseUsecase.actionCourse(String(courseid), !course.data.unlist);
+      await this.CourseUsecase.actionCourse(String(courseid), !course.unlist);
       res.status(HttpStatusCode.OK).json({
         success: true,
         message: "updated",

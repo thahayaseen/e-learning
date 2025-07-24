@@ -46,7 +46,6 @@ export class courseControllerClass {
         isvalid,
         _id
       );
-console.log('data from ',reslt);
 
       if (!reslt.progress) {
         delete reslt.progress;

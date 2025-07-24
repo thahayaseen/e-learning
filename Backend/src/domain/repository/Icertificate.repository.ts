@@ -1,24 +1,23 @@
-import { Types } from "mongoose";
 import { CertificateDTO } from "../../app/dtos/Certificate";
 
 export interface ICertificaterepository {
   createCertificate(
-    student_id: Types.ObjectId,
+    student_id: string,
     student_name: string,
-    course_id: Types.ObjectId,
+    course_id: string,
     course_name: string,
     category: string,
     completed_date: Date
   ): Promise<CertificateDTO>;
   getCertificate(certificateId: string): Promise<CertificateDTO>;
   GetCertificateByCourseid(
-    studentid: Types.ObjectId,
-    courseid: Types.ObjectId
+    studentid: string,
+    courseid: string
   ): Promise<CertificateDTO | null>;
   getAllcertificate(
     studentid: string,
     page: number,
     limit: number,
-    search: string
+    search: any
   ): Promise<{ data: CertificateDTO[]; total: number }>;
 }

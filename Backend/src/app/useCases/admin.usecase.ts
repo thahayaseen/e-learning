@@ -5,9 +5,6 @@ import { SystemError } from "./enum/systemError";
 import { HttpStatusCode } from "./enum/Status";
 import { ICategory } from "../../infra/database/models/Category";
 import { ICoursesRepository } from "../../domain/repository/Icourses.repository";
-import { FilterQuery } from "mongoose";
-import { IUserModel } from "../../infra/database/models/User";
-import { ICourses } from "../../infra/database/models/course";
 class AppError extends Error {
   constructor(message: string, private statuscode: number) {
     super(message);
@@ -29,14 +26,11 @@ export default class Admin implements IAdmin {
     page?: string;
     limit?: string;
     search?: string;
-    filter?: {
-    statusFilter?: string;
-    rolefilter?: string;
-  };
+    filter?: any;
   }) {
     try {
       const skip = (Number(page) - 1) * Number(limit);
-      let filters: FilterQuery<IUserModel> = {};
+      let filters: any = {};
       if (search) {
         filters["$or"] = [
           { name: { $regex: search, $options: "i" } },
@@ -65,8 +59,8 @@ export default class Admin implements IAdmin {
         throw "not fount";
       }
       return data;
-    } catch (error) {
-      new AppError(error instanceof Error?error.message:'An error from get All users', 404);
+    } catch (error: any) {
+      new AppError(error.message, 404);
     }
   }
   async Blockuser(id: string, type: boolean) {
@@ -74,8 +68,8 @@ export default class Admin implements IAdmin {
       await this.UserRepository.Blockuser(id, type);
       return;
       return;
-    } catch (error) {
-      new AppError(error instanceof Error?error.message:'Error while block user form usecase', 404);
+    } catch (error: any) {
+      new AppError(error.message, 404);
     }
   }
   async getCategoryNameUsecase(name: string): Promise<ICategory | null> {
@@ -94,8 +88,8 @@ export default class Admin implements IAdmin {
       new AppError(SystemError.DatabaseError, HttpStatusCode.BAD_REQUEST);
     }
   }
-  async unaprovedgetCourses(page: number, typeofList: string, filters?: object) {
-    let filter:FilterQuery<ICourses> = {};
+  async unaprovedgetCourses(page: number, typeofList: string, filters?: any) {
+    let filter: any = {};
     if (typeofList != "all") {
       filter = { Approved_by_admin: typeofList };
     } else if (filters) {

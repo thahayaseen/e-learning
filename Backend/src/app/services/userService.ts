@@ -1,8 +1,5 @@
 import { UserUsecase } from "../useCases/User.usecase";
 import { CourseUsecase } from "../useCases/CourseUsecase";
-import { IUserModel } from "../../infra/database/models/User";
-import { ICourses } from "../../infra/database/models/course";
-import { ILesson } from "../../infra/database/models/lessone";
 interface PipelineData {
   search?: string;
   filter?: string;
@@ -30,23 +27,22 @@ export class userServises {
       throw new Error("User not found");
     }
 
-    const course = await this.courseUsecase.getSelectedCourse(courseId, false) 
+    const course = await this.courseUsecase.getSelectedCourse(courseId, false);
     if (!course) {
       throw new Error("Course not found");
     }
-console.log(course.data.Mentor_id.mentorId,'courseis ',user._id);
 
-    if (String(course.data.Mentor_id.mentorId) !== String(user._id)) {
+    if (String(course.Mentor_id.mentorId) !== String(user._id)) {
       throw new Error("You don't have permission");
     }
 
-    if (course.data.Approved_by_admin === "approved" && isCourseDelete) {
+    if (course.Approved_by_admin === "approved" && isCourseDelete) {
       throw new Error("Cannot update approved Course");
     }
 
-    const lessonIndex = course.data.lessons.findIndex(
-      (data: ILesson) => String(data._id) === lessonid
-    ) 
+    const lessonIndex = course.lessons.findIndex(
+      (data: any) => String(data._id) === lessonid
+    );
 
     if (lessonid && islesson && lessonIndex === -1) {
       throw new Error("You don't have permission for this lesson");
@@ -61,7 +57,7 @@ console.log(course.data.Mentor_id.mentorId,'courseis ',user._id);
       }
 
       const lesson = await this.courseUsecase.getLessonByid(lessonid);
-      if (!lesson ||(lesson.Task&& !lesson.Task.includes(taskId as never))) {
+      if (!lesson || !lesson.Task?.includes(taskId)) {
         throw new Error("Unauthorized Task");
       }
     }
