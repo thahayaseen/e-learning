@@ -16,7 +16,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(
   cors({
     origin:
-      "https://e-learning-phi-five.vercel.app",
+     process.env.NEXT_PUBLIC_SERVER,
     
     methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
     credentials: true,
